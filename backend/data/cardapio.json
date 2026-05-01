@@ -1,0 +1,285 @@
+{
+  "semana": "2026-W18",
+  "dias": [
+    {
+      "data": "2026-04-27",
+      "dia_semana": "Segunda-feira",
+      "pratos": [
+        {
+          "id": 101,
+          "nome": "Frango Grelhado com Legumes Salteados",
+          "categoria": "Prato Principal",
+          "ingredientes": ["frango", "abobrinha", "cenoura", "azeite", "alho", "sal"],
+          "alergenos": [],
+          "restricoes_atendidas": ["sem gluten", "sem lactose", "low carb", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano"],
+          "nutricao": { "calorias": 380, "proteinas_g": 42, "carboidratos_g": 15, "gorduras_g": 14 }
+        },
+        {
+          "id": 102,
+          "nome": "Strogonoff de Grão-de-Bico",
+          "categoria": "Prato Principal",
+          "ingredientes": ["grao-de-bico", "creme de leite", "molho de tomate", "cebola", "champignon"],
+          "alergenos": ["lactose"],
+          "restricoes_atendidas": ["vegetariano", "sem gluten"],
+          "nao_indicado_para": ["vegano", "intolerante a lactose"],
+          "nutricao": { "calorias": 420, "proteinas_g": 22, "carboidratos_g": 45, "gorduras_g": 18 }
+        },
+        {
+          "id": 103,
+          "nome": "Salada Caesar com Frango",
+          "categoria": "Salada",
+          "ingredientes": ["alface romana", "frango grelhado", "croutons", "queijo parmesao", "molho caesar"],
+          "alergenos": ["gluten", "lactose", "ovo"],
+          "restricoes_atendidas": ["proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "celiaco", "intolerante a lactose"],
+          "nutricao": { "calorias": 340, "proteinas_g": 28, "carboidratos_g": 18, "gorduras_g": 16 }
+        },
+        {
+          "id": 104,
+          "nome": "Bowl Vegano de Quinoa e Legumes Assados",
+          "categoria": "Prato Principal",
+          "ingredientes": ["quinoa", "abobora", "brocolis", "grao-de-bico", "tahine", "limao"],
+          "alergenos": ["gergelim"],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem gluten", "sem lactose"],
+          "nao_indicado_para": [],
+          "nutricao": { "calorias": 460, "proteinas_g": 18, "carboidratos_g": 58, "gorduras_g": 16 }
+        },
+        {
+          "id": 105,
+          "nome": "Salmao ao Forno com Batata Doce",
+          "categoria": "Prato Principal",
+          "ingredientes": ["salmao", "batata doce", "alecrim", "azeite", "limao"],
+          "alergenos": ["peixe"],
+          "restricoes_atendidas": ["sem gluten", "sem lactose", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "alergico a peixe"],
+          "nutricao": { "calorias": 520, "proteinas_g": 38, "carboidratos_g": 40, "gorduras_g": 22 }
+        }
+      ]
+    },
+    {
+      "data": "2026-04-28",
+      "dia_semana": "Terca-feira",
+      "pratos": [
+        {
+          "id": 201,
+          "nome": "Lasanha de Berinjela",
+          "categoria": "Prato Principal",
+          "ingredientes": ["berinjela", "molho de tomate", "queijo mussarela", "ricota", "manjericao"],
+          "alergenos": ["lactose"],
+          "restricoes_atendidas": ["vegetariano", "sem gluten", "low carb"],
+          "nao_indicado_para": ["vegano", "intolerante a lactose"],
+          "nutricao": { "calorias": 410, "proteinas_g": 24, "carboidratos_g": 22, "gorduras_g": 24 }
+        },
+        {
+          "id": 202,
+          "nome": "Carne de Panela com Mandioquinha",
+          "categoria": "Prato Principal",
+          "ingredientes": ["acem bovino", "mandioquinha", "cebola", "tomate", "louro"],
+          "alergenos": [],
+          "restricoes_atendidas": ["sem gluten", "sem lactose", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano"],
+          "nutricao": { "calorias": 540, "proteinas_g": 36, "carboidratos_g": 42, "gorduras_g": 24 }
+        },
+        {
+          "id": 203,
+          "nome": "Curry de Lentilha com Arroz Basmati",
+          "categoria": "Prato Principal",
+          "ingredientes": ["lentilha", "leite de coco", "arroz basmati", "curry", "espinafre"],
+          "alergenos": [],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem gluten", "sem lactose"],
+          "nao_indicado_para": [],
+          "nutricao": { "calorias": 480, "proteinas_g": 20, "carboidratos_g": 70, "gorduras_g": 12 }
+        },
+        {
+          "id": 204,
+          "nome": "Wrap Integral de Atum",
+          "categoria": "Sanduiche",
+          "ingredientes": ["tortilha integral", "atum", "iogurte natural", "alface", "tomate"],
+          "alergenos": ["gluten", "peixe", "lactose"],
+          "restricoes_atendidas": ["proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "celiaco", "alergico a peixe"],
+          "nutricao": { "calorias": 380, "proteinas_g": 30, "carboidratos_g": 36, "gorduras_g": 12 }
+        },
+        {
+          "id": 205,
+          "nome": "Omelete de Espinafre com Quinoa",
+          "categoria": "Prato Principal",
+          "ingredientes": ["ovo", "espinafre", "quinoa", "queijo branco", "azeite"],
+          "alergenos": ["ovo", "lactose"],
+          "restricoes_atendidas": ["vegetariano", "sem gluten", "low carb", "proteico"],
+          "nao_indicado_para": ["vegano", "intolerante a lactose", "alergico a ovo"],
+          "nutricao": { "calorias": 340, "proteinas_g": 26, "carboidratos_g": 18, "gorduras_g": 18 }
+        }
+      ]
+    },
+    {
+      "data": "2026-04-29",
+      "dia_semana": "Quarta-feira",
+      "pratos": [
+        {
+          "id": 301,
+          "nome": "Peito de Peru ao Molho de Mostarda",
+          "categoria": "Prato Principal",
+          "ingredientes": ["peito de peru", "mostarda dijon", "creme de leite light", "ervas finas"],
+          "alergenos": ["lactose", "mostarda"],
+          "restricoes_atendidas": ["sem gluten", "low carb", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "intolerante a lactose"],
+          "nutricao": { "calorias": 360, "proteinas_g": 40, "carboidratos_g": 12, "gorduras_g": 16 }
+        },
+        {
+          "id": 302,
+          "nome": "Risoto de Cogumelos",
+          "categoria": "Prato Principal",
+          "ingredientes": ["arroz arborio", "shitake", "shimeji", "vinho branco", "queijo parmesao", "manteiga"],
+          "alergenos": ["lactose"],
+          "restricoes_atendidas": ["vegetariano", "sem gluten"],
+          "nao_indicado_para": ["vegano", "intolerante a lactose"],
+          "nutricao": { "calorias": 510, "proteinas_g": 14, "carboidratos_g": 78, "gorduras_g": 16 }
+        },
+        {
+          "id": 303,
+          "nome": "Tofu Grelhado com Brocolis",
+          "categoria": "Prato Principal",
+          "ingredientes": ["tofu firme", "brocolis", "shoyu", "gengibre", "gergelim"],
+          "alergenos": ["soja", "gluten", "gergelim"],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem lactose", "low carb", "proteico"],
+          "nao_indicado_para": ["alergico a soja", "celiaco"],
+          "nutricao": { "calorias": 320, "proteinas_g": 28, "carboidratos_g": 14, "gorduras_g": 18 }
+        },
+        {
+          "id": 304,
+          "nome": "Feijoada Light",
+          "categoria": "Prato Principal",
+          "ingredientes": ["feijao preto", "lombo", "linguica calabresa", "couve refogada", "laranja"],
+          "alergenos": [],
+          "restricoes_atendidas": ["sem gluten", "sem lactose", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano"],
+          "nutricao": { "calorias": 580, "proteinas_g": 38, "carboidratos_g": 50, "gorduras_g": 22 }
+        },
+        {
+          "id": 305,
+          "nome": "Salada de Quinoa com Abacate e Tomate Cereja",
+          "categoria": "Salada",
+          "ingredientes": ["quinoa", "abacate", "tomate cereja", "rucula", "limao", "azeite"],
+          "alergenos": [],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem gluten", "sem lactose"],
+          "nao_indicado_para": [],
+          "nutricao": { "calorias": 380, "proteinas_g": 12, "carboidratos_g": 42, "gorduras_g": 18 }
+        }
+      ]
+    },
+    {
+      "data": "2026-04-30",
+      "dia_semana": "Quinta-feira",
+      "pratos": [
+        {
+          "id": 401,
+          "nome": "Tilapia Empanada ao Forno",
+          "categoria": "Prato Principal",
+          "ingredientes": ["tilapia", "farinha de rosca", "ovo", "limao", "azeite"],
+          "alergenos": ["peixe", "gluten", "ovo"],
+          "restricoes_atendidas": ["proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "celiaco", "alergico a peixe", "alergico a ovo"],
+          "nutricao": { "calorias": 410, "proteinas_g": 32, "carboidratos_g": 28, "gorduras_g": 18 }
+        },
+        {
+          "id": 402,
+          "nome": "Macarrao Integral ao Pesto",
+          "categoria": "Prato Principal",
+          "ingredientes": ["macarrao integral", "manjericao", "queijo parmesao", "azeite", "pinoli"],
+          "alergenos": ["gluten", "lactose", "amendoim"],
+          "restricoes_atendidas": ["vegetariano"],
+          "nao_indicado_para": ["vegano", "celiaco", "intolerante a lactose", "alergico a amendoim"],
+          "nutricao": { "calorias": 520, "proteinas_g": 18, "carboidratos_g": 68, "gorduras_g": 20 }
+        },
+        {
+          "id": 403,
+          "nome": "Hamburguer de Lentilha com Salada",
+          "categoria": "Prato Principal",
+          "ingredientes": ["lentilha", "aveia", "cebola", "alho", "salada verde"],
+          "alergenos": ["gluten"],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem lactose"],
+          "nao_indicado_para": ["celiaco"],
+          "nutricao": { "calorias": 360, "proteinas_g": 18, "carboidratos_g": 50, "gorduras_g": 8 }
+        },
+        {
+          "id": 404,
+          "nome": "Bife Acebolado com Arroz e Feijao",
+          "categoria": "Prato Principal",
+          "ingredientes": ["coxao mole", "cebola", "arroz branco", "feijao carioca"],
+          "alergenos": [],
+          "restricoes_atendidas": ["sem gluten", "sem lactose", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano"],
+          "nutricao": { "calorias": 620, "proteinas_g": 40, "carboidratos_g": 70, "gorduras_g": 18 }
+        },
+        {
+          "id": 405,
+          "nome": "Salada Mediterranea com Grao-de-Bico",
+          "categoria": "Salada",
+          "ingredientes": ["grao-de-bico", "pepino", "tomate", "azeitona", "queijo feta", "azeite"],
+          "alergenos": ["lactose"],
+          "restricoes_atendidas": ["vegetariano", "sem gluten"],
+          "nao_indicado_para": ["vegano", "intolerante a lactose"],
+          "nutricao": { "calorias": 390, "proteinas_g": 16, "carboidratos_g": 38, "gorduras_g": 20 }
+        }
+      ]
+    },
+    {
+      "data": "2026-05-01",
+      "dia_semana": "Sexta-feira",
+      "pratos": [
+        {
+          "id": 501,
+          "nome": "Frango Xadrez com Arroz",
+          "categoria": "Prato Principal",
+          "ingredientes": ["frango", "pimentao", "shoyu", "amendoim", "arroz branco"],
+          "alergenos": ["soja", "gluten", "amendoim"],
+          "restricoes_atendidas": ["proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "celiaco", "alergico a amendoim", "alergico a soja"],
+          "nutricao": { "calorias": 510, "proteinas_g": 34, "carboidratos_g": 56, "gorduras_g": 16 }
+        },
+        {
+          "id": 502,
+          "nome": "Escondidinho de Carne Seca",
+          "categoria": "Prato Principal",
+          "ingredientes": ["carne seca", "mandioca", "manteiga", "queijo coalho"],
+          "alergenos": ["lactose"],
+          "restricoes_atendidas": ["sem gluten", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "intolerante a lactose"],
+          "nutricao": { "calorias": 590, "proteinas_g": 32, "carboidratos_g": 58, "gorduras_g": 24 }
+        },
+        {
+          "id": 503,
+          "nome": "Caponata de Berinjela com Polenta",
+          "categoria": "Prato Principal",
+          "ingredientes": ["berinjela", "tomate", "azeitona", "alcaparra", "polenta"],
+          "alergenos": [],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem gluten", "sem lactose"],
+          "nao_indicado_para": [],
+          "nutricao": { "calorias": 360, "proteinas_g": 9, "carboidratos_g": 58, "gorduras_g": 12 }
+        },
+        {
+          "id": 504,
+          "nome": "Salmao Teriyaki com Legumes no Vapor",
+          "categoria": "Prato Principal",
+          "ingredientes": ["salmao", "shoyu", "mel", "gengibre", "brocolis", "cenoura"],
+          "alergenos": ["peixe", "soja", "gluten"],
+          "restricoes_atendidas": ["sem lactose", "low carb", "proteico"],
+          "nao_indicado_para": ["vegetariano", "vegano", "celiaco", "alergico a peixe", "alergico a soja"],
+          "nutricao": { "calorias": 480, "proteinas_g": 36, "carboidratos_g": 24, "gorduras_g": 22 }
+        },
+        {
+          "id": 505,
+          "nome": "Salada de Folhas com Tofu Defumado",
+          "categoria": "Salada",
+          "ingredientes": ["mix de folhas", "tofu defumado", "tomate cereja", "semente de girassol", "azeite"],
+          "alergenos": ["soja"],
+          "restricoes_atendidas": ["vegetariano", "vegano", "sem gluten", "sem lactose", "low carb"],
+          "nao_indicado_para": ["alergico a soja"],
+          "nutricao": { "calorias": 290, "proteinas_g": 18, "carboidratos_g": 14, "gorduras_g": 18 }
+        }
+      ]
+    }
+  ]
+}
