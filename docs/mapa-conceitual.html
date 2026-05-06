@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lia — Mapa Conceitual Interativo</title>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a1f2e;
+    --panel-border: #2a3142;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #ff8a65;
+    --accent-2: #4fc3f7;
+    --green: #7ee787;
+    --orange: #ffd33d;
+    --pink: #ff7b72;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* Header sticky com nav */
+  header {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 20, 25, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--panel-border);
+    padding: 16px 32px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header h1 span { color: var(--accent); }
+  nav { display: flex; flex-wrap: wrap; gap: 4px; }
+  nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  nav a:hover { background: var(--panel-border); color: var(--text); }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* Intro */
+  .intro {
+    text-align: center;
+    margin: 32px 0 48px;
+    padding: 32px;
+  }
+  .intro h2 {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .intro p {
+    color: var(--text-dim);
+    font-size: 16px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* Legenda dos níveis de explicação */
+  .legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 800px;
+    margin: 32px auto 48px;
+  }
+  .legend-item {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-left: 4px solid;
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .legend-item.beginner { border-left-color: var(--green); }
+  .legend-item.tech { border-left-color: var(--accent-2); }
+  .legend-item .icon {
+    font-size: 20px;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .legend-item h3 {
+    display: inline;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .legend-item.beginner h3 { color: var(--green); }
+  .legend-item.tech h3 { color: var(--accent-2); }
+  .legend-item p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  /* Glossário */
+  .glossary {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 48px;
+  }
+  .glossary h3 {
+    color: var(--accent);
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  .glossary p.subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px 24px;
+  }
+  .gloss-term {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--panel-border);
+  }
+  .gloss-term strong {
+    color: var(--accent-2);
+    font-size: 14px;
+  }
+  .gloss-term span {
+    color: var(--text-dim);
+    font-size: 13px;
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* Cards de diagrama */
+  .diagram-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .diagram-card .card-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--panel-border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .diagram-card h2 {
+    font-size: 22px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .diagram-card h2 .number {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 28px;
+  }
+  .diagram-card .subtitle {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* Description com camadas */
+  .description {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .audience-line {
+    padding: 12px 16px;
+    border-left: 3px solid;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .audience-line:last-child { margin-bottom: 0; }
+  .audience-line.beginner {
+    border-left-color: var(--green);
+    background: rgba(126, 231, 135, 0.05);
+    color: var(--text);
+  }
+  .audience-line.beginner strong { color: var(--green); }
+  .audience-line.tech {
+    border-left-color: var(--accent-2);
+    background: rgba(79, 195, 247, 0.05);
+    color: var(--text);
+  }
+  .audience-line.tech strong { color: var(--accent-2); }
+  .audience-line code {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "Monaco", "Menlo", monospace;
+    font-size: 12px;
+  }
+
+  /* Pontos-chave */
+  .diagram-card .key-points {
+    padding: 16px 32px;
+    background: rgba(255, 211, 61, 0.04);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .diagram-card .key-points h4 {
+    color: var(--orange);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .diagram-card .key-points ul { list-style: none; padding: 0; }
+  .diagram-card .key-points li {
+    padding: 4px 0 4px 20px;
+    position: relative;
+    font-size: 14px;
+  }
+  .diagram-card .key-points li::before {
+    content: "▸";
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+  }
+  .diagram-card .key-points code {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: "Monaco", "Menlo", monospace;
+    font-size: 12px;
+  }
+
+  /* Diagrama */
+  .mermaid-wrapper {
+    background: #fff;
+    padding: 32px;
+    overflow-x: auto;
+    text-align: center;
+  }
+  .mermaid { margin: 0 auto; display: inline-block; }
+
+  /* Bloco de código (pra exemplos comparativos) */
+  .code-blocks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  @media (max-width: 900px) {
+    .code-blocks { grid-template-columns: 1fr; }
+  }
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .code-block-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .code-block.lc .code-block-header { color: var(--accent); background: rgba(255, 138, 101, 0.08); }
+  .code-block.lg .code-block-header { color: var(--accent-2); background: rgba(79, 195, 247, 0.08); }
+  .code-block pre {
+    padding: 16px;
+    margin: 0;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+    font-family: "Monaco", "Menlo", "Consolas", monospace;
+  }
+
+  /* Tabela de decisão */
+  .decision-table {
+    padding: 0 32px 24px;
+  }
+  .decision-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .decision-table th,
+  .decision-table td {
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--panel-border);
+    font-size: 14px;
+  }
+  .decision-table th {
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 600;
+    color: var(--text);
+  }
+  .decision-table th.lc { color: var(--accent); }
+  .decision-table th.lg { color: var(--accent-2); }
+  .decision-table td:first-child { color: var(--text-dim); }
+  .decision-table tr:last-child td { border-bottom: 0; }
+
+  /* Print */
+  @media print {
+    header { position: static; }
+    .diagram-card { break-inside: avoid; page-break-inside: avoid; }
+  }
+
+  /* Responsivo */
+  @media (max-width: 768px) {
+    header { padding: 12px 16px; }
+    main { padding: 20px 16px 60px; }
+    .legend { grid-template-columns: 1fr; }
+    .diagram-card .card-header,
+    .description,
+    .diagram-card .key-points,
+    .mermaid-wrapper,
+    .glossary { padding: 16px; }
+    .intro h2 { font-size: 24px; }
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 80px;
+    padding: 32px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+    border-top: 1px solid var(--panel-border);
+  }
+  footer a { color: var(--accent-2); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍽️ Lia <span>— Mapa Conceitual</span></h1>
+  <nav>
+    <a href="#glossario">📖 Glossário</a>
+    <a href="#d1">1. Visão geral</a>
+    <a href="#d2">2. Agent loop</a>
+    <a href="#d3">3. Anatomia de Tool</a>
+    <a href="#d4">4. Sequência</a>
+    <a href="#d5">5. Memória</a>
+    <a href="#d6">6. Guardrail</a>
+    <a href="#d7">7. Logs</a>
+    <a href="#d8">8. Docker</a>
+    <a href="#d9">9. Lifecycle</a>
+    <a href="#d10">10. Adapter</a>
+    <a href="#d11">11. LangChain vs LangGraph</a>
+  </nav>
+</header>
+
+<main>
+
+<section class="intro">
+  <h2>Como o chat com IA funciona, do clique ao prato recomendado</h2>
+  <p>10 diagramas, na ordem em que fazem sentido pra explicar o fluxo. Cada card tem duas camadas de explicação: uma para quem está começando agora, outra com os detalhes técnicos.</p>
+</section>
+
+<!-- Legenda -->
+<div class="legend">
+  <div class="legend-item beginner">
+    <span class="icon">💡</span><h3>Em uma frase</h3>
+    <p>A ideia central com analogias do dia a dia. Sem jargão. Pra quem está começando ou quer relembrar o panorama.</p>
+  </div>
+  <div class="legend-item tech">
+    <span class="icon">🔧</span><h3>Tecnicamente</h3>
+    <p>Os termos certos, nomes de bibliotecas, comportamento exato. Pra quem programa e quer precisão.</p>
+  </div>
+</div>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d1">
+  <div class="card-header">
+    <h2><span class="number">01</span> Visão de alto nível: as 3 camadas</h2>
+    <div class="subtitle">Onde mora cada peça do sistema</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Um app de chat com IA tem três grupos de peças que conversam entre si: a tela (browser), o servidor (cérebro do app) e o LLM (a "IA" propriamente). E você escolhe se a IA roda na sua máquina ou na nuvem.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> Browser (React) fala HTTP com o backend (FastAPI). O backend orquestra <code>guardrail → agent → memória</code> e fala com um LLM via LangChain. O provider é escolhido por env var (<code>LLM_PROVIDER=ollama|anthropic</code>). As tools acessam o <code>cardapio.json</code> de forma determinística (Python puro, não LLM).
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>O backend não fala com o LLM direto — fala via <code>agent.py</code>, que abstrai os providers</li>
+      <li>Tools são funções Python normais; o LLM só decide quando chamar</li>
+      <li>O <code>cardapio.json</code> é a "fonte da verdade" — o LLM nunca inventa pratos</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart LR
+    subgraph BROWSER["🖥️ Navegador"]
+        UI[React + Vite<br/>Chat.jsx]
+    end
+
+    subgraph SERVER["🐍 Backend (FastAPI)"]
+        API[main.py<br/>+ middleware]
+        CHAT[chat.py<br/>orquestrador]
+        GUARD[guardrail.py]
+        AGENT[agent.py<br/>+ adapter dual]
+        CB[agent_callbacks.py<br/>logs]
+        TOOLS[tools.py]
+        SESS[sessions.py]
+        DATA[(cardapio.json)]
+    end
+
+    subgraph LLM["🧠 LLM — escolha um"]
+        OLLAMA[Ollama local<br/>llama3.2:3b]
+        ANTHROPIC[Claude API<br/>claude-haiku-4-5]
+    end
+
+    UI -->|HTTP /chat| API
+    API --> CHAT
+    CHAT --> GUARD
+    CHAT --> AGENT
+    CHAT --> SESS
+    AGENT --> CB
+    AGENT --> TOOLS
+    TOOLS --> DATA
+    AGENT <-.->|provider=ollama| OLLAMA
+    AGENT <-.->|provider=anthropic| ANTHROPIC
+
+    style ANTHROPIC fill:#ffe0b2,stroke:#e65100
+    style OLLAMA fill:#b3e5fc,stroke:#01579b
+    style DATA fill:#c8e6c9,stroke:#1b5e20
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d2">
+  <div class="card-header">
+    <h2><span class="number">02</span> O loop interno do Agent</h2>
+    <div class="subtitle">A parte "mágica" do tool calling — explicada</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> O LLM não executa código — ele <em>pede</em> pra alguém executar. É como um chef que escreve "faça uma tigela de salada" no papel e entrega pro ajudante: o chef não pega a faca; o ajudante pega, faz, e devolve a tigela pro chef apresentar.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> O LLM gera um JSON com <code>{name, args}</code> declarando qual tool quer chamar. O LangChain executa a função Python, anexa o resultado como <code>ToolMessage</code> <em>(uma "mensagem especial" no histórico que diz "isto é o resultado da tool X")</em>, e devolve o histórico atualizado pro LLM. Loop até o LLM gerar texto puro (resposta final). No nosso caso, geralmente 2 voltas: 1 pra decidir, 1 pra formatar.
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>O LLM nunca roda código — só decide</li>
+      <li>O LangChain orquestra o ciclo "LLM → tool → LLM → ..."</li>
+      <li>Quando o LLM responde sem pedir tool, é o fim do loop</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart TD
+    START([Mensagem do usuário<br/>chega no agent]) --> BUILD[Monta prompt:<br/>system + histórico + msg]
+    BUILD --> CALL[Chama o LLM<br/>com schema das tools]
+    CALL --> CHECK{LLM decidiu<br/>chamar tool?}
+    CHECK -->|Sim| EXEC[Executa a função<br/>Python da tool]
+    EXEC --> APPEND[Anexa resultado<br/>como ToolMessage]
+    APPEND --> CALL
+    CHECK -->|Não — só texto| FINAL[Resposta final<br/>em linguagem natural]
+    FINAL --> END([Devolve pro chat.py])
+
+    style EXEC fill:#b3e5fc,stroke:#01579b
+    style CALL fill:#ffe0b2,stroke:#e65100
+    style CHECK fill:#f8bbd0,stroke:#880e4f
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d3">
+  <div class="card-header">
+    <h2><span class="number">03</span> Anatomia de uma Tool</h2>
+    <div class="subtitle">Decorator, docstring, body — três papéis distintos</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Uma "tool" é só uma função Python comum, mas com um decorador especial em cima dela. O LLM lê o nome, os parâmetros e a explicação (docstring) — mas <em>nunca</em> o código de dentro. É o manual e a etiqueta da função, não o conteúdo.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> O decorator <code>@tool</code> do LangChain transforma a assinatura tipada da função em um schema JSON consumível pelo LLM. A docstring serve como "manual de uso" — o LLM lê pra decidir <em>quando</em> chamar. O corpo é caixa-preta para o modelo (boa prática de segurança).
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>Reescrever a docstring → muda o comportamento da IA (ela lê pra decidir)</li>
+      <li>Tipos da assinatura viram schema automaticamente</li>
+      <li>O corpo é caixa-preta pro LLM: ele não pode "manipular" código que não vê</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart TB
+    subgraph TOOL["@tool def filtrar_pratos(...)"]
+        DECO["@tool<br/>(decorator LangChain)"]
+        SIG["Assinatura:<br/>restricoes: str<br/>alergias: str<br/>preferencias: str<br/>dia: str"]
+        DOC["Docstring:<br/>'Filtra pratos do dia que atendem<br/>TODAS as restrições...<br/>Use SEMPRE quando...'"]
+        BODY["Corpo Python:<br/>filtragem determinística"]
+    end
+
+    LLM[🧠 LLM] -->|lê o schema<br/>gerado da assinatura| SIG
+    LLM -->|lê pra decidir<br/>QUANDO usar| DOC
+    LLM -.->|nunca lê| BODY
+
+    style DOC fill:#ffe0b2,stroke:#e65100
+    style BODY fill:#b3e5fc,stroke:#01579b
+    style LLM fill:#fff
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d4">
+  <div class="card-header">
+    <h2><span class="number">04</span> Sequência completa de uma mensagem</h2>
+    <div class="subtitle">Caminho feliz: do clique até a bolha de resposta</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Acompanhe o caminho de uma única pergunta — desde o usuário apertar Enter até a resposta aparecer no chat. É como ver o pedido de um restaurante passar pela cozinha inteira.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> Um <code>POST /chat</code> dispara: guardrail (filtra escopo) → agent (chama LLM com schema das tools) → tool (Python filtra cardápio em ~0ms) → LLM novamente (formata resposta) → JSON de retorno. Note que o filtro vegetariano roda em código Python, não no modelo.
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>O guardrail bate keyword "vegetariano" e responde em ~0ms — sem chamar LLM</li>
+      <li>O LLM #1 decide: "vou chamar <code>filtrar_pratos</code>"</li>
+      <li>A tool roda em Python e devolve só os pratos que passam no filtro</li>
+      <li>O LLM #2 formata a resposta natural em português</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as 👤 Usuário
+    participant F as ⚛️ React
+    participant API as 🚀 FastAPI
+    participant C as 🎯 chat.py
+    participant G as 🛡️ guardrail
+    participant A as 🤖 agent
+    participant L as 🧠 LLM
+    participant T as 🔧 tools
+    participant D as 📄 cardapio.json
+    participant S as 💾 sessions
+
+    U->>F: "sou vegetariano"
+    F->>API: POST /chat
+    API->>C: processar_mensagem()
+    C->>S: get_historico_janela()
+    S-->>C: últimas mensagens
+    C->>G: is_in_scope(...)
+    Note over G: keyword bate ✅
+    G-->>C: True
+    C->>A: executor.invoke()
+    A->>L: prompt + tools schema
+    L-->>A: chamar filtrar_pratos
+    A->>T: filtrar_pratos("vegetariano")
+    T->>D: get_pratos_do_dia()
+    D-->>T: 5 pratos
+    Note over T: filtra em Python
+    T-->>A: 2 pratos compatíveis
+    A->>L: resultado da tool
+    L-->>A: texto formatado
+    A-->>C: resposta final
+    C->>S: salva o turno
+    C-->>API: JSON
+    API-->>F: 200 OK
+    F-->>U: renderiza bolha
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d5">
+  <div class="card-header">
+    <h2><span class="number">05</span> Memória de conversa</h2>
+    <div class="subtitle">RAM por session_id, janela de 6 mensagens (3 turnos)</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Cada usuário tem uma "caixinha" separada na memória do servidor com o histórico das últimas mensagens. Reiniciou o servidor, perdeu o histórico — é tipo bilhete na mesa, não livro de cabeceira.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> Dict em RAM indexado por <code>session_id</code> (gerado no frontend e salvo em <code>localStorage</code>). Janela de 6 mensagens (3 turnos) limita o crescimento do prefill em CPU. Volátil por design no MVP — SQLite seria o próximo passo pra persistência.
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>A janela de 6 limita o custo do LLM em conversas longas</li>
+      <li>Sessão por <code>session_id</code> garante isolamento entre usuários</li>
+      <li>Botão "Nova Conversa" → DELETE no backend + novo <code>session_id</code> no front</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart LR
+    subgraph SESS["sessions.py — RAM"]
+        DICT["dict[session_id, ChatMessageHistory]"]
+    end
+
+    USER1[👤 user_abc123] -->|envia msg| ADD1[adicionar_turno]
+    ADD1 -->|append HumanMessage<br/>+ AIMessage| DICT
+    USER1 -->|próxima msg| GET[get_historico_janela]
+    GET -->|últimas 6 msgs<br/>3 turnos| DICT
+    DICT -.->|reset| DEL[DELETE /chat/abc123<br/>+ frontend gera novo id]
+
+    USER2[👤 user_xyz789] -.->|nunca enxerga<br/>msgs do user_abc123| DICT
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d6">
+  <div class="card-header">
+    <h2><span class="number">06</span> Guardrail em duas camadas</h2>
+    <div class="subtitle">Por que prompt sozinho não basta</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Como impedir que a IA fale sobre coisas fora do tópico (receita de bolo, política, "ignore suas instruções"). Você não confia só no prompt — adiciona um filtro estrutural antes de passar a pergunta pro LLM.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> Heurística por keywords (~0ms, instantânea) + classificador LLM como fallback (~500ms, só pra casos ambíguos). Combinação cobre ~90% das mensagens sem chamar o classificador. Política <strong>fail-closed</strong> <em>(se algo quebrar, fica no estado seguro = recusar)</em>: se o Ollama cai, recusa por padrão (nunca abre brecha).
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>Por que duas camadas?</h4>
+    <ul>
+      <li>Keyword é instantânea, mas não cobre todas as variações de pergunta válida</li>
+      <li>LLM cobre o resto, mas é caro chamar pra TODA mensagem</li>
+      <li>Combinando: 90% não chega no LLM. Só os ambíguos pagam o custo</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart TD
+    MSG[/"Mensagem:<br/>'me ensina a fazer bolo'"/] --> NORM[Normaliza<br/>minúscula, sem acento]
+    NORM --> KW{Match com<br/>keywords do<br/>domínio?}
+    KW -->|Sim| OK1([✅ no escopo])
+    KW -->|Não| HIST{Tem histórico<br/>+ é continuação<br/>curta?}
+    HIST -->|Sim| OK2([✅ no escopo])
+    HIST -->|Não| LLM[Classificador LLM<br/>responde SIM/NAO]
+    LLM --> RESP{SIM?}
+    RESP -->|Sim| OK3([✅ no escopo])
+    RESP -->|Não| BLOCK([❌ recusado])
+    LLM -.->|Ollama caiu| FAILSAFE([❌ fail-closed])
+
+    style OK1 fill:#c8e6c9,stroke:#1b5e20
+    style OK2 fill:#c8e6c9,stroke:#1b5e20
+    style OK3 fill:#c8e6c9,stroke:#1b5e20
+    style BLOCK fill:#ffcdd2,stroke:#b71c1c
+    style FAILSAFE fill:#ffcdd2,stroke:#b71c1c
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d7">
+  <div class="card-header">
+    <h2><span class="number">07</span> Pipeline de observabilidade</h2>
+    <div class="subtitle">Cada etapa loga seu tempo — saber onde vai o tempo é parte do trabalho</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Cada etapa do processamento gera uma linha de log com o tempo que levou. Quando alguém disser "tá lento", você não chuta — você abre os logs e vê exatamente onde o tempo foi gasto.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> <code>BaseCallbackHandler</code> <em>(função que o LangChain "chama de volta" em momentos específicos)</em> do LangChain captura <code>on_chat_model_start/end</code> e <code>on_tool_start/end</code>. Middleware HTTP <em>(filtro que toda request passa antes de chegar no handler)</em> do FastAPI mede o handler completo (entry → response built). Logs estruturados com timestamp permitem cruzamento end-to-end de uma request.
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>Cada linha responde uma pergunta diferente: "qual tool foi chamada?", "o LLM #1 ou #2 demorou mais?"</li>
+      <li>O tempo entre <code>REQ END</code> e <code>HTTP RESP</code> revela overhead de Pydantic/uvicorn (geralmente &lt;1ms)</li>
+      <li>O middleware é o ponto FINAL — qualquer atraso depois disso é rede ou frontend</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart LR
+    subgraph SETUP["Setup (startup)"]
+        SL[logging_config.py<br/>setup_logging]
+    end
+
+    subgraph LIFECYCLE["Por request"]
+        REQ[REQ START<br/>chat.py]
+        GR[GUARDRAIL<br/>chat.py]
+        AS[AGENT START<br/>chat.py]
+        L1[LLM #1 START/END<br/>callback]
+        TL[TOOL START/END<br/>callback]
+        L2[LLM #2 START/END<br/>callback]
+        END[REQ END<br/>chat.py]
+        HR[HTTP RESP<br/>middleware]
+    end
+
+    SL --> REQ
+    REQ --> GR
+    GR --> AS
+    AS --> L1
+    L1 --> TL
+    TL --> L2
+    L2 --> END
+    END --> HR
+
+    style L1 fill:#ffe0b2,stroke:#e65100
+    style L2 fill:#ffe0b2,stroke:#e65100
+    style TL fill:#b3e5fc,stroke:#01579b
+    </pre>
+  </div>
+  <div class="description" style="border-top: 1px solid var(--panel-border); border-bottom: 0;">
+    <strong>Output típico:</strong>
+    <pre style="background: rgba(255,255,255,0.04); padding: 16px; border-radius: 6px; margin-top: 12px; font-size: 12px; color: var(--text); white-space: pre-wrap; line-height: 1.4; font-family: Monaco, monospace;">20:39:55.171 | chat   | REQ START   | session=user_xyz | msg='...'
+20:39:55.171 | chat   | +0.00s | GUARDRAIL  | in_scope=True
+20:39:55.180 | agent  | +0.01s | LLM #1 START   | chars_in=2634
+20:39:56.948 | agent  | +1.78s | LLM #1 END     | dur=1.77s
+20:39:56.949 | agent  | +1.78s | TOOL START      | name=filtrar_pratos
+20:39:56.950 | agent  | +1.78s | TOOL END        | dur=0.00s
+20:39:56.958 | agent  | +1.79s | LLM #2 START
+20:39:59.100 | agent  | +3.93s | LLM #2 END     | dur=2.14s
+20:39:59.100 | chat   | +3.93s | REQ END    | total=3.93s
+20:39:59.101 | api    | HTTP RESP   | total_handler_ms=3930</pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d8">
+  <div class="card-header">
+    <h2><span class="number">08</span> Flow do Docker Compose</h2>
+    <div class="subtitle">4 serviços que sobem em ordem específica</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Um arquivo (<code>docker-compose.yml</code>) descreve quatro "computadores virtuais" (containers) e a ordem em que eles devem subir: primeiro a IA, depois o setup que baixa o modelo, depois o backend, depois o frontend.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> <code>depends_on.condition</code> garante a ordem por <strong>healthcheck</strong> (não só timing). <code>ollama-init</code> roda uma vez e encerra (<code>restart: "no"</code>). Volume nomeado <code>ollama_data</code> persiste o modelo de 2 GB entre <code>down/up</code>. Política <code>restart: "no"</code> evita auto-start no boot.
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li><code>depends_on.condition</code> garante a ordem (não é só "espera 5s")</li>
+      <li><code>ollama-init</code> roda uma vez e <strong>encerra</strong> (<code>restart: "no"</code>)</li>
+      <li>Volume mantém o modelo entre <code>down</code>/<code>up</code></li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart TD
+    UP[docker compose up] --> O[ollama<br/>servidor LLM]
+    O -->|healthcheck OK| OI[ollama-init<br/>baixa o modelo]
+    OI -->|completed| B[backend<br/>FastAPI :8765]
+    B --> F[frontend<br/>nginx :5273]
+
+    F -.->|proxy /api/*| B
+    B -.->|HTTP :11534| O
+
+    style O fill:#ffe0b2,stroke:#e65100
+    style OI fill:#ffe0b2,stroke:#e65100
+    style B fill:#b3e5fc,stroke:#01579b
+    style F fill:#c8e6c9,stroke:#1b5e20
+
+    UP -.->|volume| V[(ollama_data<br/>cache do modelo)]
+    O -.- V
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d9">
+  <div class="card-header">
+    <h2><span class="number">09</span> Lifecycle: prewarm e reprewarm</h2>
+    <div class="subtitle">Como o Ollama fica "quente" no momento certo</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Como deixar a IA "preparada" antes do usuário pedir — pré-aquecer enquanto o servidor está subindo, e re-aquecer quando o usuário clica "Nova Conversa". É tipo ligar o forno antes de começar a cozinhar.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> Em CPU, llama3.2 leva ~30s pra processar o system prompt + tools schema (cold start do KV cache <em>— a "memória interna" do LLM ainda não tem nada útil</em>). <code>prewarm()</code> roda em thread daemon <em>(trabalhador silencioso em paralelo)</em> no startup, populando o cache em background. Reprewarm dispara no <code>DELETE /chat/{id}</code>, aproveitando o intervalo "humano pensando". Pulado quando provider=anthropic (sem cold start).
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>Prewarm roda em <code>threading.Thread(daemon=True)</code> — não bloqueia o healthcheck do Docker</li>
+      <li>Reprewarm dispara no handler do DELETE — sem custo aparente pro usuário</li>
+      <li>Para Anthropic, ambos são pulados (<code>provider=anthropic</code>, sem cold start)</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+sequenceDiagram
+    participant Docker
+    participant FastAPI
+    participant Thread as Thread daemon
+    participant Ollama
+    participant User
+
+    Docker->>FastAPI: container start
+    FastAPI->>Thread: dispara prewarm() em bg
+    Thread->>Ollama: invoke(SYSTEM + tools + "oi")
+    Note over Thread,Ollama: ~30-40s, popula KV cache
+    FastAPI-->>Docker: healthcheck OK ✅
+    Ollama-->>Thread: resposta dummy
+    Thread->>FastAPI: log "PREWARM done"
+
+    User->>FastAPI: 1ª POST /chat
+    Note over FastAPI,Ollama: aproveita KV cache
+    FastAPI-->>User: ~5s (cache hit) ⚡
+
+    User->>User: conversa por uns turnos<br/>(KV cache vai mudando)
+
+    User->>FastAPI: clica "Nova Conversa"
+    FastAPI->>FastAPI: DELETE /chat/{id}
+    FastAPI->>Thread: dispara prewarm() de novo
+    Note over Thread: roda enquanto user pensa
+    User->>FastAPI: próxima pergunta
+    Note over FastAPI: cache está quente
+    FastAPI-->>User: ~5s ⚡
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d10">
+  <div class="card-header">
+    <h2><span class="number">10</span> Adapter dual de provider</h2>
+    <div class="subtitle">Ollama local vs Claude API — uma env var de distância</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> Um <code>se/senão</code> que decide se a IA é a local (gratuita, mas mais lenta) ou a Claude (paga, mas muito mais rápida). Pra trocar, você só edita um arquivo de configuração — o resto do código nem sabe que mudou.
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> <code>_build_llm()</code> em <code>agent.py</code> retorna <code>ChatOllama</code> ou <code>ChatAnthropic</code> conforme a env var. Ambos herdam de <code>BaseChatModel</code> <em>(a "tomada padrão" do LangChain — qualquer LLM implementa a mesma interface)</em> — interface idêntica. O <code>create_agent()</code>, as tools, o guardrail, o frontend continuam intactos. Trocar provider: editar <code>.env</code> + rebuild do backend.
+    </div>
+  </div>
+  <div class="key-points">
+    <h4>O que olhar</h4>
+    <ul>
+      <li>Mesma interface (<code>ChatOllama</code> e <code>ChatAnthropic</code> herdam de <code>BaseChatModel</code>)</li>
+      <li>Ollama: ~30s/turno em CPU, gratuito, privado</li>
+      <li>Anthropic Haiku: ~3s/turno, ~R$ 0,01/turno, qualidade superior</li>
+      <li>Prewarm faz sentido só pro Ollama (Anthropic não tem cold start)</li>
+    </ul>
+  </div>
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart TD
+    START([backend startup]) --> READ[Lê env LLM_PROVIDER]
+    READ --> DEC{LLM_PROVIDER<br/>= ?}
+
+    DEC -->|"ollama"<br/>default| LCO[from langchain_ollama<br/>import ChatOllama]
+    LCO --> CFGO[ChatOllama com<br/>num_ctx=2048<br/>keep_alive=30m]
+    CFGO --> AGENT_O[create_agent]
+    AGENT_O --> PWO[prewarm thread<br/>~30-40s]
+    PWO --> READY_O[Ready: ~30s/turno]
+
+    DEC -->|"anthropic"| KEY{ANTHROPIC_API_KEY<br/>setada?}
+    KEY -->|não| ERR[RuntimeError]
+    KEY -->|sim| LCA[from langchain_anthropic<br/>import ChatAnthropic]
+    LCA --> CFGA[ChatAnthropic<br/>max_tokens=512]
+    CFGA --> AGENT_A[create_agent]
+    AGENT_A --> SKIP[prewarm SKIP<br/>cloud sem cold start]
+    SKIP --> READY_A[Ready: ~3s/turno]
+
+    style LCO fill:#b3e5fc,stroke:#01579b
+    style READY_O fill:#b3e5fc,stroke:#01579b
+    style LCA fill:#ffe0b2,stroke:#e65100
+    style READY_A fill:#ffe0b2,stroke:#e65100
+    style ERR fill:#ffcdd2,stroke:#b71c1c
+    </pre>
+  </div>
+</article>
+
+<!-- ======================================================================= -->
+<article class="diagram-card" id="d11">
+  <div class="card-header">
+    <h2><span class="number">11</span> LangChain vs LangGraph — quando usar cada um</h2>
+    <div class="subtitle">Agent loop linear vs grafo de estado ramificado</div>
+  </div>
+  <div class="description">
+    <div class="audience-line beginner">
+      <strong>💡 Em uma frase:</strong> LangChain é tipo seguir uma <em>receita linear</em>: pergunta → tool → resposta. LangGraph é tipo um <em>diagrama de fluxo</em> cheio de "se isso, faz aquilo" — mais poderoso pra fluxos complexos, mas exagero pra casos simples. <strong>Comece com LangChain. Migre quando o `create_agent` deixar de caber no problema.</strong>
+    </div>
+    <div class="audience-line tech">
+      <strong>🔧 Tecnicamente:</strong> O <code>create_agent()</code> do LangChain encapsula o loop padrão (LLM decide → executa tool → LLM responde). O LangGraph oferece um <code>StateGraph</code> com nós e arestas condicionais — você desenha o workflow em código e tem controle total. <strong>LangGraph é construído sobre LangChain</strong> — não substitui, é uma camada acima pra workflows ramificados, multi-agente, ou que precisam de checkpoints/human-in-the-loop.
+    </div>
+  </div>
+
+  <div class="key-points">
+    <h4>Para a Lia (este projeto)</h4>
+    <ul>
+      <li>LangChain basta — o ciclo é simples (LLM → tool → LLM → resposta)</li>
+      <li>Migrar pra LangGraph só faria sentido se adicionássemos: confirmação humana antes de finalizar pedido, multi-agente (recomendador + nutricionista), hand-off pra humano</li>
+      <li>Não comece com LangGraph "porque parece mais profissional" — é over-engineering pra MVP</li>
+    </ul>
+  </div>
+
+  <div class="mermaid-wrapper">
+    <pre class="mermaid">
+flowchart TB
+    subgraph LC["🔶 LangChain — agent loop"]
+        direction LR
+        A1([Mensagem]) --> A2[LLM decide]
+        A2 -->|tool_call| A3[Executa tool]
+        A3 --> A4[LLM formata]
+        A4 --> A5([Resposta])
+    end
+
+    subgraph LG["🔷 LangGraph — grafo de estado"]
+        direction LR
+        B1([Mensagem]) --> B2[Classifica]
+        B2 -->|venda| B3[Agente vendas]
+        B2 -->|suporte| B4[Agente suporte]
+        B3 --> B5{Precisa<br/>humano?}
+        B4 --> B5
+        B5 -->|sim| B6[Pausa<br/>aguarda]
+        B5 -->|não| B7([Resposta])
+        B6 -.->|retorna| B5
+    end
+
+    style LC fill:#fff3e0,stroke:#e65100
+    style LG fill:#e1f5fe,stroke:#01579b
+    style A2 fill:#ffe0b2,stroke:#e65100
+    style A4 fill:#ffe0b2,stroke:#e65100
+    style B2 fill:#b3e5fc,stroke:#01579b
+    style B3 fill:#b3e5fc,stroke:#01579b
+    style B4 fill:#b3e5fc,stroke:#01579b
+    style B5 fill:#f8bbd0,stroke:#880e4f
+    </pre>
+  </div>
+
+  <div class="code-blocks">
+    <div class="code-block lc">
+      <div class="code-block-header">🔶 LangChain — 5 linhas que resolvem</div>
+      <pre>from langchain.agents import create_agent
+from langchain_ollama import ChatOllama
+
+llm = ChatOllama(model="llama3.2")
+agent = create_agent(
+    model=llm,
+    tools=TOOLS,
+    system_prompt=SYSTEM,
+)
+
+# uso
+resposta = agent.invoke({
+    "messages": [HumanMessage("o que tem hoje?")]
+})</pre>
+    </div>
+    <div class="code-block lg">
+      <div class="code-block-header">🔷 LangGraph — equivalente verboso</div>
+      <pre>from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolNode
+from typing import TypedDict, Annotated
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+llm = ChatOllama(model="llama3.2").bind_tools(TOOLS)
+
+def chamar_llm(state: State):
+    msgs = [SystemMessage(SYSTEM)] + state["messages"]
+    return {"messages": [llm.invoke(msgs)]}
+
+def precisa_tool(state: State):
+    return "tools" if state["messages"][-1].tool_calls else END
+
+graph = StateGraph(State)
+graph.add_node("llm", chamar_llm)
+graph.add_node("tools", ToolNode(TOOLS))
+graph.set_entry_point("llm")
+graph.add_conditional_edges("llm", precisa_tool)
+graph.add_edge("tools", "llm")
+agent = graph.compile()</pre>
+    </div>
+  </div>
+
+  <div class="decision-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Pergunta</th>
+          <th class="lc">🔶 LangChain</th>
+          <th class="lg">🔷 LangGraph</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Quantos LLMs cooperam?</td><td>1</td><td>2+</td></tr>
+        <tr><td>Quantos passos típicos?</td><td>1–3</td><td>4+</td></tr>
+        <tr><td>Tem ramificação condicional não-trivial?</td><td>Não</td><td>Sim</td></tr>
+        <tr><td>Precisa pausar e retomar a execução?</td><td>Não</td><td>Sim</td></tr>
+        <tr><td>Precisa de aprovação humana no meio?</td><td>Não</td><td>Sim</td></tr>
+        <tr><td>Precisa visualizar workflow pra stakeholders?</td><td>Não</td><td>Sim</td></tr>
+        <tr><td>Curva de aprendizado</td><td>suave</td><td>íngreme</td></tr>
+        <tr><td>Adequado pra MVP / prova de conceito?</td><td>Sim</td><td>Geralmente over-engineering</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="description" style="border-top: 1px solid var(--panel-border); border-bottom: 0;">
+    <div class="audience-line beginner">
+      <strong>🚨 Sinais de que é hora de migrar pra LangGraph:</strong> você tem <code>if/else</code> aninhado decidindo qual agent chamar; criou uma "super tool" porque uma sozinha não bastaria; quer pausar o agent no meio pra usuário aprovar; quer mostrar o "fluxo" do bot pro time não-técnico. <em>Sem nenhum desses sinais? Não migre.</em>
+    </div>
+  </div>
+</article>
+
+</main>
+
+<footer>
+  <p>📺 Use durante a videoaula: cada card é um diagrama renderizado em SVG, dá zoom à vontade.</p>
+  <p style="margin-top: 8px;">
+    Conteúdo equivalente em texto:
+    <a href="mapa-conceitual.md">mapa-conceitual.md</a>
+    · Roteiro da aula:
+    <a href="videoaula-roteiro.md">videoaula-roteiro.md</a>
+  </p>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#fff',
+      primaryTextColor: '#0d1117',
+      primaryBorderColor: '#444',
+      lineColor: '#444',
+      secondaryColor: '#f5f5f5',
+      tertiaryColor: '#fff',
+      background: '#fff',
+      mainBkg: '#fff',
+      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+      fontSize: '14px'
+    },
+    flowchart: { htmlLabels: true, useMaxWidth: false, curve: 'basis' },
+    sequence: { useMaxWidth: false, mirrorActors: false },
+    securityLevel: 'loose'
+  });
+</script>
+
+</body>
+</html>

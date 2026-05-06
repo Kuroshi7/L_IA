@@ -3,7 +3,7 @@
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
-WINDOW_SIZE = 20  # 10 turnos (user + ai)
+WINDOW_SIZE = 6  # 3 turnos (user + ai) — limita prefill em CPU; Lia "esquece" >3 turnos
 
 _sessoes: dict[str, InMemoryChatMessageHistory] = {}
 

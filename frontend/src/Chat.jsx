@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { enviarMensagem, getOuCriarSessionId, getSaudacao, limparConversa } from "./api.js";
+import { enviarMensagem, gerarSessionId, getOuCriarSessionId, getSaudacao, limparConversa } from "./api.js";
 
 const SUGESTOES = [
   { icon: "🥦", text: "Sou vegetariano, o que tem hoje?" },
@@ -88,7 +88,7 @@ function AvatarUser() {
 }
 
 export default function Chat() {
-  const [sessionId] = useState(getOuCriarSessionId);
+  const [sessionId, setSessionId] = useState(getOuCriarSessionId);
   const [mensagens, setMensagens] = useState([]);
   const [input, setInput] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -146,7 +146,18 @@ export default function Chat() {
   }
 
   async function novaConversa() {
-    await limparConversa(sessionId).catch(() => {});
+    // Tenta apagar a sessão no backend; logamos se falhar pra não cair em
+    // silêncio (caso de antes onde "Nova Conversa" parecia funcionar mas o
+    // histórico continuava acumulando).
+    await limparConversa(sessionId).catch((err) => {
+      console.warn("[novaConversa] DELETE /chat falhou — gerando novo session_id mesmo assim:", err);
+    });
+    // Gera novo session_id e persiste. Garante conversa limpa mesmo se o DELETE
+    // acima falhou — o backend cria histórico fresh para um id desconhecido.
+    const novoId = gerarSessionId();
+    localStorage.setItem("lia_session_id", novoId);
+    setSessionId(novoId);
+
     const m = await getSaudacao().catch(() => "Conversa reiniciada! 🍽️");
     setMensagens([{ role: "ai", text: m }]);
   }
@@ -174,12 +185,27 @@ export default function Chat() {
               </span>
             </div>
           </div>
-          <button className="btn-ghost" onClick={novaConversa} disabled={carregando}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" />
-            </svg>
-            Nova conversa
-          </button>
+          <div className="header-actions">
+            <a
+              className="btn-ghost"
+              href="/mapa-conceitual.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Mapa conceitual do projeto"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+              Sobre o projeto
+            </a>
+            <button className="btn-ghost" onClick={novaConversa} disabled={carregando}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" />
+              </svg>
+              Nova conversa
+            </button>
+          </div>
         </header>
 
         <main className="messages">

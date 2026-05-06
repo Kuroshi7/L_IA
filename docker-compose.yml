@@ -1,0 +1,94 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    # restart: "no" evita que os containers subam automaticamente ao ligar a máquina.
+    # Para subir manualmente: `docker compose up -d`. Para parar: `docker compose stop`.
+    restart: "no"
+    environment:
+      # KV cache em q8_0: 50% menos memória (448 MB → 224 MB) e ~10–15% mais rápido
+      # nas operações de attention. Perda de precisão é imperceptível para tool calling.
+      OLLAMA_KV_CACHE_TYPE: q8_0
+      # 1 usuário por vez = 1 slot. Evita Ollama duplicar KV cache pra paralelismo.
+      OLLAMA_NUM_PARALLEL: "1"
+      # Flash attention é "auto" e já habilita pra esse modelo, mas explicitar evita
+      # surpresa em update do Ollama.
+      OLLAMA_FLASH_ATTENTION: "1"
+      # Mantém modelo na RAM por 1h sem requests (já fazemos via ChatOllama, mas o
+      # servidor pode descarregar antes se não vir uso — cinto + suspensório).
+      OLLAMA_KEEP_ALIVE: 1h
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      # Defaults afastados das portas-padrão para não conflitar com outros projetos.
+      # Sobrescreva no .env se quiser outras portas.
+      - "${LIA_OLLAMA_PORT:-11534}:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    # Para usar GPU NVIDIA, descomente:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Garantindo que o modelo $$OLLAMA_MODEL está disponível...";
+        if ollama list | awk '{print $$1}' | grep -q "^$$OLLAMA_MODEL"; then
+          echo "Modelo $$OLLAMA_MODEL já está em cache.";
+        else
+          echo "Baixando $$OLLAMA_MODEL (pode demorar alguns minutos)...";
+          ollama pull "$$OLLAMA_MODEL";
+        fi
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    restart: "no"
+    environment:
+      # Provider de LLM: "ollama" (default, local) ou "anthropic" (Claude API).
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      # Ollama (usado quando LLM_PROVIDER=ollama)
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      # Anthropic (usado quando LLM_PROVIDER=anthropic)
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    ports:
+      - "${LIA_BACKEND_PORT:-8765}:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: /api
+    restart: "no"
+    depends_on:
+      - backend
+    ports:
+      - "${LIA_FRONTEND_PORT:-5273}:80"
+
+volumes:
+  ollama_data:

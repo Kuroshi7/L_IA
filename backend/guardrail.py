@@ -17,6 +17,13 @@ _KEYWORDS_BASE = {
     "amendoim", "soja", "ovo", "peixe", "carne", "frango", "salada", "sopa",
     "low carb", "fit", "diet", "dieta", "lia", "hoje", "amanha", "amanhã",
     "recomenda", "recomendacao", "sugere", "sugestao", "indica", "indicacao",
+    # Termos do domínio que aparecem com frequência em perguntas de continuação:
+    # adicionados pra evitar a chamada do classificador LLM (que custa ~5-8s).
+    "ingrediente", "ingredientes", "tem", "ter", "contem", "contém",
+    "vem", "leva", "feito", "feita", "preparo", "preparado", "preparada",
+    "valor", "valores", "info", "informacao", "informacoes", "detalhe", "detalhes",
+    "porcao", "porção", "tamanho", "quantidade", "qual", "qualquer",
+    "diferenca", "diferença", "comparar", "comparacao", "comparação",
 }
 
 _CONTINUACAO = {"ok", "obrigado", "obrigada", "valeu", "sim", "nao", "claro",
@@ -24,20 +31,40 @@ _CONTINUACAO = {"ok", "obrigado", "obrigada", "valeu", "sim", "nao", "claro",
                 "quero", "vamos", "bora", "qual", "tem", "tudo", "tambem",
                 "outro", "outra", "mais", "menos", "esse", "essa", "esses", "aquele"}
 
+_LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower().strip()
 _OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+_ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
 
-_classificador: ChatOllama | None = None
+# Tipo amplo: pode ser ChatOllama ou ChatAnthropic. Importa lazy para não exigir
+# o pacote do provider que não está em uso.
+_classificador = None
 
 
-def _get_classificador() -> ChatOllama:
+def _get_classificador():
     global _classificador
-    if _classificador is None:
+    if _classificador is not None:
+        return _classificador
+
+    if _LLM_PROVIDER == "anthropic":
+        from langchain_anthropic import ChatAnthropic
+
+        _classificador = ChatAnthropic(
+            model=_ANTHROPIC_MODEL,
+            max_tokens=4,
+            temperature=0,
+        )
+    else:
         _classificador = ChatOllama(
             model=_OLLAMA_MODEL,
             base_url=_OLLAMA_BASE_URL,
             temperature=0,
             num_predict=4,
+            # Mesma janela do agent — evita o Ollama subir runner extra com
+            # n_ctx=4096, fragmentando memória e duplicando KV cache.
+            num_ctx=2048,
+            # Mesmo keep_alive — para o classificador não causar descarga do modelo.
+            keep_alive="30m",
         )
     return _classificador
 

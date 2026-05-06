@@ -143,6 +143,12 @@ body {
 }
 
 /* ============ BUTTONS ============ */
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -157,6 +163,8 @@ body {
   cursor: pointer;
   transition: all 0.18s ease;
   font-family: inherit;
+  text-decoration: none;
+  white-space: nowrap;
 }
 .btn-ghost:hover:not(:disabled) {
   background: var(--surface-soft);

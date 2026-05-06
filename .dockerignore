@@ -1,0 +1,15 @@
+**/node_modules/
+**/dist/
+**/.vite/
+**/__pycache__/
+**/*.pyc
+.git/
+.gitignore
+.env
+.env.*
+.~lock.*
+*.docx
+backend/
+.claude/
+README.md
+start.txt
