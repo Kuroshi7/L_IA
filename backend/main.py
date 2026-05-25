@@ -13,11 +13,12 @@ from logging_config import setup_logging
 
 setup_logging()
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from agent import prewarm
 from cardapio import get_cardapio_semana, get_pratos_do_dia
+from channels import telegram as tg_channel
 from chat import processar_mensagem
 from models import MensagemRequest, MensagemResponse
 from prompts import MENSAGEM_INICIAL
@@ -99,6 +100,42 @@ def chat(request: MensagemRequest):
         resposta=resultado["resposta"],
         fora_de_escopo=resultado["fora_de_escopo"],
     )
+
+
+@app.post("/webhook/telegram")
+async def webhook_telegram(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    x_telegram_bot_api_secret_token: str | None = Header(default=None),
+):
+    """Webhook do Telegram (https://core.telegram.org/bots/api#setwebhook).
+
+    Boas práticas que seguimos aqui:
+      - Validação do header `X-Telegram-Bot-Api-Secret-Token` (se configurado no .env).
+        Sem isso, qualquer um que descobrir a URL pode injetar updates falsos.
+      - Resposta 200 imediata + processamento em BackgroundTask. O Telegram considera
+        que falhamos se demorarmos demais e fica retentando, o que duplica respostas.
+    """
+    expected = tg_channel.webhook_secret()
+    if expected and x_telegram_bot_api_secret_token != expected:
+        log.warning("TG webhook | secret token inválido — request rejeitado")
+        raise HTTPException(status_code=403, detail="Invalid secret token")
+
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Body precisa ser JSON")
+
+    try:
+        update = tg_channel.TelegramUpdate.model_validate(payload)
+    except Exception as e:
+        log.warning(f"TG webhook | update inválido | {type(e).__name__}: {e}")
+        # Devolve 200 mesmo assim — não queremos que o Telegram retente um payload
+        # que nunca vai bater nosso schema.
+        return {"ok": True, "ignored": True}
+
+    background_tasks.add_task(tg_channel.handle_update, update)
+    return {"ok": True}
 
 
 @app.delete("/chat/{session_id}")

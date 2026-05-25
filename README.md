@@ -23,6 +23,7 @@ Chat conversacional onde o usuário informa restrições (vegetariano, celíaco,
 5. **Pré-aquecimento (Ollama)**: thread em background no startup popula o KV cache com o contexto real (system prompt + tools schema), eliminando ~30s de cold start da 1ª request.
 6. **Re-warm automático em "Nova Conversa"**: o handler do `DELETE /chat/{id}` dispara prewarm em background — quando o usuário começa nova conversa, ela já vem rápida.
 7. **Tweaks Ollama**: `KV_CACHE_TYPE=q8_0` (-50% RAM), `num_ctx=2048` (-25% prefill), `NUM_PARALLEL=1`, `keep_alive=30m/1h`. Aplicados via env do compose.
+8. **Webhook multicanal**: endpoint `POST /webhook/<canal>` desacopla o canal externo (Telegram já implementado) do pipeline interno — mesma memória, guardrail e tools.
 
 ## Pré-requisitos
 
@@ -103,6 +104,57 @@ Mesma pergunta ("Sou vegetariano, o que tem hoje?"), mesmo backend, mesmo cardá
 | Total por turno | **~33s** | **~4s** |
 | Custo por turno | grátis | ~R$ 0,01 |
 
+## Canal Telegram (opcional)
+
+A Lia expõe `POST /webhook/telegram` para receber updates da [Bot API](https://core.telegram.org/bots/api). O adapter fica em [backend/channels/telegram.py](backend/channels/telegram.py) — o mesmo pipeline (`guardrail → agent → memória`) é reaproveitado e a sessão é namespacada como `tg:{chat_id}`, sem colidir com o canal web. Para somar outros canais (WhatsApp, etc.) basta criar `backend/channels/<canal>.py` + um `POST /webhook/<canal>` em [main.py](backend/main.py).
+
+**Como funciona o fluxo:**
+
+1. Telegram envia `POST /webhook/telegram` com um [Update](https://core.telegram.org/bots/api#update) JSON
+2. O endpoint valida o header `X-Telegram-Bot-Api-Secret-Token` (definido no `setWebhook`)
+3. Devolve `200 {ok:true}` na hora e empurra o processamento para uma `BackgroundTask` — Telegram não retenta
+4. Adapter manda `sendChatAction: typing` → roda `processar_mensagem` no threadpool → responde com `sendMessage`
+5. Comandos suportados: `/start` (saudação inicial) e `/reset` (limpa a sessão daquele chat)
+
+**Ativar em 5 passos:**
+
+```bash
+# 1. Crie o bot
+# Fale com @BotFather no Telegram → /newbot → copie o token (formato 123456:ABC...)
+
+# 2. Gere um secret aleatório
+openssl rand -hex 32
+
+# 3. Preencha no .env
+TELEGRAM_BOT_TOKEN=123456:ABC...
+TELEGRAM_WEBHOOK_SECRET=<o hex gerado>
+
+# 4. Suba o backend e exponha publicamente (em dev usamos ngrok; em prod, seu domínio HTTPS)
+docker compose up -d --build backend
+ngrok http 8765   # copie a URL https://xxxx.ngrok-free.app
+
+# 5. Registre o webhook no Telegram (uma vez só)
+curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://xxxx.ngrok-free.app/webhook/telegram",
+    "secret_token": "<o mesmo hex do .env>",
+    "allowed_updates": ["message"]
+  }'
+
+# Verificar configuração:
+curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
+```
+
+Mande `/start` para o bot e ele responde com a saudação inicial. Qualquer texto seguinte vai para o agente normal.
+
+> **Segurança:** o `TELEGRAM_WEBHOOK_SECRET` é opcional mas **fortemente recomendado**. Sem ele, qualquer pessoa que descobrir a URL pública pode injetar updates falsos. Com ele, o backend rejeita (403) qualquer request que não traga o header.
+
+> **Limitações conhecidas:**
+> - A memória continua em RAM ([sessions.py](backend/sessions.py)) — usuário que voltar dias depois perde o contexto. Trocar por Redis/SQLite quando virar dor real.
+> - Hoje qualquer usuário do Telegram consegue conversar com o bot. Se precisar de whitelist, filtre por `msg.from_.id` no [adapter](backend/channels/telegram.py).
+> - Mensagens não-texto (foto, áudio, sticker) recebem um aviso curto e são ignoradas.
+
 ## Comandos úteis
 
 ```bash
@@ -154,6 +206,7 @@ UI em `http://localhost:5173` (porta padrão do Vite quando rodado fora do Docke
 - `GET  /chat/saudacao` — texto inicial do bot
 - `POST /chat` — `{ session_id, mensagem }` → `{ session_id, resposta, fora_de_escopo }`
 - `DELETE /chat/{session_id}` — reseta memória **e dispara reprewarm em background** (modo Ollama)
+- `POST /webhook/telegram` — recebe [Update](https://core.telegram.org/bots/api#update) do Telegram (ver [seção Canal Telegram](#canal-telegram-opcional))
 
 ## Estrutura
 
@@ -180,6 +233,9 @@ menu-ai/
 │   ├── sessions.py            # memória RAM, WINDOW_SIZE=6 (3 turnos)
 │   ├── models.py              # Pydantic schemas
 │   ├── logging_config.py      # setup centralizado de logs
+│   ├── channels/
+│   │   ├── __init__.py
+│   │   └── telegram.py        # adapter Telegram (parse Update, sendMessage, dispatch /start /reset)
 │   └── data/cardapio.json     # 5 dias × 5 pratos
 └── frontend/
     ├── Dockerfile
@@ -277,6 +333,18 @@ Aplicado por padrão no `docker-compose.yml` e `agent.py`:
 | Mudei `.env` mas nada mudou | Container precisa recriar | `docker compose up -d --build backend` (rebuild se mudou código) ou `--force-recreate backend` (só env) |
 | Latência alta mesmo com Ollama tunado | CPU em `powersave` | `sudo cpupower frequency-set -g performance` |
 | Latência cresce a cada mensagem | RAM/swap pressure | `free -h` — se swap > 0, fechar outros apps/containers |
+
+### Canal Telegram
+
+| Sintoma | Causa provável | Solução |
+|---|---|---|
+| Bot não responde nada | Webhook não registrado ou URL pública offline | `curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"` — confira `url` e `last_error_message` |
+| `getWebhookInfo` mostra `last_error_message: "Wrong response from the webhook: 403 Forbidden"` | `TELEGRAM_WEBHOOK_SECRET` divergente entre `.env` e `setWebhook` | Re-registrar com o mesmo valor: `setWebhook?secret_token=<hex>` |
+| Backend loga `TG API sendMessage falhou \| status=404` | `TELEGRAM_BOT_TOKEN` errado ou vazio | Reconfira o token recebido do @BotFather, refaça o `docker compose up -d --build backend` |
+| Backend loga `TG API sendMessage falhou \| status=401` | Token revogado/inválido | Gere novo token em `/revoke` → `/token` no @BotFather |
+| Bot responde mas o usuário recebe a mensagem duplicada | Endpoint demorou demais e o Telegram retentou | Já mitigado: respondemos `200` imediato e processamos em `BackgroundTask`. Se voltar, ver logs do backend buscando exceções |
+| `Erro ao conectar` interno no log do adapter | Backend não consegue alcançar `api.telegram.org` | Confira saída de internet do container — em redes corporativas talvez precise de proxy |
+| `/start` mostra texto antigo após mudar `prompts.py` | Container não recriado | `docker compose up -d --build backend` |
 
 ### Erros conceituais
 

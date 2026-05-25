@@ -70,6 +70,9 @@ services:
       # Anthropic (usado quando LLM_PROVIDER=anthropic)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+      # Telegram (opcional — só usado se /webhook/telegram for chamado)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
     depends_on:
       ollama:
         condition: service_healthy
