@@ -1,12 +1,19 @@
 from pydantic import BaseModel, Field
 
 
-class MensagemRequest(BaseModel):
-    session_id: str = Field(..., min_length=1, max_length=128)
+class Turno(BaseModel):
+    papel: str
+    conteudo: str
+
+
+class InferRequest(BaseModel):
+    session_id: str = Field(default="", max_length=128)
+    unidade_id: int
+    usuario_id: int | None = None
     mensagem: str = Field(..., min_length=1, max_length=2000)
+    historico: list[Turno] = Field(default_factory=list)
 
 
-class MensagemResponse(BaseModel):
-    session_id: str
+class InferResponse(BaseModel):
     resposta: str
     fora_de_escopo: bool = False

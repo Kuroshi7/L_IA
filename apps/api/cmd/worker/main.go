@@ -1,0 +1,107 @@
+package main
+
+import (
+	"context"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+
+	"github.com/tamy-ai/menu-ai/api/internal/config"
+	"github.com/tamy-ai/menu-ai/api/internal/db"
+	"github.com/tamy-ai/menu-ai/api/internal/queue"
+	"github.com/tamy-ai/menu-ai/api/internal/store"
+)
+
+const consumerName = "go-worker"
+
+// Worker de efeitos colaterais: consome eventos de domínio (menuai.events) de
+// forma idempotente. Hoje apenas registra; aqui entrarão scoring de gamificação
+// e agregação de desperdício nas próximas fases.
+func main() {
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	cfg := config.Load()
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	pool, err := db.Connect(ctx, cfg.DatabaseURL)
+	if err != nil {
+		log.Error("conectar ao banco", "err", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+	st := store.New(pool)
+
+	rabbit, err := queue.Connect(cfg.RabbitURL)
+	if err != nil {
+		log.Error("conectar ao rabbitmq", "err", err)
+		os.Exit(1)
+	}
+	defer rabbit.Close()
+
+	ch, err := rabbit.Conn.Channel()
+	if err != nil {
+		log.Error("abrir canal", "err", err)
+		os.Exit(1)
+	}
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare("go.worker.events", true, false, false, false, nil)
+	if err != nil {
+		log.Error("declarar fila", "err", err)
+		os.Exit(1)
+	}
+	if err := ch.QueueBind(q.Name, "#", queue.ExchangeEvents, false, nil); err != nil {
+		log.Error("bind fila", "err", err)
+		os.Exit(1)
+	}
+	if err := ch.Qos(10, 0, false); err != nil { // prefetch: controla concorrência
+		log.Error("qos", "err", err)
+		os.Exit(1)
+	}
+
+	deliveries, err := ch.Consume(q.Name, consumerName, false, false, false, false, nil)
+	if err != nil {
+		log.Error("consumir", "err", err)
+		os.Exit(1)
+	}
+
+	log.Info("worker de eventos iniciado")
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case d, ok := <-deliveries:
+			if !ok {
+				return
+			}
+			handle(ctx, st, log, d)
+		}
+	}
+}
+
+func handle(ctx context.Context, st *store.Store, log *slog.Logger, d amqp.Delivery) {
+	processed, err := st.AlreadyProcessed(ctx, d.MessageId, consumerName)
+	if err != nil {
+		log.Error("checar inbox", "err", err)
+		_ = d.Nack(false, true)
+		return
+	}
+	if processed {
+		_ = d.Ack(false) // efeito exactly-once: já tratado
+		return
+	}
+
+	// Processamento do evento (placeholder na Fase 1).
+	log.Info("evento recebido", "type", d.Type, "msg_id", d.MessageId, "payload", string(d.Body))
+
+	if err := st.MarkProcessed(ctx, d.MessageId, consumerName); err != nil {
+		log.Error("marcar processado", "err", err)
+		_ = d.Nack(false, true)
+		return
+	}
+	_ = d.Ack(false)
+}

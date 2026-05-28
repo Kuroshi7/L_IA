@@ -1,41 +1,174 @@
+# Menu-AI v2 — stack de desenvolvimento.
+# Subir: (no diretório deploy/)  docker compose up -d --build
+# Seed:  docker compose run --rm api-seed
+# Index RAG: docker compose run --rm ai-indexer
+#
+# restart:"no" → containers não sobem sozinhos no boot da máquina.
+
 services:
-  ollama:
-    image: ollama/ollama:latest
-    # restart: "no" evita que os containers subam automaticamente ao ligar a máquina.
-    # Para subir manualmente: `docker compose up -d`. Para parar: `docker compose stop`.
+  postgres:
+    image: pgvector/pgvector:pg16
     restart: "no"
     environment:
-      # KV cache em q8_0: 50% menos memória (448 MB → 224 MB) e ~10–15% mais rápido
-      # nas operações de attention. Perda de precisão é imperceptível para tool calling.
-      OLLAMA_KV_CACHE_TYPE: q8_0
-      # 1 usuário por vez = 1 slot. Evita Ollama duplicar KV cache pra paralelismo.
-      OLLAMA_NUM_PARALLEL: "1"
-      # Flash attention é "auto" e já habilita pra esse modelo, mas explicitar evita
-      # surpresa em update do Ollama.
-      OLLAMA_FLASH_ATTENTION: "1"
-      # Mantém modelo na RAM por 1h sem requests (já fazemos via ChatOllama, mas o
-      # servidor pode descarregar antes se não vir uso — cinto + suspensório).
+      POSTGRES_USER: ${POSTGRES_USER:-menuai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-menuai}
+      POSTGRES_DB: ${POSTGRES_DB:-menuai}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "${MENUAI_PG_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-menuai} -d ${POSTGRES_DB:-menuai}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: "no"
+    ports:
+      - "${MENUAI_RABBIT_PORT:-5672}:5672"
+      - "${MENUAI_RABBIT_UI_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # API Go — fonte da verdade. Aplica migrations no startup e roda o outbox relay.
+  api:
+    build:
+      context: ../apps/api
+    restart: "no"
+    environment:
+      API_HTTP_PORT: "8080"
+      DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      CHAT_TIMEOUT_SECONDS: ${CHAT_TIMEOUT_SECONDS:-60}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "${MENUAI_API_PORT:-8080}:8080"
+
+  # Seed one-shot (unidades, cardápio do dia, medidas caseiras, guias).
+  api-seed:
+    build:
+      context: ../apps/api
+    command: ["/app/seed"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  # Worker Go — consome eventos de domínio (outbox → RabbitMQ) de forma idempotente.
+  api-worker:
+    build:
+      context: ../apps/api
+    command: ["/app/worker"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: "no"
+
+  # Worker de IA — consome chat.requests, roda o agente, responde via RPC.
+  ai-worker:
+    build:
+      context: ../apps/ai
+    command: ["python", "-m", "app.workers.chat_worker"]
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      API_INTERNAL_URL: http://api:8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      EMBED_PROVIDER: ${EMBED_PROVIDER:-ollama}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+      WORKER_PREFETCH: ${WORKER_PREFETCH:-1}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: "no"
+    # Escale a concorrência rodando mais réplicas:  docker compose up -d --scale ai-worker=3
+
+  # API Python (health + /infer + webhook Telegram). Opcional para o fluxo principal.
+  ai-api:
+    build:
+      context: ../apps/ai
+    environment:
+      API_INTERNAL_URL: http://api:8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      EMBED_PROVIDER: ${EMBED_PROVIDER:-ollama}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "${MENUAI_AI_PORT:-8000}:8000"
+    restart: "no"
+
+  # Indexador RAG one-shot (chunk + embed dos guias → pgvector).
+  ai-indexer:
+    build:
+      context: ../apps/ai
+    command: ["python", "-m", "app.rag.indexer"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
+      EMBED_PROVIDER: ${EMBED_PROVIDER:-ollama}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build:
+      context: ../apps/web
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    restart: "no"
+    depends_on:
+      - api
+    ports:
+      - "${MENUAI_WEB_PORT:-5273}:80"
+
+  # Ollama local (LLM + embeddings). Use LLM_PROVIDER=anthropic para não depender dele.
+  ollama:
+    image: ollama/ollama:latest
+    restart: "no"
+    environment:
       OLLAMA_KEEP_ALIVE: 1h
     volumes:
       - ollama_data:/root/.ollama
     ports:
-      # Defaults afastados das portas-padrão para não conflitar com outros projetos.
-      # Sobrescreva no .env se quiser outras portas.
-      - "${LIA_OLLAMA_PORT:-11534}:11434"
+      - "${MENUAI_OLLAMA_PORT:-11534}:11434"
     healthcheck:
       test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
-    # Para usar GPU NVIDIA, descomente:
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
 
   ollama-init:
     image: ollama/ollama:latest
@@ -45,53 +178,20 @@ services:
     environment:
       OLLAMA_HOST: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        echo "Garantindo que o modelo $$OLLAMA_MODEL está disponível...";
-        if ollama list | awk '{print $$1}' | grep -q "^$$OLLAMA_MODEL"; then
-          echo "Modelo $$OLLAMA_MODEL já está em cache.";
-        else
-          echo "Baixando $$OLLAMA_MODEL (pode demorar alguns minutos)...";
-          ollama pull "$$OLLAMA_MODEL";
-        fi
+        for m in "$$OLLAMA_MODEL" "$$EMBED_MODEL"; do
+          if ollama list | awk '{print $$1}' | grep -q "^$$m"; then
+            echo "Modelo $$m já em cache.";
+          else
+            echo "Baixando $$m...";
+            ollama pull "$$m";
+          fi
+        done
     restart: "no"
-
-  backend:
-    build:
-      context: ./backend
-    restart: "no"
-    environment:
-      # Provider de LLM: "ollama" (default, local) ou "anthropic" (Claude API).
-      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
-      # Ollama (usado quando LLM_PROVIDER=ollama)
-      OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
-      # Anthropic (usado quando LLM_PROVIDER=anthropic)
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
-      # Telegram (opcional — só usado se /webhook/telegram for chamado)
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
-    depends_on:
-      ollama:
-        condition: service_healthy
-      ollama-init:
-        condition: service_completed_successfully
-    ports:
-      - "${LIA_BACKEND_PORT:-8765}:8000"
-
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        VITE_API_URL: /api
-    restart: "no"
-    depends_on:
-      - backend
-    ports:
-      - "${LIA_FRONTEND_PORT:-5273}:80"
 
 volumes:
+  pg_data:
   ollama_data:

@@ -1,22 +1,21 @@
-"""Tools LangChain expostas ao agent. Args usam CSV string (mais robusto para LLMs pequenos
-que tendem a enviar tipos errados quando recebem list[str]). Lógica de filtragem é determinística
-em Python, garantindo que vegetariano nunca veja prato com carne."""
+"""Tools LangChain expostas ao agente.
+
+Os dados vêm da API interna do serviço Go (fonte da verdade), sempre filtrados
+pela UNIDADE do contexto da requisição. Args usam CSV string (mais robusto para
+LLMs pequenos). A filtragem por restrição/alergia é determinística em Python.
+"""
 
 from typing import Literal
 
 from langchain_core.tools import tool
 
-from cardapio import (
-    formatar_pratos_resumido,
-    get_pratos_do_dia,
-    get_prato_por_id,
-    prato_atende_restricao,
-    prato_combina_preferencia,
-    prato_seguro_para_alergias,
-)
+from app.agent import filters
+from app.agent.context import current_context
+from app.clients import go_api
+from app.rag import retriever
 
 
-def _csv_para_lista(s: str | None) -> list[str]:
+def _csv(s: str | None) -> list[str]:
     if not s:
         return []
     return [item.strip() for item in s.split(",") if item.strip()]
@@ -24,56 +23,46 @@ def _csv_para_lista(s: str | None) -> list[str]:
 
 @tool
 def listar_pratos_do_dia(dia: str = "hoje") -> list[dict]:
-    """Lista os pratos disponíveis num dia. `dia` aceita 'hoje', 'segunda-feira',
-    'terca-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira' ou data ISO '2026-04-27'.
-    Retorna [{id, nome, categoria}, ...]. Use SEMPRE esta tool quando o usuário perguntar
-    o que tem no cardápio sem informar restrições."""
-    pratos = get_pratos_do_dia(dia or "hoje")
-    return formatar_pratos_resumido(pratos)
+    """Lista TODOS os pratos do cardápio do dia da unidade atual. `dia` aceita 'hoje'
+    ou data ISO '2026-05-28'. Retorna [{id, nome, categoria}, ...]. Use SEMPRE quando o
+    usuário pedir o cardápio — mostre a lista completa antes de recomendar."""
+    ctx = current_context()
+    pratos = go_api.get_pratos(ctx.unidade_id, dia or "hoje")
+    return [filters.resumir(p) for p in pratos]
 
 
 @tool
-def filtrar_pratos(
-    restricoes: str = "",
-    alergias: str = "",
-    preferencias: str = "",
-    dia: str = "hoje",
-) -> list[dict]:
-    """Filtra pratos do dia que atendem TODAS as restrições, são seguros para TODAS as alergias
-    e combinam com as preferências. Use SEMPRE quando o usuário mencionar restrição/alergia.
+def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str = "", dia: str = "hoje") -> list[dict]:
+    """Filtra os pratos do dia (da unidade atual) que atendem TODAS as restrições, são
+    seguros para TODAS as alergias e combinam com as preferências. Use ao recomendar.
 
-    Args (todos como CSV string, vírgula-separado):
-      restricoes: ex. "vegetariano,sem gluten" ou "vegano" ou "celiaco,low carb"
-      alergias:   ex. "amendoim,peixe" ou "lactose"
-      preferencias: ex. "proteico,frango" ou "salada"
-      dia: ex. "hoje" (default), "segunda-feira", "terca-feira", "sexta-feira"
+    Args (CSV string): restricoes ex "vegetariano,sem gluten"; alergias ex "peixe,lactose";
+    preferencias ex "proteico,frango"; dia "hoje" (default) ou data ISO.
+    Retorna pratos completos compatíveis. Lista vazia = nenhum atende."""
+    ctx = current_context()
+    rest, alerg, pref = _csv(restricoes), _csv(alergias), _csv(preferencias)
+    pratos = go_api.get_pratos(ctx.unidade_id, dia or "hoje")
 
-    Retorna lista de pratos completos compatíveis. Lista vazia = nenhum prato atende."""
-    rest_list = _csv_para_lista(restricoes)
-    alerg_list = _csv_para_lista(alergias)
-    pref_list = _csv_para_lista(preferencias)
-
-    pratos = get_pratos_do_dia(dia or "hoje")
     compativeis = []
-    for prato in pratos:
-        if not all(prato_atende_restricao(prato, r) for r in rest_list):
+    for p in pratos:
+        if not all(filters.prato_atende_restricao(p, r) for r in rest):
             continue
-        if not prato_seguro_para_alergias(prato, alerg_list):
+        if not filters.prato_seguro_para_alergias(p, alerg):
             continue
-        if pref_list and not any(prato_combina_preferencia(prato, p) for p in pref_list):
+        if pref and not any(filters.prato_combina_preferencia(p, x) for x in pref):
             continue
-        compativeis.append(prato)
+        compativeis.append(p)
     return compativeis
 
 
 @tool
-def detalhar_prato(prato_id: int) -> dict | str:
-    """Retorna detalhes completos de um prato (ingredientes, alérgenos, nutrição, restrições).
-    Use depois que o usuário escolher um prato específico ou pedir mais detalhes."""
-    prato = get_prato_por_id(prato_id)
-    if prato is None:
-        return f"Prato com id {prato_id} não encontrado."
-    return prato
+def detalhar_prato(prato_id: int, dia: str = "hoje") -> dict | str:
+    """Detalhes completos de um prato do cardápio do dia (ingredientes, alérgenos, nutrição)."""
+    ctx = current_context()
+    for p in go_api.get_pratos(ctx.unidade_id, dia or "hoje"):
+        if p["id"] == prato_id:
+            return p
+    return f"Prato com id {prato_id} não encontrado no cardápio de hoje."
 
 
 @tool
@@ -82,51 +71,62 @@ def comparar_pratos(
     prato_ids: str = "",
     dia: str = "hoje",
 ) -> list[dict]:
-    """Compara pratos por critério nutricional, ordenando do maior para o menor valor.
-    Use SEMPRE quando o usuário perguntar "qual tem mais/menos X?" (proteína, caloria, etc).
+    """Compara pratos do dia por critério nutricional (decrescente). Use para "qual tem mais/menos X?".
+    prato_ids: CSV de ids; vazio = compara todos do dia."""
+    ctx = current_context()
+    chave = {"proteinas": "proteinas_g", "calorias": "calorias",
+             "carboidratos": "carboidratos_g", "gorduras": "gorduras_g"}.get(criterio, "proteinas_g")
 
-    Args:
-      criterio: "proteinas" (default) | "calorias" | "carboidratos" | "gorduras"
-      prato_ids: CSV de ids para comparar, ex. "101,102". Se vazio, compara TODOS os pratos do `dia`.
-      dia: "hoje" (default) ou nome do dia. Usado quando prato_ids está vazio.
-
-    Retorna [{id, nome, criterio, valor}, ...] ordenado decrescente."""
-    chave = {
-        "proteinas": "proteinas_g",
-        "calorias": "calorias",
-        "carboidratos": "carboidratos_g",
-        "gorduras": "gorduras_g",
-    }.get(criterio, "proteinas_g")
-
-    ids = []
-    for x in _csv_para_lista(prato_ids):
-        try:
-            ids.append(int(x))
-        except ValueError:
-            continue
-
-    pratos_a_comparar: list[dict] = []
+    pratos = go_api.get_pratos(ctx.unidade_id, dia or "hoje")
+    ids = {int(x) for x in _csv(prato_ids) if x.isdigit()}
     if ids:
-        for pid in ids:
-            p = get_prato_por_id(pid)
-            if p is not None:
-                pratos_a_comparar.append(p)
-    else:
-        pratos_a_comparar = get_pratos_do_dia(dia or "hoje")
+        pratos = [p for p in pratos if p["id"] in ids]
 
-    resultado = [
-        {
-            "id": p["id"],
-            "nome": p["nome"],
-            "criterio": criterio,
-            "valor": p.get("nutricao", {}).get(chave, 0),
-            "nutricao_completa": p.get("nutricao", {}),
-            "ingredientes": p.get("ingredientes", []),
-        }
-        for p in pratos_a_comparar
-    ]
+    resultado = [{"id": p["id"], "nome": p["nome"], "criterio": criterio, "valor": p.get(chave, 0)} for p in pratos]
     resultado.sort(key=lambda x: x["valor"], reverse=True)
     return resultado
 
 
-TOOLS = [listar_pratos_do_dia, filtrar_pratos, detalhar_prato, comparar_pratos]
+@tool
+def meu_perfil() -> dict | str:
+    """Retorna o perfil do usuário atual (restrições, preferências, alergias, IMC e meta
+    calórica diária), quando disponível. Use para personalizar recomendações e porções."""
+    ctx = current_context()
+    if not ctx.usuario_id:
+        return "Usuário não identificado nesta sessão — peça as restrições/preferências diretamente."
+    try:
+        return go_api.get_perfil(ctx.usuario_id)
+    except Exception:
+        return "Não foi possível carregar o perfil do usuário agora."
+
+
+@tool
+def consultar_medidas_caseiras() -> list[dict]:
+    """Tabela de medidas caseiras (medida → gramas → kcal) para traduzir recomendações em
+    porções práticas no self-service (ex.: '2 colheres de arroz')."""
+    try:
+        return go_api.get_medidas_caseiras()
+    except Exception:
+        return []
+
+
+@tool
+def buscar_informacao(consulta: str) -> str:
+    """Busca semântica (RAG) em guias de medidas caseiras e referência nutricional da unidade.
+    Use para dúvidas sobre porções, cálculo calórico/IMC e orientações gerais de consumo."""
+    ctx = current_context()
+    trechos = retriever.buscar(consulta, unidade_id=ctx.unidade_id, k=4)
+    if not trechos:
+        return "Sem informações adicionais indexadas para esta consulta."
+    return "\n\n".join(trechos)
+
+
+TOOLS = [
+    listar_pratos_do_dia,
+    filtrar_pratos,
+    detalhar_prato,
+    comparar_pratos,
+    meu_perfil,
+    consultar_medidas_caseiras,
+    buscar_informacao,
+]

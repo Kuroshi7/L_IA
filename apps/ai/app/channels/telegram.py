@@ -16,16 +16,29 @@ import logging
 import os
 
 import httpx
+from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 
-from chat import processar_mensagem
-from prompts import MENSAGEM_INICIAL
-from sessions import resetar
+from app.agent.orchestrator import processar_mensagem
+from app.agent.prompts import MENSAGEM_INICIAL
+from app.memory import session_store
 
 log = logging.getLogger("telegram")
 
 TELEGRAM_API_BASE = "https://api.telegram.org"
 SESSION_PREFIX = "tg"
+
+# Telegram não passa por seletor de unidade; até a reintegração v2, usa uma unidade padrão.
+TELEGRAM_DEFAULT_UNIDADE_ID = int(os.getenv("TELEGRAM_DEFAULT_UNIDADE_ID", "1"))
+
+
+def _historico_dicts(session_id: str) -> list[dict]:
+    msgs: list[BaseMessage] = session_store.get_historico_janela(session_id)
+    out = []
+    for m in msgs:
+        papel = "assistant" if m.__class__.__name__ == "AIMessage" else "user"
+        out.append({"papel": papel, "conteudo": getattr(m, "content", "")})
+    return out
 
 # Limite de mensagem do Telegram (4096 chars). Deixo margem de segurança.
 MAX_TG_MESSAGE = 4000
@@ -135,7 +148,7 @@ async def handle_update(update: TelegramUpdate) -> None:
         return
 
     if text.startswith("/reset"):
-        removido = resetar(session_id)
+        removido = session_store.resetar(session_id)
         log.info(f"TG /reset | chat={chat_id} | removido={removido}")
         await send_message(chat_id, "Conversa zerada. Pode mandar a próxima pergunta. 👇")
         return
@@ -144,11 +157,15 @@ async def handle_update(update: TelegramUpdate) -> None:
     log.info(f"TG msg | chat={chat_id} | user=@{user_label} | text={text[:80]!r}")
     await send_typing(chat_id)
 
+    historico = _historico_dicts(session_id)
     try:
-        resultado = await asyncio.to_thread(processar_mensagem, session_id, text)
+        resultado = await asyncio.to_thread(
+            processar_mensagem, session_id, text, TELEGRAM_DEFAULT_UNIDADE_ID, None, historico
+        )
     except Exception as e:
         log.exception(f"TG erro no pipeline | chat={chat_id} | {type(e).__name__}: {e}")
         await send_message(chat_id, "Tive um problema técnico aqui. Pode tentar de novo daqui a pouco?")
         return
 
+    session_store.adicionar_turno(session_id, text, resultado["resposta"])
     await send_message(chat_id, resultado["resposta"])

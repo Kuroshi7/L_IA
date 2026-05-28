@@ -5,8 +5,7 @@ import unicodedata
 
 from langchain_ollama import ChatOllama
 
-from cardapio import vocabulario_dominio
-from prompts import SYSTEM_GUARDRAIL
+from app.agent.prompts import SYSTEM_GUARDRAIL
 
 _KEYWORDS_BASE = {
     "cardapio", "menu", "comer", "comida", "almoco", "jantar", "refeicao", "refeicoes",
@@ -76,11 +75,7 @@ def _normalizar(texto: str) -> str:
 
 def _bate_keyword(texto_norm: str) -> bool:
     palavras = set(texto_norm.replace("?", " ").replace("!", " ").replace(",", " ").split())
-    if palavras & _KEYWORDS_BASE:
-        return True
-    if palavras & vocabulario_dominio():
-        return True
-    return False
+    return bool(palavras & _KEYWORDS_BASE)
 
 
 def _eh_continuacao_curta(texto_norm: str) -> bool:

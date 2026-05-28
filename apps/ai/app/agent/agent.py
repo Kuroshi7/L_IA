@@ -12,19 +12,16 @@ import time
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from prompts import SYSTEM_AGENT
-from tools import TOOLS
+from app import config
+from app.agent.prompts import SYSTEM_AGENT
+from app.agent.tools import TOOLS
 
 log = logging.getLogger("agent")
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower().strip()
-
-# Ollama (local)
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
-
-# Anthropic (cloud)
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
+LLM_PROVIDER = config.LLM_PROVIDER
+OLLAMA_BASE_URL = config.OLLAMA_BASE_URL
+OLLAMA_MODEL = config.OLLAMA_MODEL
+ANTHROPIC_MODEL = config.ANTHROPIC_MODEL
 
 
 def _build_llm():

@@ -1,0 +1,93 @@
+openapi: 3.0.3
+info:
+  title: Menu-AI — API Go (pública)
+  version: "2.0.0"
+  description: >
+    Contrato da API pública consumida pelo front. Fonte da verdade do domínio.
+    Endpoints internos (/internal/*) são consumidos pelo serviço de IA em rede privada.
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      summary: Healthcheck
+      responses: { "200": { description: ok } }
+  /unidades:
+    get:
+      summary: Lista unidades ativas (para o seletor do front)
+      responses:
+        "200":
+          description: lista de unidades
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unidades:
+                    type: array
+                    items: { $ref: "#/components/schemas/Unidade" }
+  /unidades/{unidadeId}/cardapio:
+    get:
+      summary: Cardápio do dia da unidade
+      parameters:
+        - { name: unidadeId, in: path, required: true, schema: { type: integer } }
+        - { name: data, in: query, required: false, schema: { type: string }, description: "ISO date ou 'hoje'" }
+      responses:
+        "200":
+          description: cardápio do dia
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CardapioDia" }
+  /chat:
+    post:
+      summary: Envia mensagem ao agente (RPC via fila)
+      parameters:
+        - { name: Idempotency-Key, in: header, required: false, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mensagem]
+              properties:
+                unidade_id: { type: integer }
+                session_id: { type: string }
+                mensagem: { type: string }
+      responses:
+        "200":
+          description: resposta do agente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatResponse" }
+  /chat/{sessionId}:
+    delete:
+      summary: Reseta a sessão (limpa o histórico)
+      parameters:
+        - { name: sessionId, in: path, required: true, schema: { type: string } }
+      responses: { "200": { description: ok } }
+components:
+  schemas:
+    Unidade:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        slug: { type: string }
+        ativo: { type: boolean }
+    CardapioDia:
+      type: object
+      properties:
+        id: { type: integer }
+        unidade_id: { type: integer }
+        data: { type: string }
+        dia_semana: { type: string }
+        pratos:
+          type: array
+          items: { type: object }
+    ChatResponse:
+      type: object
+      properties:
+        session_id: { type: string }
+        resposta: { type: string }
+        fora_de_escopo: { type: boolean }

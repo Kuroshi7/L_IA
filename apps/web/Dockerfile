@@ -1,21 +1,20 @@
-FROM node:20-alpine AS build
-
+# node:20-slim (glibc) — casa com o package-lock.json gerado no host (evita o bug
+# de optional deps do rollup no Alpine/musl).
+FROM node:20-slim AS build
 WORKDIR /app
 
+# VITE_API_URL é embutido no bundle em build time. No Docker, default "/api"
+# (nginx faz proxy reverso para a API Go, evitando CORS).
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
-COPY frontend/package.json frontend/package-lock.json ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY frontend/ ./
-COPY docs/ ../docs/
+COPY . .
 RUN npm run build
 
-
 FROM nginx:1.27-alpine
-
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
-
 EXPOSE 80
