@@ -1,0 +1,675 @@
+{
+  "_fonte": "Tabela para Avaliação de Consumo Alimentar em Medidas Caseiras (Atheneu, 4a ed.) + IBGE/GF. Cobertura ampla do universo de buffet self-service (kcal+macros). Itens industrializados de lanche/doce/bebida de marca foram omitidos (não são itens de self-service) — usar o ETL para 'tudo'. Conferir números num passe de validação.",
+  "medida_aliases": [
+    {"alias": "colher de sopa", "medida_cod": "COL S", "descricao": "colher de sopa"},
+    {"alias": "colheres de sopa", "medida_cod": "COL S", "descricao": "colher de sopa"},
+    {"alias": "colher", "medida_cod": "COL S", "descricao": "colher de sopa"},
+    {"alias": "colheres", "medida_cod": "COL S", "descricao": "colher de sopa"},
+    {"alias": "colher de cha", "medida_cod": "COL CHA", "descricao": "colher de chá"},
+    {"alias": "colher de cafe", "medida_cod": "COL CAFE", "descricao": "colher de café"},
+    {"alias": "colher de sobremesa", "medida_cod": "COL SOB", "descricao": "colher de sobremesa"},
+    {"alias": "colher de arroz", "medida_cod": "COL A", "descricao": "colher de arroz"},
+    {"alias": "colher de servir", "medida_cod": "COL A", "descricao": "colher de servir (grande)"},
+    {"alias": "colherona", "medida_cod": "COL A", "descricao": "colher de servir (grande)"},
+    {"alias": "concha", "medida_cod": "CO", "descricao": "concha"},
+    {"alias": "conchas", "medida_cod": "CO", "descricao": "concha"},
+    {"alias": "conchinha", "medida_cod": "CO", "descricao": "concha pequena"},
+    {"alias": "escumadeira", "medida_cod": "ESC", "descricao": "escumadeira"},
+    {"alias": "escumadeiras", "medida_cod": "ESC", "descricao": "escumadeira"},
+    {"alias": "fatia", "medida_cod": "FT", "descricao": "fatia"},
+    {"alias": "fatias", "medida_cod": "FT", "descricao": "fatia"},
+    {"alias": "pedaco", "medida_cod": "PED", "descricao": "pedaço"},
+    {"alias": "pedacos", "medida_cod": "PED", "descricao": "pedaço"},
+    {"alias": "prato fundo", "medida_cod": "PT F", "descricao": "prato fundo"},
+    {"alias": "pratao", "medida_cod": "PT F", "descricao": "prato fundo (grande)"},
+    {"alias": "prato raso", "medida_cod": "PT R", "descricao": "prato raso"},
+    {"alias": "prato", "medida_cod": "PT R", "descricao": "prato raso"},
+    {"alias": "unidade", "medida_cod": "UND", "descricao": "unidade"},
+    {"alias": "unidades", "medida_cod": "UND", "descricao": "unidade"},
+    {"alias": "file", "medida_cod": "FILE", "descricao": "filé"},
+    {"alias": "files", "medida_cod": "FILE", "descricao": "filé"},
+    {"alias": "posta", "medida_cod": "POSTA", "descricao": "posta"},
+    {"alias": "postas", "medida_cod": "POSTA", "descricao": "posta"},
+    {"alias": "pegador", "medida_cod": "PEGADOR", "descricao": "pegador (salada)"},
+    {"alias": "folha", "medida_cod": "FOLHA", "descricao": "folha"},
+    {"alias": "folhas", "medida_cod": "FOLHA", "descricao": "folha"},
+    {"alias": "ramo", "medida_cod": "RAMO", "descricao": "ramo"},
+    {"alias": "xicara", "medida_cod": "X", "descricao": "xícara"},
+    {"alias": "copo", "medida_cod": "COPO", "descricao": "copo"},
+    {"alias": "gomo", "medida_cod": "GOMO", "descricao": "gomo"}
+  ],
+  "alimentos": [
+    {"nome": "Arroz Branco Cozido", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["arroz", "arroz branco", "arroz cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 164, "proteina_g": 2.30, "carboidrato_g": 32.30, "gordura_g": 2.90},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 41.00, "proteina_g": 0.58, "carboidrato_g": 8.07, "gordura_g": 0.73},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 45, "kcal": 73.80, "proteina_g": 1.04, "carboidrato_g": 14.54, "gordura_g": 1.31},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 85, "kcal": 139.40, "proteina_g": 1.96, "carboidrato_g": 27.46, "gordura_g": 2.47},
+      {"medida_label": "PT F CH", "medida_cod": "PT F", "quantidade_g": 200, "kcal": 328.00, "proteina_g": 4.60, "carboidrato_g": 64.60, "gordura_g": 5.80}
+    ]},
+    {"nome": "Arroz Integral Cozido", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["arroz integral"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 257.00, "proteina_g": 4.86, "carboidrato_g": 45.96, "gordura_g": 5.96},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 63, "kcal": 161.91, "proteina_g": 3.06, "carboidrato_g": 28.95, "gordura_g": 3.75},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 117, "kcal": 300.69, "proteina_g": 5.69, "carboidrato_g": 53.77, "gordura_g": 6.97}
+    ]},
+    {"nome": "Arroz à Grega", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["arroz a grega"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 140, "proteina_g": 2.03, "carboidrato_g": 26.50, "gordura_g": 2.86},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 45, "kcal": 63.00, "proteina_g": 0.91, "carboidrato_g": 11.93, "gordura_g": 1.29},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 85, "kcal": 119.00, "proteina_g": 1.73, "carboidrato_g": 22.53, "gordura_g": 2.43}
+    ]},
+    {"nome": "Macarrão Cozido", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["macarrao", "macarrao cozido", "massa"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 109.00, "proteina_g": 3.40, "carboidrato_g": 23.00, "gordura_g": 0.40},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 110, "kcal": 119.90, "proteina_g": 3.74, "carboidrato_g": 25.30, "gordura_g": 0.44},
+      {"medida_label": "PEGADOR", "medida_cod": "PEGADOR", "quantidade_g": 110, "kcal": 119.90, "proteina_g": 3.74, "carboidrato_g": 25.30, "gordura_g": 0.44}
+    ]},
+    {"nome": "Macarrão à Bolonhesa", "categoria": "Prato Principal", "fonte": "*", "aliases": ["macarrao a bolonhesa", "macarrao bolonhesa"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 124.00, "proteina_g": 4.04, "carboidrato_g": 20.44, "gordura_g": 2.94},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 110, "kcal": 136.40, "proteina_g": 4.44, "carboidrato_g": 22.48, "gordura_g": 3.23},
+      {"medida_label": "PT R CH", "medida_cod": "PT R", "quantidade_g": 320, "kcal": 396.80, "proteina_g": 12.93, "carboidrato_g": 65.41, "gordura_g": 9.41}
+    ]},
+    {"nome": "Macarrão ao Sugo", "categoria": "Prato Principal", "fonte": "*", "aliases": ["macarrao ao sugo", "macarrao ao molho de tomate"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 102.00, "proteina_g": 3.10, "carboidrato_g": 21.60, "gordura_g": 0.39},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 110, "kcal": 112.20, "proteina_g": 3.41, "carboidrato_g": 23.76, "gordura_g": 0.43},
+      {"medida_label": "PT R CH", "medida_cod": "PT R", "quantidade_g": 320, "kcal": 326.40, "proteina_g": 9.92, "carboidrato_g": 69.12, "gordura_g": 1.25}
+    ]},
+    {"nome": "Macarrão ao Alho e Óleo", "categoria": "Prato Principal", "fonte": "*", "aliases": ["macarrao ao alho e oleo", "macarrao alho e oleo"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 219.00, "proteina_g": 5.28, "carboidrato_g": 31.55, "gordura_g": 7.92},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 110, "kcal": 240.90, "proteina_g": 5.81, "carboidrato_g": 34.71, "gordura_g": 8.71}
+    ]},
+    {"nome": "Aipim Cozido", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["aipim", "mandioca", "macaxeira", "aipim cozido", "mandioca cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 120.00, "proteina_g": 0.60, "carboidrato_g": 28.90, "gordura_g": 0.20},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 100, "kcal": 120.00, "proteina_g": 0.60, "carboidrato_g": 28.90, "gordura_g": 0.20},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 60, "kcal": 72.00, "proteina_g": 0.36, "carboidrato_g": 17.34, "gordura_g": 0.12}
+    ]},
+    {"nome": "Aipim Frito", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["aipim frito", "mandioca frita"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 356.00, "proteina_g": 1.20, "carboidrato_g": 55.20, "gordura_g": 14.50},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 80, "kcal": 284.80, "proteina_g": 0.96, "carboidrato_g": 44.16, "gordura_g": 11.60}
+    ]},
+    {"nome": "Inhame Cozido", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["inhame", "inhame cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 103.00, "proteina_g": 1.80, "carboidrato_g": 23.80, "gordura_g": 0.10},
+      {"medida_label": "COL A CH PICADO", "medida_cod": "COL A", "quantidade_g": 62, "kcal": 63.86, "proteina_g": 1.12, "carboidrato_g": 14.76, "gordura_g": 0.06},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 125, "kcal": 128.75, "proteina_g": 2.25, "carboidrato_g": 29.75, "gordura_g": 0.13}
+    ]},
+    {"nome": "Purê de Batata", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["pure de batata", "pure"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 124.00, "proteina_g": 2.52, "carboidrato_g": 18.80, "gordura_g": 4.33},
+      {"medida_label": "CO M R", "medida_cod": "CO", "quantidade_g": 140, "kcal": 173.60, "proteina_g": 3.53, "carboidrato_g": 26.32, "gordura_g": 6.06},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 80, "kcal": 99.20, "proteina_g": 2.02, "carboidrato_g": 15.04, "gordura_g": 3.46}
+    ]},
+    {"nome": "Batata-Inglesa Cozida", "categoria": "Acompanhamento", "fonte": "GF", "aliases": ["batata", "batata cozida", "batata inglesa"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 85.00, "proteina_g": 2.00, "carboidrato_g": 19.10, "gordura_g": 0.10},
+      {"medida_label": "COL A CH PICADA", "medida_cod": "COL A", "quantidade_g": 60, "kcal": 51.00, "proteina_g": 1.20, "carboidrato_g": 11.46, "gordura_g": 0.06},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 140, "kcal": 119.00, "proteina_g": 2.80, "carboidrato_g": 26.74, "gordura_g": 0.14}
+    ]},
+    {"nome": "Batata-Inglesa Frita", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["batata frita"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 280.00, "proteina_g": 4.30, "carboidrato_g": 36.00, "gordura_g": 13.20},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 70.00, "proteina_g": 1.08, "carboidrato_g": 9.00, "gordura_g": 3.30},
+      {"medida_label": "PORCAO M", "medida_cod": "PED", "quantidade_g": 200, "kcal": 560.00, "proteina_g": 8.60, "carboidrato_g": 72.00, "gordura_g": 26.40}
+    ]},
+    {"nome": "Batata-Doce Cozida", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["batata doce", "batata doce cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 103.00, "proteina_g": 1.10, "carboidrato_g": 24.00, "gordura_g": 0.30},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 70, "kcal": 72.10, "proteina_g": 0.77, "carboidrato_g": 16.80, "gordura_g": 0.21},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 355, "kcal": 365.60, "proteina_g": 3.91, "carboidrato_g": 85.20, "gordura_g": 1.07}
+    ]},
+    {"nome": "Batata-Baroa Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["batata baroa", "mandioquinha", "batata salsa"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 134.00, "proteina_g": 1.58, "carboidrato_g": 31.19, "gordura_g": 0.32},
+      {"medida_label": "COL A CH PICADA", "medida_cod": "COL A", "quantidade_g": 55, "kcal": 73.70, "proteina_g": 0.87, "carboidrato_g": 17.15, "gordura_g": 0.18}
+    ]},
+    {"nome": "Farofa", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["farofa", "farofa de mandioca"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 471.00, "proteina_g": 1.79, "carboidrato_g": 78.81, "gordura_g": 16.49},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 15, "kcal": 70.65, "proteina_g": 0.27, "carboidrato_g": 11.82, "gordura_g": 2.47},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 35, "kcal": 164.85, "proteina_g": 0.63, "carboidrato_g": 27.58, "gordura_g": 5.77}
+    ]},
+    {"nome": "Angu", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["angu", "polenta", "polenta cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 124.00, "proteina_g": 3.30, "carboidrato_g": 26.20, "gordura_g": 0.70},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 150, "kcal": 186.00, "proteina_g": 4.95, "carboidrato_g": 39.30, "gordura_g": 1.05},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 60, "kcal": 74.40, "proteina_g": 1.98, "carboidrato_g": 15.72, "gordura_g": 0.42}
+    ]},
+    {"nome": "Pirão", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["pirao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 121.00, "proteina_g": 0.60, "carboidrato_g": 29.50, "gordura_g": 0.10},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 165, "kcal": 199.65, "proteina_g": 0.99, "carboidrato_g": 48.68, "gordura_g": 0.17}
+    ]},
+    {"nome": "Feijão-Preto Cozido", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["feijao", "feijao preto", "feijao carioca"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 69.00, "proteina_g": 4.40, "carboidrato_g": 12.20, "gordura_g": 0.30},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 140, "kcal": 96.60, "proteina_g": 6.16, "carboidrato_g": 17.08, "gordura_g": 0.42},
+      {"medida_label": "CO M R", "medida_cod": "CO", "quantidade_g": 80, "kcal": 55.20, "proteina_g": 3.52, "carboidrato_g": 9.76, "gordura_g": 0.24},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 17, "kcal": 11.73, "proteina_g": 0.75, "carboidrato_g": 2.07, "gordura_g": 0.05}
+    ]},
+    {"nome": "Feijão-Branco Cozido", "categoria": "Acompanhamento", "fonte": "FP", "aliases": ["feijao branco"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 121.00, "proteina_g": 7.83, "carboidrato_g": 21.00, "gordura_g": 0.61},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 140, "kcal": 169.40, "proteina_g": 10.96, "carboidrato_g": 29.40, "gordura_g": 0.85}
+    ]},
+    {"nome": "Feijoada Caseira", "categoria": "Prato Principal", "fonte": "IBGE", "aliases": ["feijoada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 154.00, "proteina_g": 8.60, "carboidrato_g": 10.50, "gordura_g": 8.60},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 225, "kcal": 346.50, "proteina_g": 19.35, "carboidrato_g": 23.63, "gordura_g": 19.35}
+    ]},
+    {"nome": "Tutu de Feijão", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["tutu", "tutu de feijao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 114.00, "proteina_g": 3.59, "carboidrato_g": 13.22, "gordura_g": 5.25},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 190, "kcal": 216.60, "proteina_g": 6.82, "carboidrato_g": 25.12, "gordura_g": 9.98},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 85, "kcal": 96.90, "proteina_g": 3.05, "carboidrato_g": 11.24, "gordura_g": 4.46}
+    ]},
+    {"nome": "Lentilha Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["lentilha", "lentilha cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 105.00, "proteina_g": 7.11, "carboidrato_g": 18.21, "gordura_g": 0.39},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 160, "kcal": 168.00, "proteina_g": 11.38, "carboidrato_g": 29.14, "gordura_g": 0.62},
+      {"medida_label": "COL A", "medida_cod": "COL A", "quantidade_g": 32, "kcal": 33.60, "proteina_g": 2.28, "carboidrato_g": 5.83, "gordura_g": 0.12}
+    ]},
+    {"nome": "Grão-de-Bico Cozido", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["grao de bico", "grao-de-bico"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 136.00, "proteina_g": 6.60, "carboidrato_g": 22.90, "gordura_g": 2.00},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 120, "kcal": 163.20, "proteina_g": 7.92, "carboidrato_g": 27.48, "gordura_g": 2.40}
+    ]},
+    {"nome": "Ervilha Enlatada", "categoria": "Acompanhamento", "fonte": "IBGE", "aliases": ["ervilha", "ervilha enlatada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 67.00, "proteina_g": 3.50, "carboidrato_g": 12.50, "gordura_g": 0.30},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 27, "kcal": 18.09, "proteina_g": 0.95, "carboidrato_g": 3.38, "gordura_g": 0.08},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 38, "kcal": 25.46, "proteina_g": 1.33, "carboidrato_g": 4.75, "gordura_g": 0.11}
+    ]},
+    {"nome": "Cenoura Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["cenoura", "cenoura cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 54.00, "proteina_g": 1.32, "carboidrato_g": 11.64, "gordura_g": 0.24},
+      {"medida_label": "COL A CH PICADA", "medida_cod": "COL A", "quantidade_g": 40, "kcal": 21.60, "proteina_g": 0.53, "carboidrato_g": 4.66, "gordura_g": 0.10},
+      {"medida_label": "COL S CH PICADA", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 13.50, "proteina_g": 0.33, "carboidrato_g": 2.91, "gordura_g": 0.06}
+    ]},
+    {"nome": "Cenoura Crua", "categoria": "Salada", "fonte": "IBGE", "aliases": ["cenoura crua", "cenoura ralada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 45.00, "proteina_g": 1.10, "carboidrato_g": 9.70, "gordura_g": 0.20},
+      {"medida_label": "COL S CH RALADA", "medida_cod": "COL S", "quantidade_g": 12, "kcal": 5.40, "proteina_g": 0.13, "carboidrato_g": 1.16, "gordura_g": 0.02},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 120, "kcal": 54.00, "proteina_g": 1.32, "carboidrato_g": 11.64, "gordura_g": 0.24}
+    ]},
+    {"nome": "Cenoura Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["cenoura refogada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 101.00, "proteina_g": 1.39, "carboidrato_g": 12.12, "gordura_g": 5.25},
+      {"medida_label": "COL S CH PICADA", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 25.25, "proteina_g": 0.35, "carboidrato_g": 3.03, "gordura_g": 1.31}
+    ]},
+    {"nome": "Abóbora Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["abobora", "abobora cozida", "moranga"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 70.00, "proteina_g": 1.80, "carboidrato_g": 14.70, "gordura_g": 0.45},
+      {"medida_label": "COL S CH PICADA", "medida_cod": "COL S", "quantidade_g": 36, "kcal": 25.20, "proteina_g": 0.65, "carboidrato_g": 5.29, "gordura_g": 0.16},
+      {"medida_label": "ESC M CH PICADA", "medida_cod": "ESC", "quantidade_g": 100, "kcal": 70.00, "proteina_g": 1.80, "carboidrato_g": 14.70, "gordura_g": 0.45}
+    ]},
+    {"nome": "Abóbora Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["abobora refogada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 117.00, "proteina_g": 1.87, "carboidrato_g": 15.18, "gordura_g": 5.46},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 30, "kcal": 35.10, "proteina_g": 0.56, "carboidrato_g": 4.55, "gordura_g": 1.64},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 105, "kcal": 122.85, "proteina_g": 1.96, "carboidrato_g": 15.94, "gordura_g": 5.73}
+    ]},
+    {"nome": "Abobrinha Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["abobrinha", "abobrinha cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 56.00, "proteina_g": 2.00, "carboidrato_g": 11.00, "gordura_g": 0.40},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 70, "kcal": 39.20, "proteina_g": 1.40, "carboidrato_g": 7.70, "gordura_g": 0.28},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 30, "kcal": 16.80, "proteina_g": 0.60, "carboidrato_g": 3.30, "gordura_g": 0.12}
+    ]},
+    {"nome": "Abobrinha Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["abobrinha refogada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 103.00, "proteina_g": 2.07, "carboidrato_g": 11.48, "gordura_g": 5.41},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 70, "kcal": 72.10, "proteina_g": 1.45, "carboidrato_g": 8.04, "gordura_g": 3.79}
+    ]},
+    {"nome": "Acelga", "categoria": "Salada", "fonte": "IBGE", "aliases": ["acelga"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 33.00, "proteina_g": 1.80, "carboidrato_g": 5.60, "gordura_g": 0.40},
+      {"medida_label": "COL A CH PICADA", "medida_cod": "COL A", "quantidade_g": 10, "kcal": 3.30, "proteina_g": 0.18, "carboidrato_g": 0.56, "gordura_g": 0.04}
+    ]},
+    {"nome": "Agrião Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["agriao refogado", "agriao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 75.00, "proteina_g": 2.87, "carboidrato_g": 3.78, "gordura_g": 5.41},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 50, "kcal": 37.50, "proteina_g": 1.44, "carboidrato_g": 1.89, "gordura_g": 2.71}
+    ]},
+    {"nome": "Beterraba Crua", "categoria": "Salada", "fonte": "IBGE", "aliases": ["beterraba", "beterraba crua", "beterraba ralada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 46.00, "proteina_g": 1.70, "carboidrato_g": 9.50, "gordura_g": 0.10},
+      {"medida_label": "COL S CH RALADA", "medida_cod": "COL S", "quantidade_g": 16, "kcal": 7.36, "proteina_g": 0.27, "carboidrato_g": 1.52, "gordura_g": 0.02}
+    ]},
+    {"nome": "Beterraba Cozida", "categoria": "Acompanhamento", "fonte": "GF", "aliases": ["beterraba cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 44.00, "proteina_g": 1.00, "carboidrato_g": 9.80, "gordura_g": 0.10},
+      {"medida_label": "COL A CH PICADA", "medida_cod": "COL A", "quantidade_g": 38, "kcal": 16.72, "proteina_g": 0.38, "carboidrato_g": 3.72, "gordura_g": 0.04},
+      {"medida_label": "COL S CH PICADA", "medida_cod": "COL S", "quantidade_g": 20, "kcal": 8.80, "proteina_g": 0.20, "carboidrato_g": 1.96, "gordura_g": 0.02}
+    ]},
+    {"nome": "Brócolis Cozido", "categoria": "Acompanhamento", "fonte": "FP", "aliases": ["brocolis", "brocolis cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 36.00, "proteina_g": 2.95, "carboidrato_g": 5.54, "gordura_g": 0.28},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 10, "kcal": 3.60, "proteina_g": 0.30, "carboidrato_g": 0.55, "gordura_g": 0.03}
+    ]},
+    {"nome": "Brócolis Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["brocolis refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 81.00, "proteina_g": 2.95, "carboidrato_g": 5.54, "gordura_g": 5.28},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 10, "kcal": 8.10, "proteina_g": 0.30, "carboidrato_g": 0.55, "gordura_g": 0.53}
+    ]},
+    {"nome": "Couve Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["couve", "couve refogada", "couve mineira"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 146.00, "proteina_g": 7.25, "carboidrato_g": 14.88, "gordura_g": 6.41},
+      {"medida_label": "COL S CH PICADA", "medida_cod": "COL S", "quantidade_g": 20, "kcal": 29.20, "proteina_g": 1.45, "carboidrato_g": 2.98, "gordura_g": 1.28},
+      {"medida_label": "FOLHA M", "medida_cod": "FOLHA", "quantidade_g": 25, "kcal": 36.50, "proteina_g": 1.81, "carboidrato_g": 3.72, "gordura_g": 1.60}
+    ]},
+    {"nome": "Couve-Flor Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["couve flor", "couve-flor", "couve-flor cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 41.00, "proteina_g": 2.80, "carboidrato_g": 6.50, "gordura_g": 0.40},
+      {"medida_label": "COL S CH PICADA", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 10.25, "proteina_g": 0.70, "carboidrato_g": 1.63, "gordura_g": 0.10},
+      {"medida_label": "RAMO M", "medida_cod": "RAMO", "quantidade_g": 60, "kcal": 24.60, "proteina_g": 1.68, "carboidrato_g": 3.90, "gordura_g": 0.24}
+    ]},
+    {"nome": "Chuchu Cozido", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["chuchu", "chuchu cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 43.00, "proteina_g": 1.08, "carboidrato_g": 9.24, "gordura_g": 0.24},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 20, "kcal": 8.60, "proteina_g": 0.22, "carboidrato_g": 1.85, "gordura_g": 0.05},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 230, "kcal": 98.90, "proteina_g": 2.48, "carboidrato_g": 21.25, "gordura_g": 0.55}
+    ]},
+    {"nome": "Chuchu Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["chuchu refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 91.00, "proteina_g": 1.15, "carboidrato_g": 9.72, "gordura_g": 5.25},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 22.75, "proteina_g": 0.29, "carboidrato_g": 2.43, "gordura_g": 1.31}
+    ]},
+    {"nome": "Berinjela Ensopada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["berinjela", "berinjela ensopada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 69.00, "proteina_g": 0.76, "carboidrato_g": 4.78, "gordura_g": 5.23},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 75, "kcal": 51.75, "proteina_g": 0.57, "carboidrato_g": 3.59, "gordura_g": 3.92},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 17.25, "proteina_g": 0.19, "carboidrato_g": 1.20, "gordura_g": 1.31}
+    ]},
+    {"nome": "Berinjela Frita", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["berinjela frita"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 218.00, "proteina_g": 1.20, "carboidrato_g": 7.56, "gordura_g": 20.36},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 20, "kcal": 43.60, "proteina_g": 0.24, "carboidrato_g": 1.51, "gordura_g": 4.07}
+    ]},
+    {"nome": "Bertalha Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["bertalha", "bertalha refogada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 93.00, "proteina_g": 3.27, "carboidrato_g": 7.48, "gordura_g": 5.61},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 23.25, "proteina_g": 0.82, "carboidrato_g": 1.87, "gordura_g": 1.40}
+    ]},
+    {"nome": "Chicória Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["chicoria", "chicoria refogada", "almeirao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 88.00, "proteina_g": 2.96, "carboidrato_g": 7.45, "gordura_g": 5.18},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 76, "kcal": 66.88, "proteina_g": 2.25, "carboidrato_g": 5.66, "gordura_g": 3.94}
+    ]},
+    {"nome": "Espinafre Cozido", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["espinafre", "espinafre cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 60.00, "proteina_g": 5.60, "carboidrato_g": 7.60, "gordura_g": 0.80},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 15.00, "proteina_g": 1.40, "carboidrato_g": 1.90, "gordura_g": 0.20}
+    ]},
+    {"nome": "Espinafre Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["espinafre refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 107.00, "proteina_g": 5.67, "carboidrato_g": 8.08, "gordura_g": 5.81},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 26.75, "proteina_g": 1.42, "carboidrato_g": 2.02, "gordura_g": 1.45}
+    ]},
+    {"nome": "Jiló Cozido", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["jilo", "jilo cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 52.00, "proteina_g": 1.68, "carboidrato_g": 8.40, "gordura_g": 1.32},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 95, "kcal": 49.40, "proteina_g": 1.60, "carboidrato_g": 7.98, "gordura_g": 1.25}
+    ]},
+    {"nome": "Jiló Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["jilo refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 99.00, "proteina_g": 1.75, "carboidrato_g": 8.88, "gordura_g": 6.33},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 95, "kcal": 94.05, "proteina_g": 1.66, "carboidrato_g": 8.44, "gordura_g": 6.01}
+    ]},
+    {"nome": "Maxixe Cozido", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["maxixe", "maxixe cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 6.00, "proteina_g": 0.16, "carboidrato_g": 1.15, "gordura_g": 0.07},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 75, "kcal": 4.50, "proteina_g": 0.12, "carboidrato_g": 0.86, "gordura_g": 0.05}
+    ]},
+    {"nome": "Maxixe Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["maxixe refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 53.00, "proteina_g": 0.23, "carboidrato_g": 1.63, "gordura_g": 5.08},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 75, "kcal": 39.75, "proteina_g": 0.17, "carboidrato_g": 1.22, "gordura_g": 3.81}
+    ]},
+    {"nome": "Quiabo Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["quiabo", "quiabo refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 90.00, "proteina_g": 2.17, "carboidrato_g": 8.68, "gordura_g": 5.21},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 40, "kcal": 36.00, "proteina_g": 0.87, "carboidrato_g": 3.47, "gordura_g": 2.08}
+    ]},
+    {"nome": "Quibebe", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["quibebe", "quibebe de abobora"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 102.00, "proteina_g": 1.57, "carboidrato_g": 12.75, "gordura_g": 5.01},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 35, "kcal": 35.70, "proteina_g": 0.55, "carboidrato_g": 4.46, "gordura_g": 1.75},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 100, "kcal": 102.00, "proteina_g": 1.57, "carboidrato_g": 12.75, "gordura_g": 5.01}
+    ]},
+    {"nome": "Repolho Cru", "categoria": "Salada", "fonte": "IBGE", "aliases": ["repolho", "repolho cru"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 33.00, "proteina_g": 1.70, "carboidrato_g": 6.10, "gordura_g": 0.20},
+      {"medida_label": "COL A CH PICADO", "medida_cod": "COL A", "quantidade_g": 25, "kcal": 8.25, "proteina_g": 0.43, "carboidrato_g": 1.53, "gordura_g": 0.05}
+    ]},
+    {"nome": "Repolho Refogado", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["repolho refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 60.00, "proteina_g": 2.27, "carboidrato_g": 1.48, "gordura_g": 5.01},
+      {"medida_label": "COL A CH PICADO", "medida_cod": "COL A", "quantidade_g": 45, "kcal": 27.00, "proteina_g": 1.02, "carboidrato_g": 0.67, "gordura_g": 2.25}
+    ]},
+    {"nome": "Vagem Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["vagem", "vagem cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 52.00, "proteina_g": 3.00, "carboidrato_g": 9.48, "gordura_g": 0.24},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 20, "kcal": 10.40, "proteina_g": 0.60, "carboidrato_g": 1.90, "gordura_g": 0.05}
+    ]},
+    {"nome": "Vagem Refogada", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["vagem refogada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 99.00, "proteina_g": 3.07, "carboidrato_g": 9.96, "gordura_g": 5.25},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 73, "kcal": 72.27, "proteina_g": 2.24, "carboidrato_g": 7.27, "gordura_g": 3.83}
+    ]},
+    {"nome": "Pimentão", "categoria": "Salada", "fonte": "IBGE", "aliases": ["pimentao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 56.00, "proteina_g": 2.00, "carboidrato_g": 10.30, "gordura_g": 0.80},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 13, "kcal": 7.28, "proteina_g": 0.26, "carboidrato_g": 1.34, "gordura_g": 0.10}
+    ]},
+    {"nome": "Ervilha Vagem Cozida", "categoria": "Acompanhamento", "fonte": "*", "aliases": ["ervilha vagem", "ervilha torta"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 96.00, "proteina_g": 4.68, "carboidrato_g": 18.90, "gordura_g": 0.18},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 60, "kcal": 57.60, "proteina_g": 2.81, "carboidrato_g": 11.34, "gordura_g": 0.11}
+    ]},
+    {"nome": "Frango Assado", "categoria": "Proteína", "fonte": "GF", "aliases": ["frango", "frango grelhado", "peito de frango", "frango assado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 121.00, "proteina_g": 18.20, "carboidrato_g": 0.00, "gordura_g": 5.40},
+      {"medida_label": "FILE", "medida_cod": "FILE", "quantidade_g": 100, "kcal": 121.00, "proteina_g": 18.20, "carboidrato_g": 0.00, "gordura_g": 5.40},
+      {"medida_label": "PEITO M", "medida_cod": "PED", "quantidade_g": 180, "kcal": 217.80, "proteina_g": 32.76, "carboidrato_g": 0.00, "gordura_g": 9.72},
+      {"medida_label": "SOBRECOXA M", "medida_cod": "PED", "quantidade_g": 65, "kcal": 78.65, "proteina_g": 11.83, "carboidrato_g": 0.00, "gordura_g": 3.51}
+    ]},
+    {"nome": "Frango Frito", "categoria": "Proteína", "fonte": "*", "aliases": ["frango frito"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 145.00, "proteina_g": 22.00, "carboidrato_g": 0.00, "gordura_g": 6.30},
+      {"medida_label": "FILE M", "medida_cod": "FILE", "quantidade_g": 100, "kcal": 145.00, "proteina_g": 22.00, "carboidrato_g": 0.00, "gordura_g": 6.30},
+      {"medida_label": "PEITO M", "medida_cod": "PED", "quantidade_g": 180, "kcal": 261.00, "proteina_g": 39.60, "carboidrato_g": 0.00, "gordura_g": 11.34}
+    ]},
+    {"nome": "Frango Ensopado", "categoria": "Proteína", "fonte": "*", "aliases": ["frango ensopado", "frango cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 127.00, "proteina_g": 22.00, "carboidrato_g": 0.00, "gordura_g": 4.30},
+      {"medida_label": "PEITO M", "medida_cod": "PED", "quantidade_g": 180, "kcal": 228.60, "proteina_g": 39.60, "carboidrato_g": 0.00, "gordura_g": 7.74}
+    ]},
+    {"nome": "Frango à Milanesa", "categoria": "Proteína", "fonte": "*", "aliases": ["frango a milanesa", "frango empanado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 311.00, "proteina_g": 26.67, "carboidrato_g": 14.80, "gordura_g": 16.15},
+      {"medida_label": "FILE M", "medida_cod": "FILE", "quantidade_g": 140, "kcal": 435.40, "proteina_g": 37.34, "carboidrato_g": 20.72, "gordura_g": 22.61},
+      {"medida_label": "FILE P", "medida_cod": "FILE", "quantidade_g": 100, "kcal": 311.00, "proteina_g": 26.67, "carboidrato_g": 14.80, "gordura_g": 16.15}
+    ]},
+    {"nome": "Frango ao Molho Pardo", "categoria": "Proteína", "fonte": "*", "aliases": ["frango ao molho pardo", "galinha ao molho pardo"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 158.00, "proteina_g": 24.19, "carboidrato_g": 0.98, "gordura_g": 6.35}
+    ]},
+    {"nome": "Peixe Cozido", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["peixe", "peixe cozido", "tilapia", "file de peixe"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 98.00, "proteina_g": 22.90, "carboidrato_g": 0.00, "gordura_g": 0.70},
+      {"medida_label": "FILE M", "medida_cod": "FILE", "quantidade_g": 120, "kcal": 117.60, "proteina_g": 27.48, "carboidrato_g": 0.00, "gordura_g": 0.84},
+      {"medida_label": "FILE G", "medida_cod": "FILE", "quantidade_g": 155, "kcal": 151.90, "proteina_g": 35.50, "carboidrato_g": 0.00, "gordura_g": 1.09},
+      {"medida_label": "POSTA M", "medida_cod": "POSTA", "quantidade_g": 200, "kcal": 196.00, "proteina_g": 45.80, "carboidrato_g": 0.00, "gordura_g": 1.40}
+    ]},
+    {"nome": "Peixe Frito", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["peixe frito"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 364.00, "proteina_g": 28.90, "carboidrato_g": 3.40, "gordura_g": 26.10},
+      {"medida_label": "FILE M", "medida_cod": "FILE", "quantidade_g": 120, "kcal": 436.80, "proteina_g": 34.68, "carboidrato_g": 4.08, "gordura_g": 31.32},
+      {"medida_label": "POSTA M", "medida_cod": "POSTA", "quantidade_g": 200, "kcal": 728.00, "proteina_g": 57.80, "carboidrato_g": 6.80, "gordura_g": 52.20}
+    ]},
+    {"nome": "Peixe à Milanesa", "categoria": "Proteína", "fonte": "*", "aliases": ["peixe a milanesa", "peixe empanado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 266.00, "proteina_g": 21.83, "carboidrato_g": 14.80, "gordura_g": 13.24},
+      {"medida_label": "FILE M", "medida_cod": "FILE", "quantidade_g": 115, "kcal": 305.90, "proteina_g": 25.10, "carboidrato_g": 17.02, "gordura_g": 15.23}
+    ]},
+    {"nome": "Peixe Ensopado", "categoria": "Proteína", "fonte": "*", "aliases": ["peixe ensopado", "peixe ao molho"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 130.00, "proteina_g": 17.93, "carboidrato_g": 1.91, "gordura_g": 5.64},
+      {"medida_label": "FILE M", "medida_cod": "FILE", "quantidade_g": 120, "kcal": 156.00, "proteina_g": 21.52, "carboidrato_g": 2.29, "gordura_g": 6.77},
+      {"medida_label": "POSTA M", "medida_cod": "POSTA", "quantidade_g": 200, "kcal": 260.00, "proteina_g": 35.86, "carboidrato_g": 3.82, "gordura_g": 11.28}
+    ]},
+    {"nome": "Carne Assada", "categoria": "Proteína", "fonte": "GF", "aliases": ["carne assada", "carne", "carne bovina"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 288.00, "proteina_g": 25.25, "carboidrato_g": 0.00, "gordura_g": 20.75},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 90, "kcal": 259.20, "proteina_g": 22.73, "carboidrato_g": 0.00, "gordura_g": 18.68},
+      {"medida_label": "FT G", "medida_cod": "FT", "quantidade_g": 135, "kcal": 388.80, "proteina_g": 34.09, "carboidrato_g": 0.00, "gordura_g": 28.01}
+    ]},
+    {"nome": "Bife", "categoria": "Proteína", "fonte": "*", "aliases": ["bife", "bife bovino", "bife grelhado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 228.00, "proteina_g": 27.95, "carboidrato_g": 0.00, "gordura_g": 12.93},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 100, "kcal": 228.00, "proteina_g": 27.95, "carboidrato_g": 0.00, "gordura_g": 12.93},
+      {"medida_label": "UND G", "medida_cod": "UND", "quantidade_g": 150, "kcal": 342.00, "proteina_g": 41.93, "carboidrato_g": 0.00, "gordura_g": 19.40}
+    ]},
+    {"nome": "Bife à Milanesa", "categoria": "Proteína", "fonte": "*", "aliases": ["bife a milanesa", "bife empanado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 287.00, "proteina_g": 26.34, "carboidrato_g": 7.46, "gordura_g": 16.86},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 80, "kcal": 229.60, "proteina_g": 21.07, "carboidrato_g": 5.97, "gordura_g": 13.49}
+    ]},
+    {"nome": "Bife à Parmegiana", "categoria": "Proteína", "fonte": "*", "aliases": ["bife a parmegiana", "parmegiana"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 327.00, "proteina_g": 23.46, "carboidrato_g": 8.46, "gordura_g": 22.14},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 150, "kcal": 490.50, "proteina_g": 35.19, "carboidrato_g": 12.69, "gordura_g": 33.21}
+    ]},
+    {"nome": "Bife de Fígado", "categoria": "Proteína", "fonte": "*", "aliases": ["bife de figado", "figado", "figado acebolado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 216.00, "proteina_g": 25.87, "carboidrato_g": 5.72, "gordura_g": 9.94},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 100, "kcal": 216.00, "proteina_g": 25.87, "carboidrato_g": 5.72, "gordura_g": 9.94}
+    ]},
+    {"nome": "Carne Ensopada", "categoria": "Proteína", "fonte": "*", "aliases": ["carne ensopada", "carne cozida"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 186.00, "proteina_g": 21.50, "carboidrato_g": 0.00, "gordura_g": 11.10},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 35, "kcal": 65.10, "proteina_g": 7.52, "carboidrato_g": 0.00, "gordura_g": 3.89},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 30, "kcal": 55.80, "proteina_g": 6.45, "carboidrato_g": 0.00, "gordura_g": 3.33}
+    ]},
+    {"nome": "Carne Ensopada com Legumes", "categoria": "Prato Principal", "fonte": "*", "aliases": ["carne com legumes", "carne ensopada com legumes"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 164.00, "proteina_g": 13.78, "carboidrato_g": 7.53, "gordura_g": 8.77},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 70, "kcal": 114.80, "proteina_g": 9.65, "carboidrato_g": 5.27, "gordura_g": 6.14}
+    ]},
+    {"nome": "Carne Moída", "categoria": "Proteína", "fonte": "*", "aliases": ["carne moida", "carne moida refogada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 195.00, "proteina_g": 21.81, "carboidrato_g": 1.84, "gordura_g": 11.18},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 60, "kcal": 117.00, "proteina_g": 13.09, "carboidrato_g": 1.10, "gordura_g": 6.71}
+    ]},
+    {"nome": "Carne-Seca", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["carne seca", "carne de sol", "charque"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 429.00, "proteina_g": 42.00, "carboidrato_g": 0.00, "gordura_g": 29.00},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 65, "kcal": 278.85, "proteina_g": 27.30, "carboidrato_g": 0.00, "gordura_g": 18.85}
+    ]},
+    {"nome": "Costela de Boi Assada", "categoria": "Proteína", "fonte": "*", "aliases": ["costela", "costela de boi", "costela assada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 453.00, "proteina_g": 30.76, "carboidrato_g": 0.48, "gordura_g": 36.41},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 40, "kcal": 181.20, "proteina_g": 12.30, "carboidrato_g": 0.19, "gordura_g": 14.56}
+    ]},
+    {"nome": "Costela de Porco Cozida", "categoria": "Proteína", "fonte": "*", "aliases": ["costela de porco", "costelinha"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 411.00, "proteina_g": 28.07, "carboidrato_g": 0.48, "gordura_g": 33.01},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 25, "kcal": 102.75, "proteina_g": 7.02, "carboidrato_g": 0.12, "gordura_g": 8.25}
+    ]},
+    {"nome": "Almôndega", "categoria": "Proteína", "fonte": "*", "aliases": ["almondega", "almondegas"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 203.00, "proteina_g": 15.06, "carboidrato_g": 7.05, "gordura_g": 12.79},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 50, "kcal": 101.50, "proteina_g": 7.53, "carboidrato_g": 3.53, "gordura_g": 6.40}
+    ]},
+    {"nome": "Hambúrguer", "categoria": "Proteína", "fonte": "*", "aliases": ["hamburguer", "hamburguer de carne"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 186.00, "proteina_g": 21.50, "carboidrato_g": 0.00, "gordura_g": 11.11},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 56, "kcal": 104.16, "proteina_g": 12.04, "carboidrato_g": 0.00, "gordura_g": 6.22}
+    ]},
+    {"nome": "Strogonoff de Carne", "categoria": "Prato Principal", "fonte": "*", "aliases": ["strogonoff", "estrogonofe", "strogonoff de carne"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 173.00, "proteina_g": 15.95, "carboidrato_g": 2.13, "gordura_g": 11.19},
+      {"medida_label": "CO M", "medida_cod": "CO", "quantidade_g": 170, "kcal": 294.10, "proteina_g": 27.12, "carboidrato_g": 3.62, "gordura_g": 19.02},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 40, "kcal": 69.20, "proteina_g": 6.38, "carboidrato_g": 0.85, "gordura_g": 4.48}
+    ]},
+    {"nome": "Strogonoff de Frango", "categoria": "Prato Principal", "fonte": "*", "aliases": ["strogonoff de frango", "estrogonofe de frango"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 199.00, "proteina_g": 17.41, "carboidrato_g": 2.48, "gordura_g": 13.31},
+      {"medida_label": "CO M", "medida_cod": "CO", "quantidade_g": 170, "kcal": 338.30, "proteina_g": 29.60, "carboidrato_g": 4.22, "gordura_g": 22.63},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 40, "kcal": 79.60, "proteina_g": 6.96, "carboidrato_g": 0.99, "gordura_g": 5.32}
+    ]},
+    {"nome": "Lasanha à Bolonhesa", "categoria": "Prato Principal", "fonte": "*", "aliases": ["lasanha", "lasanha a bolonhesa"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 209.00, "proteina_g": 15.46, "carboidrato_g": 15.87, "gordura_g": 9.30},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 190, "kcal": 397.10, "proteina_g": 29.37, "carboidrato_g": 30.15, "gordura_g": 17.67}
+    ]},
+    {"nome": "Quibe Frito", "categoria": "Proteína", "fonte": "*", "aliases": ["quibe", "quibe frito", "kibe"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 207.00, "proteina_g": 10.40, "carboidrato_g": 22.50, "gordura_g": 8.39},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 50, "kcal": 103.50, "proteina_g": 5.20, "carboidrato_g": 11.25, "gordura_g": 4.20}
+    ]},
+    {"nome": "Croquete de Carne", "categoria": "Proteína", "fonte": "*", "aliases": ["croquete", "croquete de carne"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 346.00, "proteina_g": 14.21, "carboidrato_g": 37.88, "gordura_g": 15.25},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 25, "kcal": 86.50, "proteina_g": 3.55, "carboidrato_g": 9.47, "gordura_g": 3.81}
+    ]},
+    {"nome": "Panqueca de Carne", "categoria": "Prato Principal", "fonte": "*", "aliases": ["panqueca", "panqueca de carne"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 286.00, "proteina_g": 17.63, "carboidrato_g": 22.01, "gordura_g": 14.13},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 80, "kcal": 228.80, "proteina_g": 14.10, "carboidrato_g": 17.61, "gordura_g": 11.30}
+    ]},
+    {"nome": "Ovo Cozido", "categoria": "Proteína", "fonte": "GF", "aliases": ["ovo", "ovo cozido", "ovo de galinha cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 158.00, "proteina_g": 12.80, "carboidrato_g": 0.70, "gordura_g": 11.50},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 45, "kcal": 71.10, "proteina_g": 5.76, "carboidrato_g": 0.31, "gordura_g": 5.18}
+    ]},
+    {"nome": "Ovo Frito", "categoria": "Proteína", "fonte": "GF", "aliases": ["ovo frito"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 210.00, "proteina_g": 13.80, "carboidrato_g": 0.00, "gordura_g": 17.20},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 50, "kcal": 105.00, "proteina_g": 6.90, "carboidrato_g": 0.00, "gordura_g": 8.60}
+    ]},
+    {"nome": "Ovo Mexido", "categoria": "Proteína", "fonte": "*", "aliases": ["ovo mexido", "ovos mexidos"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 195.00, "proteina_g": 12.93, "carboidrato_g": 0.82, "gordura_g": 15.55},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 45, "kcal": 87.75, "proteina_g": 5.82, "carboidrato_g": 0.37, "gordura_g": 7.00},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 15, "kcal": 29.25, "proteina_g": 1.94, "carboidrato_g": 0.12, "gordura_g": 2.33}
+    ]},
+    {"nome": "Omelete", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["omelete", "omelete simples"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 170.00, "proteina_g": 11.20, "carboidrato_g": 2.40, "gordura_g": 12.90},
+      {"medida_label": "UND P", "medida_cod": "UND", "quantidade_g": 65, "kcal": 110.50, "proteina_g": 7.28, "carboidrato_g": 1.56, "gordura_g": 8.39}
+    ]},
+    {"nome": "Salsicha", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["salsicha"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 292.00, "proteina_g": 13.10, "carboidrato_g": 2.50, "gordura_g": 25.50},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 35, "kcal": 102.20, "proteina_g": 4.59, "carboidrato_g": 0.88, "gordura_g": 8.92}
+    ]},
+    {"nome": "Linguiça", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["linguica", "calabresa"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 300.00, "proteina_g": 12.10, "carboidrato_g": 1.10, "gordura_g": 27.50},
+      {"medida_label": "GOMO", "medida_cod": "GOMO", "quantidade_g": 60, "kcal": 180.00, "proteina_g": 7.26, "carboidrato_g": 0.66, "gordura_g": 16.50}
+    ]},
+    {"nome": "Atum em Conserva", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["atum", "atum em conserva", "atum enlatado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 281.00, "proteina_g": 24.20, "carboidrato_g": 0.00, "gordura_g": 20.50},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 16, "kcal": 44.96, "proteina_g": 3.87, "carboidrato_g": 0.00, "gordura_g": 3.28}
+    ]},
+    {"nome": "Sardinha em Conserva", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["sardinha", "sardinha em conserva", "sardinha enlatada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 294.00, "proteina_g": 20.90, "carboidrato_g": 0.50, "gordura_g": 23.20},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 33, "kcal": 97.02, "proteina_g": 6.90, "carboidrato_g": 0.17, "gordura_g": 7.66}
+    ]},
+    {"nome": "Bacalhau Cozido", "categoria": "Proteína", "fonte": "*", "aliases": ["bacalhau", "bacalhau cozido"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 147.00, "proteina_g": 34.80, "carboidrato_g": 0.00, "gordura_g": 0.84},
+      {"medida_label": "COL A CH DESFIADO", "medida_cod": "COL A", "quantidade_g": 55, "kcal": 80.85, "proteina_g": 19.14, "carboidrato_g": 0.00, "gordura_g": 0.46},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 135, "kcal": 198.45, "proteina_g": 46.98, "carboidrato_g": 0.00, "gordura_g": 1.13}
+    ]},
+    {"nome": "Bobó de Camarão", "categoria": "Prato Principal", "fonte": "*", "aliases": ["bobo de camarao", "bobo"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 164.00, "proteina_g": 7.10, "carboidrato_g": 20.93, "gordura_g": 5.79},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 190, "kcal": 311.60, "proteina_g": 13.49, "carboidrato_g": 39.77, "gordura_g": 11.00}
+    ]},
+    {"nome": "Camarão Frito", "categoria": "Proteína", "fonte": "*", "aliases": ["camarao", "camarao frito"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 159.00, "proteina_g": 26.40, "carboidrato_g": 1.35, "gordura_g": 5.35},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 35, "kcal": 55.65, "proteina_g": 9.24, "carboidrato_g": 0.47, "gordura_g": 1.87}
+    ]},
+    {"nome": "Polvo Refogado", "categoria": "Proteína", "fonte": "*", "aliases": ["polvo", "polvo refogado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 82.00, "proteina_g": 6.54, "carboidrato_g": 0.92, "gordura_g": 5.81},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 40, "kcal": 32.80, "proteina_g": 2.62, "carboidrato_g": 0.37, "gordura_g": 2.32}
+    ]},
+    {"nome": "Siri", "categoria": "Proteína", "fonte": "IBGE", "aliases": ["siri", "carne de siri"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 95.00, "proteina_g": 17.90, "carboidrato_g": 1.30, "gordura_g": 2.00}
+    ]},
+    {"nome": "Fígado de Galinha Cozido", "categoria": "Proteína", "fonte": "*", "aliases": ["figado de galinha", "figado de frango"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 176.00, "proteina_g": 19.90, "carboidrato_g": 4.40, "gordura_g": 8.80},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 30, "kcal": 52.80, "proteina_g": 5.97, "carboidrato_g": 1.32, "gordura_g": 2.64}
+    ]},
+    {"nome": "Coração de Galinha Cozido", "categoria": "Proteína", "fonte": "*", "aliases": ["coracao de galinha", "coracao de frango", "coracao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 157.00, "proteina_g": 17.60, "carboidrato_g": 0.40, "gordura_g": 9.40},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 5, "kcal": 7.85, "proteina_g": 0.88, "carboidrato_g": 0.02, "gordura_g": 0.47}
+    ]},
+    {"nome": "Língua Bovina Ensopada", "categoria": "Proteína", "fonte": "*", "aliases": ["lingua bovina", "lingua"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 251.00, "proteina_g": 23.01, "carboidrato_g": 2.33, "gordura_g": 16.61},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 30, "kcal": 75.30, "proteina_g": 6.90, "carboidrato_g": 0.70, "gordura_g": 4.98}
+    ]},
+    {"nome": "Rabada", "categoria": "Proteína", "fonte": "*", "aliases": ["rabada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 351.00, "proteina_g": 14.21, "carboidrato_g": 2.20, "gordura_g": 31.69},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 40, "kcal": 140.40, "proteina_g": 5.68, "carboidrato_g": 0.88, "gordura_g": 12.68}
+    ]},
+    {"nome": "Dobradinha", "categoria": "Prato Principal", "fonte": "*", "aliases": ["dobradinha", "buchada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 111.00, "proteina_g": 9.91, "carboidrato_g": 8.25, "gordura_g": 4.31},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 70, "kcal": 77.70, "proteina_g": 6.94, "carboidrato_g": 5.77, "gordura_g": 3.02}
+    ]},
+    {"nome": "Isca de Fígado", "categoria": "Proteína", "fonte": "*", "aliases": ["isca de figado", "iscas de figado"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 242.00, "proteina_g": 29.85, "carboidrato_g": 6.60, "gordura_g": 10.70},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 22, "kcal": 53.24, "proteina_g": 6.57, "carboidrato_g": 1.45, "gordura_g": 2.35}
+    ]},
+    {"nome": "Salpicão de Frango", "categoria": "Salada", "fonte": "*", "aliases": ["salpicao", "salpicao de frango"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 187.00, "proteina_g": 13.09, "carboidrato_g": 8.81, "gordura_g": 11.07},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 40, "kcal": 74.80, "proteina_g": 5.24, "carboidrato_g": 3.52, "gordura_g": 4.43}
+    ]},
+    {"nome": "Risoto de Frango", "categoria": "Prato Principal", "fonte": "*", "aliases": ["risoto de frango", "risoto"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 180.00, "proteina_g": 8.28, "carboidrato_g": 25.22, "gordura_g": 5.06},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 85, "kcal": 153.00, "proteina_g": 7.04, "carboidrato_g": 21.44, "gordura_g": 4.30},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 45.00, "proteina_g": 2.07, "carboidrato_g": 6.31, "gordura_g": 1.27}
+    ]},
+    {"nome": "Alface", "categoria": "Salada", "fonte": "IBGE", "aliases": ["alface", "salada verde", "salada de alface"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 19.00, "proteina_g": 1.30, "carboidrato_g": 2.90, "gordura_g": 0.20},
+      {"medida_label": "FOLHA M", "medida_cod": "FOLHA", "quantidade_g": 10, "kcal": 1.90, "proteina_g": 0.13, "carboidrato_g": 0.29, "gordura_g": 0.02},
+      {"medida_label": "PT R CH PICADA", "medida_cod": "PT R", "quantidade_g": 80, "kcal": 15.20, "proteina_g": 1.04, "carboidrato_g": 2.32, "gordura_g": 0.16}
+    ]},
+    {"nome": "Tomate", "categoria": "Salada", "fonte": "IBGE", "aliases": ["tomate"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 24.00, "proteina_g": 0.80, "carboidrato_g": 4.60, "gordura_g": 0.30},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 15, "kcal": 3.60, "proteina_g": 0.12, "carboidrato_g": 0.69, "gordura_g": 0.05},
+      {"medida_label": "COL S CH CUBOS", "medida_cod": "COL S", "quantidade_g": 15, "kcal": 3.60, "proteina_g": 0.12, "carboidrato_g": 0.69, "gordura_g": 0.05}
+    ]},
+    {"nome": "Pepino", "categoria": "Salada", "fonte": "IBGE", "aliases": ["pepino"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 17.00, "proteina_g": 0.70, "carboidrato_g": 3.40, "gordura_g": 0.10},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 18, "kcal": 3.06, "proteina_g": 0.13, "carboidrato_g": 0.61, "gordura_g": 0.02},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 100, "kcal": 17.00, "proteina_g": 0.70, "carboidrato_g": 3.40, "gordura_g": 0.10}
+    ]},
+    {"nome": "Salada de Legumes", "categoria": "Salada", "fonte": "*", "aliases": ["salada de legumes", "legumes", "mistura de legumes"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 83.00, "proteina_g": 1.32, "carboidrato_g": 12.34, "gordura_g": 3.18},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 55, "kcal": 45.65, "proteina_g": 0.73, "carboidrato_g": 6.79, "gordura_g": 1.75},
+      {"medida_label": "ESC M CH", "medida_cod": "ESC", "quantidade_g": 90, "kcal": 74.70, "proteina_g": 1.19, "carboidrato_g": 11.11, "gordura_g": 2.86}
+    ]},
+    {"nome": "Salada de Legumes com Maionese", "categoria": "Salada", "fonte": "*", "aliases": ["salada de maionese", "maionese de legumes"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 134.00, "proteina_g": 1.80, "carboidrato_g": 15.04, "gordura_g": 7.42},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 70, "kcal": 93.80, "proteina_g": 1.26, "carboidrato_g": 10.53, "gordura_g": 5.19}
+    ]},
+    {"nome": "Salada de Batata com Maionese", "categoria": "Salada", "fonte": "*", "aliases": ["salada de batata", "maionese de batata"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 152.00, "proteina_g": 2.41, "carboidrato_g": 18.27, "gordura_g": 7.71},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 38, "kcal": 57.76, "proteina_g": 0.92, "carboidrato_g": 6.94, "gordura_g": 2.93}
+    ]},
+    {"nome": "Salada de Feijão-Fradinho", "categoria": "Salada", "fonte": "*", "aliases": ["salada de feijao fradinho", "feijao fradinho"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 158.00, "proteina_g": 9.19, "carboidrato_g": 24.05, "gordura_g": 2.73},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 57, "kcal": 90.06, "proteina_g": 5.24, "carboidrato_g": 13.71, "gordura_g": 1.56}
+    ]},
+    {"nome": "Molho à Bolonhesa", "categoria": "Molho", "fonte": "*", "aliases": ["molho a bolonhesa", "molho bolonhesa", "molho de carne"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 185.00, "proteina_g": 6.60, "carboidrato_g": 10.20, "gordura_g": 13.10},
+      {"medida_label": "COL A", "medida_cod": "COL A", "quantidade_g": 35, "kcal": 64.75, "proteina_g": 2.31, "carboidrato_g": 3.57, "gordura_g": 4.59},
+      {"medida_label": "CO P CH", "medida_cod": "CO", "quantidade_g": 63, "kcal": 116.55, "proteina_g": 4.16, "carboidrato_g": 6.43, "gordura_g": 8.25}
+    ]},
+    {"nome": "Molho Branco", "categoria": "Molho", "fonte": "*", "aliases": ["molho branco", "bechamel"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 200.00, "proteina_g": 6.66, "carboidrato_g": 14.80, "gordura_g": 12.73},
+      {"medida_label": "COL A", "medida_cod": "COL A", "quantidade_g": 55, "kcal": 110.00, "proteina_g": 3.66, "carboidrato_g": 8.14, "gordura_g": 7.00},
+      {"medida_label": "COL S", "medida_cod": "COL S", "quantidade_g": 35, "kcal": 70.00, "proteina_g": 2.33, "carboidrato_g": 5.18, "gordura_g": 4.46}
+    ]},
+    {"nome": "Molho de Tomate", "categoria": "Molho", "fonte": "*", "aliases": ["molho de tomate", "molho vermelho"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 66.00, "proteina_g": 0.71, "carboidrato_g": 4.16, "gordura_g": 5.19},
+      {"medida_label": "COL A", "medida_cod": "COL A", "quantidade_g": 45, "kcal": 29.70, "proteina_g": 0.32, "carboidrato_g": 1.87, "gordura_g": 2.34},
+      {"medida_label": "COL S", "medida_cod": "COL S", "quantidade_g": 20, "kcal": 13.20, "proteina_g": 0.14, "carboidrato_g": 0.83, "gordura_g": 1.04}
+    ]},
+    {"nome": "Maionese Caseira", "categoria": "Molho", "fonte": "*", "aliases": ["maionese", "maionese caseira"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 185.00, "proteina_g": 5.55, "carboidrato_g": 0.34, "gordura_g": 17.94},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 27, "kcal": 49.95, "proteina_g": 1.50, "carboidrato_g": 0.09, "gordura_g": 4.84}
+    ]},
+    {"nome": "Ricota", "categoria": "Queijo", "fonte": "GF", "aliases": ["ricota"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 179.00, "proteina_g": 12.60, "carboidrato_g": 0.00, "gordura_g": 14.28},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 35, "kcal": 62.65, "proteina_g": 4.41, "carboidrato_g": 0.00, "gordura_g": 5.00}
+    ]},
+    {"nome": "Queijo Minas Fresco", "categoria": "Queijo", "fonte": "IBGE", "aliases": ["queijo minas", "queijo branco", "queijo minas fresco"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 243.00, "proteina_g": 18.00, "carboidrato_g": 0.00, "gordura_g": 19.00},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 30, "kcal": 72.90, "proteina_g": 5.40, "carboidrato_g": 0.00, "gordura_g": 5.70}
+    ]},
+    {"nome": "Queijo Prato", "categoria": "Queijo", "fonte": "IBGE", "aliases": ["queijo prato", "queijo amarelo"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 391.00, "proteina_g": 28.30, "carboidrato_g": 0.60, "gordura_g": 30.60},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 15, "kcal": 58.65, "proteina_g": 4.25, "carboidrato_g": 0.09, "gordura_g": 4.59}
+    ]},
+    {"nome": "Queijo Muzzarela", "categoria": "Queijo", "fonte": "GF", "aliases": ["queijo muzzarela", "mussarela", "muçarela"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 325.00, "proteina_g": 27.20, "carboidrato_g": 0.00, "gordura_g": 24.00},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 20, "kcal": 65.00, "proteina_g": 5.44, "carboidrato_g": 0.00, "gordura_g": 4.80}
+    ]},
+    {"nome": "Banana-Prata", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["banana", "banana prata"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 99.00, "proteina_g": 1.30, "carboidrato_g": 22.80, "gordura_g": 0.30},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 40, "kcal": 39.60, "proteina_g": 0.52, "carboidrato_g": 9.12, "gordura_g": 0.12}
+    ]},
+    {"nome": "Laranja", "categoria": "Fruta", "fonte": "*", "aliases": ["laranja"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 48.00, "proteina_g": 0.63, "carboidrato_g": 10.82, "gordura_g": 0.27},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 180, "kcal": 86.40, "proteina_g": 1.13, "carboidrato_g": 19.48, "gordura_g": 0.49}
+    ]},
+    {"nome": "Maçã", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["maca", "maçã"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 65.00, "proteina_g": 0.30, "carboidrato_g": 15.20, "gordura_g": 0.30},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 130, "kcal": 84.50, "proteina_g": 0.39, "carboidrato_g": 19.76, "gordura_g": 0.39}
+    ]},
+    {"nome": "Mamão Papaya", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["mamao", "mamao papaya", "papaia"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 36.00, "proteina_g": 0.50, "carboidrato_g": 8.30, "gordura_g": 0.10},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 310, "kcal": 111.60, "proteina_g": 1.55, "carboidrato_g": 25.73, "gordura_g": 0.31},
+      {"medida_label": "COL S CH PICADO", "medida_cod": "COL S", "quantidade_g": 40, "kcal": 14.40, "proteina_g": 0.20, "carboidrato_g": 3.32, "gordura_g": 0.04}
+    ]},
+    {"nome": "Melancia", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["melancia"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 24.00, "proteina_g": 0.50, "carboidrato_g": 5.30, "gordura_g": 0.10},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 200, "kcal": 48.00, "proteina_g": 1.00, "carboidrato_g": 10.60, "gordura_g": 0.20}
+    ]},
+    {"nome": "Melão", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["melao"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 28.00, "proteina_g": 0.50, "carboidrato_g": 6.20, "gordura_g": 0.10},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 90, "kcal": 25.20, "proteina_g": 0.45, "carboidrato_g": 5.58, "gordura_g": 0.09}
+    ]},
+    {"nome": "Abacaxi", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["abacaxi", "ananas"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 58.00, "proteina_g": 0.00, "carboidrato_g": 13.70, "gordura_g": 0.20},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 75, "kcal": 43.50, "proteina_g": 0.00, "carboidrato_g": 10.28, "gordura_g": 0.15}
+    ]},
+    {"nome": "Manga", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["manga"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 65.00, "proteina_g": 0.50, "carboidrato_g": 15.40, "gordura_g": 0.20},
+      {"medida_label": "ESPADA M", "medida_cod": "UND", "quantidade_g": 140, "kcal": 91.00, "proteina_g": 0.70, "carboidrato_g": 21.56, "gordura_g": 0.28}
+    ]},
+    {"nome": "Pêra", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["pera", "pêra"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 62.00, "proteina_g": 0.30, "carboidrato_g": 14.80, "gordura_g": 0.20},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 110, "kcal": 68.20, "proteina_g": 0.33, "carboidrato_g": 16.28, "gordura_g": 0.22}
+    ]},
+    {"nome": "Uva", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["uva", "uvas"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 76.00, "proteina_g": 0.60, "carboidrato_g": 16.70, "gordura_g": 0.70}
+    ]},
+    {"nome": "Pêssego", "categoria": "Fruta", "fonte": "IBGE", "aliases": ["pessego", "pêssego"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 48.00, "proteina_g": 0.80, "carboidrato_g": 10.40, "gordura_g": 0.30},
+      {"medida_label": "UND M", "medida_cod": "UND", "quantidade_g": 60, "kcal": 28.80, "proteina_g": 0.48, "carboidrato_g": 6.24, "gordura_g": 0.18}
+    ]},
+    {"nome": "Pudim de Leite", "categoria": "Sobremesa", "fonte": "*", "aliases": ["pudim", "pudim de leite"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 182.00, "proteina_g": 6.70, "carboidrato_g": 24.34, "gordura_g": 6.39},
+      {"medida_label": "FT M", "medida_cod": "FT", "quantidade_g": 130, "kcal": 236.60, "proteina_g": 8.71, "carboidrato_g": 31.64, "gordura_g": 8.31},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 50, "kcal": 91.00, "proteina_g": 3.35, "carboidrato_g": 12.17, "gordura_g": 3.20}
+    ]},
+    {"nome": "Mousse de Chocolate", "categoria": "Sobremesa", "fonte": "*", "aliases": ["mousse de chocolate", "mousse"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 318.00, "proteina_g": 8.87, "carboidrato_g": 29.22, "gordura_g": 18.35},
+      {"medida_label": "PORCAO", "medida_cod": "PED", "quantidade_g": 70, "kcal": 222.60, "proteina_g": 6.21, "carboidrato_g": 20.45, "gordura_g": 12.85}
+    ]},
+    {"nome": "Mousse de Maracujá", "categoria": "Sobremesa", "fonte": "*", "aliases": ["mousse de maracuja"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 285.00, "proteina_g": 5.17, "carboidrato_g": 32.05, "gordura_g": 15.07},
+      {"medida_label": "COL A CH", "medida_cod": "COL A", "quantidade_g": 75, "kcal": 213.75, "proteina_g": 3.88, "carboidrato_g": 24.04, "gordura_g": 11.30}
+    ]},
+    {"nome": "Gelatina", "categoria": "Sobremesa", "fonte": "GF", "aliases": ["gelatina", "gelatina preparada"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 67.00, "proteina_g": 1.60, "carboidrato_g": 15.20, "gordura_g": 0.00},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 25, "kcal": 16.75, "proteina_g": 0.40, "carboidrato_g": 3.80, "gordura_g": 0.00}
+    ]},
+    {"nome": "Arroz-Doce", "categoria": "Sobremesa", "fonte": "*", "aliases": ["arroz doce"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 164.00, "proteina_g": 3.76, "carboidrato_g": 33.04, "gordura_g": 1.84},
+      {"medida_label": "CO M CH", "medida_cod": "CO", "quantidade_g": 140, "kcal": 229.60, "proteina_g": 5.26, "carboidrato_g": 46.26, "gordura_g": 2.58},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 40, "kcal": 65.60, "proteina_g": 1.50, "carboidrato_g": 13.22, "gordura_g": 0.74}
+    ]},
+    {"nome": "Doce de Leite", "categoria": "Sobremesa", "fonte": "GF", "aliases": ["doce de leite"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 290.00, "proteina_g": 8.75, "carboidrato_g": 54.72, "gordura_g": 4.00},
+      {"medida_label": "COL S CH", "medida_cod": "COL S", "quantidade_g": 40, "kcal": 116.00, "proteina_g": 3.50, "carboidrato_g": 21.89, "gordura_g": 1.60}
+    ]},
+    {"nome": "Pavê de Chocolate", "categoria": "Sobremesa", "fonte": "*", "aliases": ["pave", "pave de chocolate"], "porcoes": [
+      {"medida_label": "100g", "quantidade_g": 100, "kcal": 181.00, "proteina_g": 4.92, "carboidrato_g": 18.88, "gordura_g": 9.48},
+      {"medida_label": "PED M", "medida_cod": "PED", "quantidade_g": 85, "kcal": 153.85, "proteina_g": 4.18, "carboidrato_g": 16.05, "gordura_g": 8.06}
+    ]},
+    {"nome": "Suco de Laranja", "categoria": "Bebida", "fonte": "GF", "aliases": ["suco de laranja", "suco"], "porcoes": [
+      {"medida_label": "100mL", "quantidade_g": 100, "kcal": 58.00, "proteina_g": 0.60, "carboidrato_g": 13.10, "gordura_g": 0.40},
+      {"medida_label": "COPO D CH", "medida_cod": "COPO", "quantidade_g": 240, "kcal": 139.20, "proteina_g": 1.44, "carboidrato_g": 31.44, "gordura_g": 0.96},
+      {"medida_label": "COPO P CH", "medida_cod": "COPO", "quantidade_g": 165, "kcal": 95.70, "proteina_g": 0.99, "carboidrato_g": 21.62, "gordura_g": 0.66}
+    ]},
+    {"nome": "Limonada", "categoria": "Bebida", "fonte": "*", "aliases": ["limonada", "suco de limao"], "porcoes": [
+      {"medida_label": "100mL", "quantidade_g": 100, "kcal": 42.00, "proteina_g": 0.00, "carboidrato_g": 10.50, "gordura_g": 0.00},
+      {"medida_label": "COPO D CH", "medida_cod": "COPO", "quantidade_g": 240, "kcal": 100.80, "proteina_g": 0.00, "carboidrato_g": 25.20, "gordura_g": 0.00}
+    ]}
+  ]
+}

@@ -37,3 +37,11 @@ def get_medidas_caseiras() -> list[dict]:
     r = _client.get("/internal/medidas-caseiras")
     r.raise_for_status()
     return r.json().get("medidas") or []
+
+
+def calcular_consumo(itens: list[dict]) -> dict:
+    """Envia itens estruturados ({alimento, medida, quantidade}) e recebe os totais
+    nutricionais calculados deterministicamente contra a base de medidas caseiras."""
+    r = _client.post("/internal/consumo/calcular", json={"itens": itens})
+    r.raise_for_status()
+    return r.json()

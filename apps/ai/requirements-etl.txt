@@ -1,0 +1,4 @@
+# Dependências SÓ do ETL de ingestão do PDF nutricional (não vão para a imagem do worker).
+# Instale com: pip install -r requirements-etl.txt
+pymupdf>=1.24.0
+anthropic>=0.40.0

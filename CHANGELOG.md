@@ -39,8 +39,16 @@ base sólida com persistência, filas, RAG e isolamento por unidade.
 - **Gamificação**: pontuação passa a ser baseada em **proximidade calórica/nutricional** da meta do usuário,
   e não na aderência item a item à recomendação.
 
+### Added — Base nutricional + motor de consumo
+- **Schema** (`migrations/0002_nutricao.sql`): `nutri_alimentos`, `nutri_porcoes`, `medida_aliases` (+ `pg_trgm` para resolução fuzzy de nomes/medidas).
+- **Seed** (`seed/nutricao.json`): **144 alimentos / 344 porções** cobrindo o universo de buffet self-service — acompanhamentos (51), proteínas (40), saladas (13), pratos principais (12), frutas (11), sobremesas (7), molhos (4), queijos (4) e bebidas (2) — extraídos da tabela (kcal+macros) + legenda de medidas caseiras com plurais. Itens industrializados de lanche/doce/bebida de marca foram omitidos (não são itens de self-service); ficam para o ETL. Carregado pelo `cmd/seed`.
+- **Resolução + cálculo (Go)**: `ResolverAlimento`/`ResolverPorcao` (exato → alias → trigram, com fallback p/ 100g) e `CalcularConsumo`; endpoint interno `POST /internal/consumo/calcular`. O cálculo nutricional é determinístico no banco.
+- **Motor de consumo (agente)**: tool `registrar_consumo` — a LLM extrai `{alimento, medida, quantidade}` da linguagem natural e o backend devolve kcal/macros + confiança por item.
+- **ETL reproduzível** (`apps/ai/app/nutrition/etl.py` + `requirements-etl.txt`): extrai os ~600 alimentos do PDF escaneado via visão da LLM, página a página, com merge no seed sem sobrescrever o núcleo verificado. Parser de rótulos de medida em `app/nutrition/medidas.py`.
+
 ### Notes
-- Diferido para fases seguintes: UI/CRUD completo de cadastro e admin, gamificação completa, dashboard de desperdício, memória de longo prazo (sumarização + rerank).
+- Diferido para fases seguintes: UI/CRUD completo de cadastro e admin, gamificação completa (score por proximidade da meta), dashboard de desperdício, memória de longo prazo (sumarização + rerank).
+- A tabela nutricional completa (~600 alimentos) ainda não foi ingerida: rodar o ETL com o PDF em `docs/sources/` + chave Anthropic, seguido de um passe de conferência dos números.
 
 ## [mvp-v1] — 2026-05-25
 

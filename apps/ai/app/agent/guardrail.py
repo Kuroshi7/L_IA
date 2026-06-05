@@ -13,6 +13,7 @@ _KEYWORDS_BASE = {
     "alergia", "alergico", "alergica", "intolerante", "intolerancia", "restricao",
     "proteina", "proteico", "caloria", "calorias", "carboidrato", "carb", "gordura",
     "saudavel", "leve", "pesado", "gostoso", "saboroso", "nutricao", "nutricional",
+    "comi", "consumi", "consumo", "comendo", "almocei", "jantei", "porcao", "concha",
     "amendoim", "soja", "ovo", "peixe", "carne", "frango", "salada", "sopa",
     "low carb", "fit", "diet", "dieta", "lia", "hoje", "amanha", "amanhã",
     "recomenda", "recomendacao", "sugere", "sugestao", "indica", "indicacao",

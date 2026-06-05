@@ -5,6 +5,7 @@ pela UNIDADE do contexto da requisição. Args usam CSV string (mais robusto par
 LLMs pequenos). A filtragem por restrição/alergia é determinística em Python.
 """
 
+import json as _json
 from typing import Literal
 
 from langchain_core.tools import tool
@@ -121,6 +122,34 @@ def buscar_informacao(consulta: str) -> str:
     return "\n\n".join(trechos)
 
 
+@tool
+def registrar_consumo(itens: list[dict]) -> dict | str:
+    """Calcula calorias e macronutrientes do que o usuário consumiu (refeição self-service).
+
+    `itens` é uma LISTA de objetos, cada um com:
+      - alimento: nome (ex: "arroz", "frango grelhado", "feijao", "salada de legumes")
+      - medida: medida caseira (ex: "concha", "colher de sopa", "file", "prato raso", "escumadeira")
+      - quantidade: número (ex: 2)
+    Exemplo:
+      [{"alimento":"arroz","medida":"concha","quantidade":2},{"alimento":"frango grelhado","medida":"file","quantidade":1}]
+
+    Retorna os totais (kcal, proteína, carboidrato, gordura) e o detalhamento por item,
+    com o nível de confiança da resolução. Os NÚMEROS vêm da base nutricional — não invente.
+    """
+    # tolera o caso de o modelo mandar uma string JSON em vez de lista
+    if isinstance(itens, str):
+        try:
+            itens = _json.loads(itens)
+        except Exception:
+            return "Envie `itens` como lista de {alimento, medida, quantidade}."
+    if not isinstance(itens, list) or not itens:
+        return "Envie ao menos um item {alimento, medida, quantidade}."
+    try:
+        return go_api.calcular_consumo(itens)
+    except Exception:
+        return "Não foi possível calcular o consumo agora."
+
+
 TOOLS = [
     listar_pratos_do_dia,
     filtrar_pratos,
@@ -129,4 +158,5 @@ TOOLS = [
     meu_perfil,
     consultar_medidas_caseiras,
     buscar_informacao,
+    registrar_consumo,
 ]

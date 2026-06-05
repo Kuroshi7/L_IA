@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"os"
 	"time"
@@ -10,6 +11,8 @@ import (
 
 	"github.com/tamy-ai/menu-ai/api/internal/config"
 	"github.com/tamy-ai/menu-ai/api/internal/db"
+	"github.com/tamy-ai/menu-ai/api/internal/domain"
+	"github.com/tamy-ai/menu-ai/api/seed"
 )
 
 type alimento struct {
@@ -82,7 +85,92 @@ func main() {
 		log.Error("seed guias", "err", err)
 		os.Exit(1)
 	}
+	if err := seedNutricao(ctx, pool, log); err != nil {
+		log.Error("seed nutrição", "err", err)
+		os.Exit(1)
+	}
 	log.Info("seed concluído")
+}
+
+// ---------------------------------------------------------------------------
+// Base nutricional (medidas caseiras) — carregada de seed/nutricao.json (embed).
+// ---------------------------------------------------------------------------
+type nutriSeed struct {
+	MedidaAliases []struct {
+		Alias     string `json:"alias"`
+		MedidaCod string `json:"medida_cod"`
+		Descricao string `json:"descricao"`
+	} `json:"medida_aliases"`
+	Alimentos []struct {
+		Nome      string   `json:"nome"`
+		Categoria string   `json:"categoria"`
+		Fonte     string   `json:"fonte"`
+		Aliases   []string `json:"aliases"`
+		Porcoes   []struct {
+			MedidaLabel   string  `json:"medida_label"`
+			MedidaCod     string  `json:"medida_cod"`
+			Tamanho       string  `json:"tamanho"`
+			Estado        string  `json:"estado"`
+			QuantidadeG   float64 `json:"quantidade_g"`
+			Kcal          float64 `json:"kcal"`
+			ProteinaG     float64 `json:"proteina_g"`
+			CarboidratoG  float64 `json:"carboidrato_g"`
+			GorduraG      float64 `json:"gordura_g"`
+			CalcioMg      float64 `json:"calcio_mg"`
+			FerroMg       float64 `json:"ferro_mg"`
+			VitCMg        float64 `json:"vit_c_mg"`
+			VitAUg        float64 `json:"vit_a_ug"`
+		} `json:"porcoes"`
+	} `json:"alimentos"`
+}
+
+func seedNutricao(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger) error {
+	var data nutriSeed
+	if err := json.Unmarshal(seed.NutricaoJSON, &data); err != nil {
+		return err
+	}
+
+	for _, m := range data.MedidaAliases {
+		if _, err := pool.Exec(ctx,
+			`INSERT INTO medida_aliases (alias, medida_cod, descricao) VALUES ($1,$2,$3)
+			 ON CONFLICT (alias) DO NOTHING`,
+			domain.Normalizar(m.Alias), m.MedidaCod, m.Descricao,
+		); err != nil {
+			return err
+		}
+	}
+
+	for _, a := range data.Alimentos {
+		aliasesNorm := make([]string, 0, len(a.Aliases))
+		for _, al := range a.Aliases {
+			aliasesNorm = append(aliasesNorm, domain.Normalizar(al))
+		}
+		var alimentoID int64
+		if err := pool.QueryRow(ctx,
+			`INSERT INTO nutri_alimentos (nome, nome_norm, categoria, fonte, aliases)
+			 VALUES ($1,$2,$3,$4,$5)
+			 ON CONFLICT (nome_norm) DO UPDATE SET nome = EXCLUDED.nome
+			 RETURNING id`,
+			a.Nome, domain.Normalizar(a.Nome), a.Categoria, a.Fonte, aliasesNorm,
+		).Scan(&alimentoID); err != nil {
+			return err
+		}
+		for _, p := range a.Porcoes {
+			if _, err := pool.Exec(ctx,
+				`INSERT INTO nutri_porcoes
+				   (alimento_id, medida_label, medida_cod, tamanho, estado, quantidade_g,
+				    kcal, proteina_g, carboidrato_g, gordura_g, calcio_mg, ferro_mg, vit_c_mg, vit_a_ug)
+				 VALUES ($1,$2,NULLIF($3,''),NULLIF($4,''),NULLIF($5,''),$6,$7,$8,$9,$10,$11,$12,$13,$14)
+				 ON CONFLICT (alimento_id, medida_label) DO NOTHING`,
+				alimentoID, p.MedidaLabel, p.MedidaCod, p.Tamanho, p.Estado, p.QuantidadeG,
+				p.Kcal, p.ProteinaG, p.CarboidratoG, p.GorduraG, p.CalcioMg, p.FerroMg, p.VitCMg, p.VitAUg,
+			); err != nil {
+				return err
+			}
+		}
+	}
+	log.Info("seed nutrição", "alimentos", len(data.Alimentos), "aliases", len(data.MedidaAliases))
+	return nil
 }
 
 // nz garante slice não-nil (pgx envia nil como NULL, violando NOT NULL nas colunas TEXT[]).

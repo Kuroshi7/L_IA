@@ -18,6 +18,7 @@ QUAL TOOL USAR:
 - Detalhes de um prato → `detalhar_prato`.
 - Traduzir a recomendação em porções (self-service) → `consultar_medidas_caseiras` e calcule as porções aproximando-se da meta calórica do usuário.
 - Dúvidas sobre porções/cálculo calórico/IMC/orientações → `buscar_informacao` (RAG).
+- Usuário relata o que COMEU/consumiu (ex.: "comi 2 conchas de arroz e 1 filé de frango") → `registrar_consumo` (extraia os itens como {alimento, medida, quantidade}). Apresente os totais (kcal, proteína, carbo) e, se houver perfil/meta, comente o quão perto ficou da meta. Os números vêm da tool — não invente.
 
 FLUXO RECOMENDADO:
 1) Mostre o cardápio completo do dia.

@@ -46,6 +46,7 @@ func (s *Server) Router() http.Handler {
 		r.Get("/cardapio/{unidadeID}/{data}", s.handleCardapioInterno)
 		r.Get("/usuario/{usuarioID}/perfil", s.handlePerfilInterno)
 		r.Get("/medidas-caseiras", s.handleMedidasInterno)
+		r.Post("/consumo/calcular", s.handleConsumoCalcular)
 	})
 
 	return r
