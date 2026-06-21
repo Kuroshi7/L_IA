@@ -1,0 +1,10 @@
+# Code Owners — revisor obrigatório (gate de merge).
+#
+# Num repo pessoal o CODEOWNERS só aceita USUÁRIOS (não times), e cada owner
+# precisa ser colaborador com acesso de escrita para que a revisão dele seja exigida.
+#
+# Kuroshi7 é o gate final: todo PR para a branch protegida exige a aprovação dele.
+# Devs (ex.: @VmaffeiDev) abrem PRs; QA e qualquer pessoa podem comentar/revisar,
+# mas o merge só é liberado com o aval do code owner abaixo.
+
+* @Kuroshi7
