@@ -15,6 +15,7 @@ type Config struct {
 	AIBaseURL    string // usado pelo worker, se precisar chamar o serviço de IA via HTTP
 	ChatTimeout  int    // segundos para aguardar a resposta do worker de IA (RPC)
 	InternalAddr string // host:port exposto internamente para o serviço de IA
+	AdminToken   string // token do gate de admin (header X-Admin-Token). Vazio = gate desabilitado (dev).
 }
 
 // Load carrega o .env (se existir) e monta a Config com defaults sensatos.
@@ -28,6 +29,7 @@ func Load() Config {
 		AIBaseURL:    env("AI_BASE_URL", "http://localhost:8000"),
 		ChatTimeout:  envInt("CHAT_TIMEOUT_SECONDS", 60),
 		InternalAddr: env("API_INTERNAL_ADDR", ":8080"),
+		AdminToken:   env("ADMIN_TOKEN", ""),
 	}
 }
 

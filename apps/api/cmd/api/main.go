@@ -62,7 +62,7 @@ func main() {
 	log.Info("outbox relay iniciado")
 
 	chatSvc := chat.New(st, chatClient, time.Duration(cfg.ChatTimeout)*time.Second)
-	srv := httpapi.NewServer(st, chatSvc, log)
+	srv := httpapi.NewServer(st, chatSvc, log, cfg.AdminToken)
 
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,

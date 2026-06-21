@@ -189,10 +189,9 @@ var diasSemanaPT = map[time.Weekday]string{
 
 func seedUnidade(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger, u unidade) error {
 	var unidadeID int64
-	var existed bool
 	err := pool.QueryRow(ctx, `SELECT id FROM unidades WHERE slug = $1`, u.slug).Scan(&unidadeID)
 	if err == nil {
-		existed = true
+		log.Info("unidade já existe, mantendo", "slug", u.slug, "id", unidadeID)
 	} else {
 		if err := pool.QueryRow(ctx,
 			`INSERT INTO unidades (nome, slug) VALUES ($1, $2) RETURNING id`, u.nome, u.slug,
@@ -200,11 +199,31 @@ func seedUnidade(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger, u un
 			return err
 		}
 	}
-	if existed {
-		log.Info("unidade já existe, mantendo", "slug", u.slug, "id", unidadeID)
+
+	// Catálogo da unidade: cada prato é uma linha distinta (referenciada pelos dias).
+	alimentoIDs := make(map[string]int64, len(u.pratos))
+	for _, p := range u.pratos {
+		var alimentoID int64
+		if err := pool.QueryRow(ctx,
+			`INSERT INTO alimentos
+			   (unidade_id, nome, categoria, ingredientes, alergenos, restricoes_atendidas,
+			    nao_indicado_para, calorias, proteinas_g, carboidratos_g, gorduras_g)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+			 ON CONFLICT (unidade_id, nome) DO UPDATE SET
+			   categoria=EXCLUDED.categoria, ingredientes=EXCLUDED.ingredientes, alergenos=EXCLUDED.alergenos,
+			   restricoes_atendidas=EXCLUDED.restricoes_atendidas, nao_indicado_para=EXCLUDED.nao_indicado_para,
+			   calorias=EXCLUDED.calorias, proteinas_g=EXCLUDED.proteinas_g,
+			   carboidratos_g=EXCLUDED.carboidratos_g, gorduras_g=EXCLUDED.gorduras_g, updated_at=now()
+			 RETURNING id`,
+			unidadeID, p.nome, p.categoria, nz(p.ingredientes), nz(p.alergenos), nz(p.restricoesAtendidas),
+			nz(p.naoIndicadoPara), p.calorias, p.prot, p.carb, p.gord,
+		).Scan(&alimentoID); err != nil {
+			return err
+		}
+		alimentoIDs[p.nome] = alimentoID
 	}
 
-	// Cardápio para hoje + próximos 2 dias.
+	// Cardápio para hoje + próximos 2 dias, referenciando os alimentos do catálogo.
 	for d := 0; d < 3; d++ {
 		data := time.Now().AddDate(0, 0, d)
 		dataStr := data.Format("2006-01-02")
@@ -220,22 +239,11 @@ func seedUnidade(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger, u un
 		}
 
 		for _, p := range u.pratos {
-			var alimentoID int64
-			if err := pool.QueryRow(ctx,
-				`INSERT INTO alimentos
-				   (unidade_id, nome, categoria, ingredientes, alergenos, restricoes_atendidas,
-				    nao_indicado_para, calorias, proteinas_g, carboidratos_g, gorduras_g)
-				 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-				 RETURNING id`,
-				unidadeID, p.nome, p.categoria, nz(p.ingredientes), nz(p.alergenos), nz(p.restricoesAtendidas),
-				nz(p.naoIndicadoPara), p.calorias, p.prot, p.carb, p.gord,
-			).Scan(&alimentoID); err != nil {
-				return err
-			}
 			if _, err := pool.Exec(ctx,
 				`INSERT INTO cardapio_itens (cardapio_dia_id, alimento_id, is_proteina_do_dia)
-				 VALUES ($1, $2, $3) ON CONFLICT (cardapio_dia_id, alimento_id) DO NOTHING`,
-				diaID, alimentoID, p.proteinaDoDia,
+				 VALUES ($1, $2, $3)
+				 ON CONFLICT (cardapio_dia_id, alimento_id) DO UPDATE SET is_proteina_do_dia = EXCLUDED.is_proteina_do_dia`,
+				diaID, alimentoIDs[p.nome], p.proteinaDoDia,
 			); err != nil {
 				return err
 			}

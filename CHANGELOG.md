@@ -46,8 +46,24 @@ base sólida com persistência, filas, RAG e isolamento por unidade.
 - **Motor de consumo (agente)**: tool `registrar_consumo` — a LLM extrai `{alimento, medida, quantidade}` da linguagem natural e o backend devolve kcal/macros + confiança por item.
 - **ETL reproduzível** (`apps/ai/app/nutrition/etl.py` + `requirements-etl.txt`): extrai os ~600 alimentos do PDF escaneado via visão da LLM, página a página, com merge no seed sem sobrescrever o núcleo verificado. Parser de rótulos de medida em `app/nutrition/medidas.py`.
 
+### Added — Admin dashboard (gestão de cardápio e alimentos)
+- **API de admin** (grupo `/admin`, gate via header `X-Admin-Token` / `ADMIN_TOKEN`): catálogo de alimentos da unidade
+  (`GET/POST /admin/unidades/{id}/alimentos`, `PUT /admin/alimentos/{id}`, `PATCH .../ativo`); referência nutricional
+  (`GET /admin/nutri-alimentos?q=`, `GET/POST /admin/nutri-alimentos`); cardápio semanal
+  (`GET /admin/unidades/{id}/cardapio-semana?inicio=`, `PUT .../cardapio-dia/{data}/itens`, `POST .../cardapio-semana/copiar`).
+- **Cadastro de alimento cria as medidas caseiras junto** (trabalho do nutricionista): o alimento do menu (`alimentos`)
+  vincula-se a uma referência `nutri_alimentos` + `nutri_porcoes` — criada no ato (porções com g/kcal/macros) ou vinculada a
+  uma existente. Nova coluna `alimentos.nutri_alimento_id` (migração `0003_admin.sql`) e índice único `(unidade_id, nome)`.
+- **Front**: `/admin` (seletor de unidade + token), `/admin/u/:id/cardapio` (grade seg–sex por datas reais, add/remover por dia,
+  marcar proteína do dia, navegação de semana e "copiar p/ próxima semana") e `/admin/u/:id/alimentos` (lista + formulário com
+  seção obrigatória de medidas caseiras).
+- **Seed corrigido**: alimentos passam a ser **distintos por unidade** (sem a duplicata por dia×prato do seed antigo); os dias
+  do cardápio referenciam o catálogo. A migração deduplica bases pré-existentes antes de criar o índice único.
+
 ### Notes
-- Diferido para fases seguintes: UI/CRUD completo de cadastro e admin, gamificação completa (score por proximidade da meta), dashboard de desperdício, memória de longo prazo (sumarização + rerank).
+- Diferido para fases seguintes: CRUD completo de cadastro de usuário; gamificação completa (score por proximidade da meta),
+  dashboard de desperdício, memória de longo prazo (sumarização + rerank). Auth de admin é um gate por token simples (auth de
+  usuário completa segue diferida).
 - A tabela nutricional completa (~600 alimentos) ainda não foi ingerida: rodar o ETL com o PDF em `docs/sources/` + chave Anthropic, seguido de um passe de conferência dos números.
 
 ## [mvp-v1] — 2026-05-25

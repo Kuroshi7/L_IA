@@ -38,6 +38,7 @@ type Alimento struct {
 	GordurasG           float64  `json:"gorduras_g"`
 	Ativo               bool     `json:"ativo"`
 	IsProteinaDoDia     bool     `json:"is_proteina_do_dia"`
+	NutriAlimentoID     *int64   `json:"nutri_alimento_id,omitempty"`
 }
 
 type CardapioDia struct {

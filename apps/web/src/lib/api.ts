@@ -1,4 +1,14 @@
-import type { ChatResponse, Prato, Unidade } from "../types";
+import type {
+  Alimento,
+  AlimentoInput,
+  CardapioDia,
+  CardapioItemInput,
+  CardapioSemana,
+  ChatResponse,
+  NutriAlimento,
+  Prato,
+  Unidade,
+} from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
@@ -41,3 +51,77 @@ export async function limparConversa(sessionId: string): Promise<void> {
   if (!sessionId) return;
   await fetch(`${BASE_URL}/chat/${sessionId}`, { method: "DELETE" });
 }
+
+// ============================ Admin ============================
+
+const ADMIN_TOKEN_KEY = "menuai_admin_token";
+
+export function getAdminToken(): string {
+  return (
+    localStorage.getItem(ADMIN_TOKEN_KEY) ||
+    (import.meta.env.VITE_ADMIN_TOKEN as string | undefined) ||
+    ""
+  );
+}
+
+export function setAdminToken(token: string): void {
+  localStorage.setItem(ADMIN_TOKEN_KEY, token.trim());
+}
+
+async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": getAdminToken(),
+      ...(init?.headers || {}),
+    },
+  });
+  if (r.status === 401) throw new Error("Não autorizado — verifique o token de admin.");
+  if (!r.ok) throw new Error((await r.text()) || `${init?.method ?? "GET"} ${path} falhou (${r.status})`);
+  if (r.status === 204) return undefined as T;
+  return r.json() as Promise<T>;
+}
+
+export const adminListarAlimentos = (unidadeId: number) =>
+  adminFetch<{ alimentos: Alimento[] | null }>(`/admin/unidades/${unidadeId}/alimentos`).then(
+    (d) => d.alimentos ?? [],
+  );
+
+export const adminCriarAlimento = (unidadeId: number, body: AlimentoInput) =>
+  adminFetch<Alimento>(`/admin/unidades/${unidadeId}/alimentos`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+export const adminAtualizarAlimento = (alimentoId: number, body: AlimentoInput) =>
+  adminFetch<Alimento>(`/admin/alimentos/${alimentoId}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+
+export const adminSetAlimentoAtivo = (alimentoId: number, ativo: boolean) =>
+  adminFetch<{ id: number; ativo: boolean }>(`/admin/alimentos/${alimentoId}/ativo`, {
+    method: "PATCH",
+    body: JSON.stringify({ ativo }),
+  });
+
+export const adminBuscarNutri = (q: string) =>
+  adminFetch<{ nutri_alimentos: NutriAlimento[] | null }>(
+    `/admin/nutri-alimentos?q=${encodeURIComponent(q)}`,
+  ).then((d) => d.nutri_alimentos ?? []);
+
+export const adminGetCardapioSemana = (unidadeId: number, inicio: string) =>
+  adminFetch<CardapioSemana>(`/admin/unidades/${unidadeId}/cardapio-semana?inicio=${inicio}`);
+
+export const adminSetCardapioItens = (unidadeId: number, data: string, itens: CardapioItemInput[]) =>
+  adminFetch<CardapioDia>(`/admin/unidades/${unidadeId}/cardapio-dia/${data}/itens`, {
+    method: "PUT",
+    body: JSON.stringify({ itens }),
+  });
+
+export const adminCopiarSemana = (unidadeId: number, origem: string, destino: string) =>
+  adminFetch<CardapioSemana>(`/admin/unidades/${unidadeId}/cardapio-semana/copiar`, {
+    method: "POST",
+    body: JSON.stringify({ origem, destino }),
+  });

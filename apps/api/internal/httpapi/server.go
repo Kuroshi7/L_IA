@@ -12,13 +12,14 @@ import (
 )
 
 type Server struct {
-	store *store.Store
-	chat  *chat.Service
-	log   *slog.Logger
+	store      *store.Store
+	chat       *chat.Service
+	log        *slog.Logger
+	adminToken string
 }
 
-func NewServer(st *store.Store, chatSvc *chat.Service, log *slog.Logger) *Server {
-	return &Server{store: st, chat: chatSvc, log: log}
+func NewServer(st *store.Store, chatSvc *chat.Service, log *slog.Logger, adminToken string) *Server {
+	return &Server{store: st, chat: chatSvc, log: log, adminToken: adminToken}
 }
 
 func (s *Server) Router() http.Handler {
@@ -49,14 +50,32 @@ func (s *Server) Router() http.Handler {
 		r.Post("/consumo/calcular", s.handleConsumoCalcular)
 	})
 
+	// API de admin (gestão de catálogo de alimentos e cardápio). Gate via X-Admin-Token.
+	r.Route("/admin", func(r chi.Router) {
+		r.Use(s.adminAuth)
+
+		r.Get("/unidades/{unidadeID}/alimentos", s.handleListAlimentos)
+		r.Post("/unidades/{unidadeID}/alimentos", s.handleCreateAlimento)
+		r.Put("/alimentos/{alimentoID}", s.handleUpdateAlimento)
+		r.Patch("/alimentos/{alimentoID}/ativo", s.handleSetAlimentoAtivo)
+
+		r.Get("/nutri-alimentos", s.handleSearchNutri)
+		r.Get("/nutri-alimentos/{nutriID}", s.handleGetNutri)
+		r.Post("/nutri-alimentos", s.handleCreateNutri)
+
+		r.Get("/unidades/{unidadeID}/cardapio-semana", s.handleGetCardapioSemana)
+		r.Put("/unidades/{unidadeID}/cardapio-dia/{data}/itens", s.handleSetCardapioItens)
+		r.Post("/unidades/{unidadeID}/cardapio-semana/copiar", s.handleCopiarSemana)
+	})
+
 	return r
 }
 
 func (s *Server) cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Idempotency-Key")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Idempotency-Key, X-Admin-Token")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
