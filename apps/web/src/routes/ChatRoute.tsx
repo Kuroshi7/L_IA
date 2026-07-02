@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { enviarMensagem, getSaudacao, limparConversa } from "../lib/api";
+import { enviarMensagem, getGamificacao, getSaudacao, getUsuarioIdSalvo, limparConversa } from "../lib/api";
+import type { Gamificacao } from "../types";
 
 interface Msg {
   role: "ai" | "user";
@@ -84,8 +85,21 @@ export default function ChatRoute() {
   const [input, setInput] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [erroConexao, setErroConexao] = useState(false);
+  const [usuarioId] = useState<number | null>(() => getUsuarioIdSalvo());
+  const [gami, setGami] = useState<Gamificacao | null>(null);
   const fimRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const atualizarGamificacao = useCallback(() => {
+    if (!usuarioId) return;
+    getGamificacao(usuarioId)
+      .then((d) => setGami(d.gamificacao))
+      .catch(() => undefined);
+  }, [usuarioId]);
+
+  useEffect(() => {
+    atualizarGamificacao();
+  }, [atualizarGamificacao]);
 
   useEffect(() => {
     getSaudacao()
@@ -114,13 +128,15 @@ export default function ChatRoute() {
     setMensagens((prev) => [...prev, { role: "user", text: texto }]);
     setCarregando(true);
     try {
-      const data = await enviarMensagem(unidadeId, sessionId || null, texto);
+      const data = await enviarMensagem(unidadeId, sessionId || null, texto, usuarioId);
       if (data.session_id && data.session_id !== sessionId) {
         setSessionId(data.session_id);
         localStorage.setItem(storageKey, data.session_id);
       }
       setMensagens((prev) => [...prev, { role: "ai", text: data.resposta, foraDeEscopo: data.fora_de_escopo }]);
       setErroConexao(false);
+      // O usuário pode ter registrado consumo pelo chat — pontos podem ter mudado.
+      atualizarGamificacao();
     } catch {
       setErroConexao(true);
       setMensagens((prev) => [...prev, { role: "ai", text: "⚠️ Não consegui me conectar agora. Verifique se o backend está rodando." }]);
@@ -161,6 +177,17 @@ export default function ChatRoute() {
             </div>
           </div>
           <div className="header-actions">
+            {gami && (
+              <span className="gami-chip" title={`Streak: ${gami.streak_dias} dia(s)`}>
+                ⭐ {gami.pontos} pts · nível {gami.nivel}
+              </span>
+            )}
+            {!usuarioId && (
+              <Link className="perfil-link" to="/cadastro">
+                Criar perfil para recomendações personalizadas
+              </Link>
+            )}
+            <Link className="btn-ghost" to={`/u/${unidadeId}/ranking`}>🏆 Ranking</Link>
             <Link className="btn-ghost" to="/">Trocar unidade</Link>
             <button className="btn-ghost" onClick={novaConversa} disabled={carregando}>Nova conversa</button>
           </div>

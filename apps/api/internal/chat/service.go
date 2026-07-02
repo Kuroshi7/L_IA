@@ -25,6 +25,7 @@ func New(st *store.Store, rpc *queue.ChatClient, timeout time.Duration) *Service
 type Input struct {
 	SessionID string
 	UnidadeID int64
+	UsuarioID *int64
 	Mensagem  string
 }
 
@@ -108,6 +109,12 @@ func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, e
 	if in.SessionID != "" {
 		sess, err := s.store.GetSessao(ctx, in.SessionID)
 		if err == nil {
+			// sessão anônima que passou a ter usuário identificado → vincula.
+			if sess.UsuarioID == nil && in.UsuarioID != nil {
+				if err := s.store.VincularSessaoUsuario(ctx, sess.ID, *in.UsuarioID); err == nil {
+					sess.UsuarioID = in.UsuarioID
+				}
+			}
 			return sess, nil
 		}
 		// sessão informada não existe → cria uma nova abaixo
@@ -115,7 +122,7 @@ func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, e
 	if in.UnidadeID == 0 {
 		return store.Sessao{}, fmt.Errorf("unidade_id é obrigatório para iniciar uma sessão")
 	}
-	return s.store.CriarSessao(ctx, in.UnidadeID, nil, "web")
+	return s.store.CriarSessao(ctx, in.UnidadeID, in.UsuarioID, "web")
 }
 
 func (s *Service) ResetarSessao(ctx context.Context, id string) error {

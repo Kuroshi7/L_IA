@@ -76,6 +76,7 @@ func (s *Server) handleSaudacao(w http.ResponseWriter, r *http.Request) {
 type chatBody struct {
 	UnidadeID int64  `json:"unidade_id"`
 	SessionID string `json:"session_id"`
+	UsuarioID *int64 `json:"usuario_id,omitempty"`
 	Mensagem  string `json:"mensagem"`
 }
 
@@ -93,6 +94,7 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 	out, err := s.chat.Responder(r.Context(), chat.Input{
 		SessionID: body.SessionID,
 		UnidadeID: body.UnidadeID,
+		UsuarioID: body.UsuarioID,
 		Mensagem:  body.Mensagem,
 	})
 	if err != nil {

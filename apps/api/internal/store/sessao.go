@@ -102,6 +102,14 @@ func (s *Store) AddMensagem(ctx context.Context, sessaoID, papel, conteudo strin
 	return tx.Commit(ctx)
 }
 
+// VincularSessaoUsuario associa um usuário a uma sessão anônima já existente.
+func (s *Store) VincularSessaoUsuario(ctx context.Context, sessaoID string, usuarioID int64) error {
+	_, err := s.pool.Exec(ctx,
+		`UPDATE sessoes SET usuario_id = $2, updated_at = now() WHERE id = $1`,
+		sessaoID, usuarioID)
+	return err
+}
+
 func (s *Store) ResetSessao(ctx context.Context, id string) error {
 	_, err := s.pool.Exec(ctx, `DELETE FROM mensagens WHERE sessao_id = $1`, id)
 	return err

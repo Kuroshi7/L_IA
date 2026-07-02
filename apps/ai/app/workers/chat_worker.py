@@ -51,6 +51,10 @@ def _on_message(ch, method, props, body):
 
 def main():
     setup_logging()
+    # aquece o modelo (Ollama) antes de aceitar mensagens — evita cold start no 1º usuário
+    from app.agent.agent import prewarm
+    prewarm()
+
     params = pika.URLParameters(config.RABBITMQ_URL)
     conn = pika.BlockingConnection(params)
     ch = conn.channel()

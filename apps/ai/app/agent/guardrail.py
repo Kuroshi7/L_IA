@@ -24,6 +24,10 @@ _KEYWORDS_BASE = {
     "valor", "valores", "info", "informacao", "informacoes", "detalhe", "detalhes",
     "porcao", "porção", "tamanho", "quantidade", "qual", "qualquer",
     "diferenca", "diferença", "comparar", "comparacao", "comparação",
+    # Gamificação e desperdício (registro de consumo/sobras):
+    "ponto", "pontos", "pontuacao", "pontuação", "nivel", "nível", "ranking",
+    "streak", "meta", "sobrou", "sobra", "sobras", "deixei", "desperdicio",
+    "registrar", "registro", "prato limpo",
 }
 
 _CONTINUACAO = {"ok", "obrigado", "obrigada", "valeu", "sim", "nao", "claro",

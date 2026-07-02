@@ -1,13 +1,19 @@
 import type {
+  AdminUsuario,
   Alimento,
   AlimentoInput,
   CardapioDia,
   CardapioItemInput,
   CardapioSemana,
   ChatResponse,
+  DesperdicioRelatorio,
+  GamificacaoResumo,
   NutriAlimento,
   Prato,
+  RankingEntry,
   Unidade,
+  UsuarioComPerfil,
+  UsuarioInput,
 } from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -37,11 +43,17 @@ export async function enviarMensagem(
   unidadeId: number,
   sessionId: string | null,
   mensagem: string,
+  usuarioId?: number | null,
 ): Promise<ChatResponse> {
   const r = await fetch(`${BASE_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ unidade_id: unidadeId, session_id: sessionId ?? "", mensagem }),
+    body: JSON.stringify({
+      unidade_id: unidadeId,
+      session_id: sessionId ?? "",
+      mensagem,
+      ...(usuarioId ? { usuario_id: usuarioId } : {}),
+    }),
   });
   if (!r.ok) throw new Error((await r.text()) || "Erro ao enviar mensagem");
   return r.json() as Promise<ChatResponse>;
@@ -125,3 +137,110 @@ export const adminCopiarSemana = (unidadeId: number, origem: string, destino: st
     method: "POST",
     body: JSON.stringify({ origem, destino }),
   });
+
+// ============================ Erros com status ============================
+
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+// ============================ Usuário / perfil ============================
+
+const USUARIO_ID_KEY = "menuai_usuario_id";
+
+export function getUsuarioIdSalvo(): number | null {
+  const raw = localStorage.getItem(USUARIO_ID_KEY);
+  const id = Number(raw);
+  return raw && Number.isFinite(id) && id > 0 ? id : null;
+}
+
+export function setUsuarioIdSalvo(id: number): void {
+  localStorage.setItem(USUARIO_ID_KEY, String(id));
+}
+
+export function limparUsuarioIdSalvo(): void {
+  localStorage.removeItem(USUARIO_ID_KEY);
+}
+
+async function sendJSON<T>(path: string, method: "POST" | "PUT", body: unknown): Promise<T> {
+  const r = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new ApiError((await r.text()) || `${method} ${path} falhou (${r.status})`, r.status);
+  return r.json() as Promise<T>;
+}
+
+export const criarUsuario = (body: UsuarioInput) =>
+  sendJSON<UsuarioComPerfil>("/usuarios", "POST", body);
+
+export const getUsuario = (id: number) => getJSON<UsuarioComPerfil>(`/usuarios/${id}`);
+
+export const atualizarUsuario = (id: number, body: UsuarioInput) =>
+  sendJSON<UsuarioComPerfil>(`/usuarios/${id}`, "PUT", body);
+
+export const getGamificacao = (usuarioId: number) =>
+  getJSON<GamificacaoResumo>(`/usuarios/${usuarioId}/gamificacao`);
+
+export const getRanking = (unidadeId: number, limit = 10) =>
+  getJSON<{ ranking: RankingEntry[] | null }>(`/unidades/${unidadeId}/ranking?limit=${limit}`).then(
+    (d) => d.ranking ?? [],
+  );
+
+// ============================ Admin: unidades / usuários / desperdício ============================
+
+// Igual ao adminFetch, mas propaga o status HTTP (ex.: 409 de slug duplicado).
+async function adminRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": getAdminToken(),
+      ...(init?.headers || {}),
+    },
+  });
+  if (r.status === 401) throw new ApiError("Não autorizado — verifique o token de admin.", 401);
+  if (!r.ok) {
+    throw new ApiError(
+      (await r.text()) || `${init?.method ?? "GET"} ${path} falhou (${r.status})`,
+      r.status,
+    );
+  }
+  if (r.status === 204) return undefined as T;
+  return r.json() as Promise<T>;
+}
+
+export const adminListarUnidades = () =>
+  adminRequest<{ unidades: Unidade[] | null }>("/admin/unidades").then((d) => d.unidades ?? []);
+
+export const adminCriarUnidade = (body: { nome: string; slug: string }) =>
+  adminRequest<Unidade>("/admin/unidades", { method: "POST", body: JSON.stringify(body) });
+
+export const adminAtualizarUnidade = (id: number, body: { nome: string; slug: string }) =>
+  adminRequest<Unidade>(`/admin/unidades/${id}`, { method: "PUT", body: JSON.stringify(body) });
+
+export const adminSetUnidadeAtiva = (id: number, ativo: boolean) =>
+  adminRequest<{ id: number; ativo: boolean }>(`/admin/unidades/${id}/ativo`, {
+    method: "PATCH",
+    body: JSON.stringify({ ativo }),
+  });
+
+export const adminListarUsuarios = (unidadeId?: number) =>
+  adminRequest<{ usuarios: AdminUsuario[] | null }>(
+    `/admin/usuarios${unidadeId ? `?unidade_id=${unidadeId}` : ""}`,
+  ).then((d) => d.usuarios ?? []);
+
+export const adminGetDesperdicio = (unidadeId: number, de?: string, ate?: string) => {
+  const qs = new URLSearchParams();
+  if (de) qs.set("de", de);
+  if (ate) qs.set("ate", ate);
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  return adminRequest<DesperdicioRelatorio>(`/admin/unidades/${unidadeId}/desperdicio${suffix}`);
+};

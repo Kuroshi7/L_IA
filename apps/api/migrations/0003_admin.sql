@@ -10,12 +10,19 @@ ALTER TABLE alimentos ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL D
 -- gerando duplicatas incoerentes com o modelo "catálogo da unidade + cardápio referencia".
 -- Mantém o menor id por (unidade_id, nome), repõe as referências dos cardápios e remove o resto.
 
--- 1. remove itens de cardápio que colidiriam após o repoint (mesmo dia, mesmo alimento canônico).
-DELETE FROM cardapio_itens ci
- USING (SELECT id, MIN(id) OVER (PARTITION BY unidade_id, nome) AS keep_id FROM alimentos) r
- WHERE ci.alimento_id = r.id AND r.id <> r.keep_id
-   AND EXISTS (SELECT 1 FROM cardapio_itens ci2
-                WHERE ci2.cardapio_dia_id = ci.cardapio_dia_id AND ci2.alimento_id = r.keep_id);
+-- 1. remove itens que colidiriam após o repoint: para cada (dia, alimento canônico),
+--    mantém só o item de menor id — cobre também o caso de DUAS duplicatas do mesmo
+--    alimento no mesmo dia sem o canônico presente.
+WITH mapa AS (
+  SELECT id, MIN(id) OVER (PARTITION BY unidade_id, nome) AS keep_id FROM alimentos
+),
+ranqueado AS (
+  SELECT ci.id AS ci_id,
+         ROW_NUMBER() OVER (PARTITION BY ci.cardapio_dia_id, m.keep_id ORDER BY ci.id) AS rn
+    FROM cardapio_itens ci
+    JOIN mapa m ON m.id = ci.alimento_id
+)
+DELETE FROM cardapio_itens WHERE id IN (SELECT ci_id FROM ranqueado WHERE rn > 1);
 
 -- 2. aponta os itens restantes para o alimento canônico.
 UPDATE cardapio_itens ci

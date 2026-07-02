@@ -45,3 +45,60 @@ def calcular_consumo(itens: list[dict]) -> dict:
     r = _client.post("/internal/consumo/calcular", json={"itens": itens})
     r.raise_for_status()
     return r.json()
+
+
+def registrar_consumo(
+    unidade_id: int,
+    itens: list[dict],
+    usuario_id: int | None = None,
+    sobras: list[dict] | None = None,
+) -> dict:
+    """Registra o consumo (e sobras) de uma refeição: calcula, persiste, pontua o
+    usuário (gamificação) e alimenta o agregado de desperdício do admin."""
+    body: dict = {"unidade_id": unidade_id, "itens": itens}
+    if usuario_id:
+        body["usuario_id"] = usuario_id
+    if sobras:
+        body["sobras"] = sobras
+    r = _client.post("/internal/consumo/registrar", json=body)
+    r.raise_for_status()
+    return r.json()
+
+
+def get_cardapio_semana(unidade_id: int, inicio: str = "") -> dict:
+    """Grade seg–sex do cardápio: {unidade_id, inicio, dias: [{data, dia_semana, pratos}]}.
+    `inicio` = segunda-feira ISO; vazio usa a semana atual."""
+    params = {"inicio": inicio} if inicio else None
+    r = _client.get(f"/internal/cardapio-semana/{unidade_id}", params=params)
+    r.raise_for_status()
+    return r.json()
+
+
+def get_gamificacao(usuario_id: int) -> dict:
+    """Estado de gamificação: {gamificacao: {pontos, nivel, streak_dias}, eventos: [...]}"""
+    r = _client.get(f"/internal/usuario/{usuario_id}/gamificacao")
+    r.raise_for_status()
+    return r.json()
+
+
+def get_unidades() -> list[dict]:
+    """Unidades ativas (rota pública servida pelo mesmo host): [{id, nome, slug}]."""
+    r = _client.get("/unidades")
+    r.raise_for_status()
+    return r.json().get("unidades") or []
+
+
+def get_usuario_por_telegram(chat_id: int) -> dict | None:
+    """Usuário vinculado a um chat do Telegram, ou None se não houver vínculo."""
+    r = _client.get(f"/internal/usuario/por-telegram/{chat_id}")
+    if r.status_code == 404:
+        return None
+    r.raise_for_status()
+    return r.json()
+
+
+def vincular_telegram(usuario_id: int, chat_id: int) -> dict:
+    """Associa um chat do Telegram a um usuário cadastrado."""
+    r = _client.post(f"/internal/usuario/{usuario_id}/vincular-telegram", json={"chat_id": chat_id})
+    r.raise_for_status()
+    return r.json()
