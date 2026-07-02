@@ -3,7 +3,7 @@
 > **Referência permanente do projeto.** Toda mudança de código deve consultar e respeitar este documento.
 > Capturado a partir das reuniões de definição do produto. Atualize aqui sempre que uma regra mudar.
 
-Última atualização: 2026-05-28
+Última atualização: 2026-07-02
 
 ---
 
@@ -91,6 +91,36 @@ desperdício a partir do consumo registrado.
   perto o resultado (calorias/nutrientes) ficou da meta dele, não a aderência item a item.
 
 ---
+
+## 6.1 Fórmula de pontuação (implementada)
+
+Registrar consumo pelo chat pontua assim (`internal/domain/gamificacao.go`):
+
+- **Meta da refeição** = 35% da meta calórica diária (almoço concentra 30–40% do VET; usamos 35%).
+- **Pontos base** = `100 × max(0, 1 − desvio/0.5)` onde `desvio = |kcal consumida − meta da refeição| / meta`.
+  Meta exata → 100; desvio ≥50% → 0; linear entre os extremos.
+- **Bônus prato limpo** = +20 quando o resto reportado ≤ 10% do servido (espelha o critério
+  de aceitação do FNDE/PNAE: consumo ≥ 90%).
+- **Bônus streak** = +5 por dia consecutivo registrando (a partir do 2º), máx. +25.
+- Perfil sem meta calórica → 10 pontos fixos por registro (engajamento).
+- **Nível** = `1 + pontos/500`.
+
+## 6.2 Desperdício (implementado)
+
+Metodologia de UAN (Unidade de Alimentação e Nutrição) adaptada ao auto-relato digital —
+não pesamos resto fisicamente; o usuário informa o que comeu e, opcionalmente, o que
+**deixou no prato** (a Lia pergunta uma vez ao registrar):
+
+- **Índice de resto-ingesta (proxy)** = `resto / (consumido + resto)`, em gramas,
+  agregado por unidade/dia. Análogo digital de `resto ÷ distribuído` da literatura.
+- **Faixas de referência** (Teixeira 1990 / Vaz 2006): **≤3% ótimo · ≤10% bom ·
+  ≤15% atenção · >15% crítico**. Resto per capita aceitável: 15–45 g.
+- **Pipeline**: registro de consumo → evento `consumo.registrado` (outbox, mesma
+  transação) → RabbitMQ → worker Go agrega em `desperdicio_diario` (idempotente via inbox)
+  → dashboard admin (`GET /admin/unidades/{id}/desperdicio`), com série diária e
+  top de alimentos deixados no prato.
+- Ressalva: auto-relato é indicador de **tendência/engajamento**, não medida absoluta;
+  agregação semanal reduz o ruído.
 
 ## 7. Cálculos de referência
 

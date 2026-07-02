@@ -18,8 +18,10 @@ import (
 const consumerName = "go-worker"
 
 // Worker de efeitos colaterais: consome eventos de domínio (menuai.events) de
-// forma idempotente. Hoje apenas registra; aqui entrarão scoring de gamificação
-// e agregação de desperdício nas próximas fases.
+// forma idempotente (inbox). Responsável pelo ETL de desperdício: cada
+// `consumo.registrado` incrementa o agregado diário lido pelo dashboard admin.
+// A pontuação de gamificação é síncrona (o usuário precisa do feedback imediato);
+// aqui ficam só os efeitos que podem ser eventualmente consistentes.
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	cfg := config.Load()
@@ -95,8 +97,18 @@ func handle(ctx context.Context, st *store.Store, log *slog.Logger, d amqp.Deliv
 		return
 	}
 
-	// Processamento do evento (placeholder na Fase 1).
-	log.Info("evento recebido", "type", d.Type, "msg_id", d.MessageId, "payload", string(d.Body))
+	switch d.Type {
+	case "consumo.registrado":
+		if err := st.AplicarConsumoNoAgregado(ctx, d.Body); err != nil {
+			log.Error("agregar desperdício", "err", err, "msg_id", d.MessageId)
+			_ = d.Nack(false, true)
+			return
+		}
+		log.Info("desperdício agregado", "msg_id", d.MessageId)
+	default:
+		// eventos sem efeito colateral (ex.: mensagem.registrada) — só auditoria.
+		log.Info("evento recebido", "type", d.Type, "msg_id", d.MessageId)
+	}
 
 	if err := st.MarkProcessed(ctx, d.MessageId, consumerName); err != nil {
 		log.Error("marcar processado", "err", err)

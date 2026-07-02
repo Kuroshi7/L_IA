@@ -2,7 +2,9 @@
 
 Assistente de IA para refeitório self-service. O cliente escolhe uma **unidade**, conversa com a **Lia**,
 vê o cardápio do dia completo e recebe recomendações personalizadas (restrições, preferências e meta calórica),
-com porções em medidas caseiras.
+com porções em medidas caseiras. Depois da refeição, registra o que comeu (e o que sobrou) em linguagem
+natural e **pontua** pela proximidade da meta (gamificação); o admin acompanha o **desperdício** por
+unidade (índice de resto-ingesta) além de gerir unidades, alimentos, cardápios e usuários.
 
 > O MVP validado está preservado na tag **`mvp-v1`**. Esta branch (`produto-v2`) é a reestruturação para produto.
 > Regras de negócio: [`docs/regras-de-negocio.md`](docs/regras-de-negocio.md).
@@ -11,10 +13,13 @@ com porções em medidas caseiras.
 
 ```
 apps/
-  api/   Go   — fonte da verdade (Postgres), API pública+interna, sessões, idempotência, outbox/relay
-  ai/    Py   — agente LLM (LangChain), tools que chamam a API Go, RAG (pgvector), worker RabbitMQ
-  web/   TS   — Vite + React: seletor de unidade → chat por unidade; scaffolds de cadastro/admin
-packages/contracts/   contratos compartilhados (futuro)
+  api/   Go   — fonte da verdade (Postgres), API pública+interna+admin, sessões, idempotência,
+                outbox/relay, gamificação (pontuação síncrona) e ETL de desperdício (worker)
+  ai/    Py   — agente LLM (LangChain), tools que chamam a API Go, RAG (pgvector),
+                worker RabbitMQ, canal Telegram (webhook + polling dev)
+  web/   TS   — Vite + React: seletor de unidade → chat; cadastro/perfil; ranking;
+                admin (unidades, alimentos, cardápio, usuários, desperdício)
+packages/contracts/   openapi.yaml — contrato da API pública+admin
 deploy/docker-compose.yml   Postgres+pgvector, RabbitMQ, api, workers, ai, web, ollama
 docs/regras-de-negocio.md   referência permanente das regras
 ```
@@ -55,6 +60,22 @@ Escalar concorrência de IA: `docker compose up -d --scale ai-worker=3`.
 
 ## Endpoints principais (API Go)
 
-- `GET /unidades` · `GET /unidades/{id}/cardapio?data=hoje`
-- `POST /chat` (`{unidade_id, session_id?, mensagem}`; header `Idempotency-Key` opcional) · `DELETE /chat/{sessionId}`
-- Internos (consumidos pela IA): `GET /internal/cardapio/{unidade}/{data}`, `GET /internal/usuario/{id}/perfil`, `GET /internal/medidas-caseiras`
+Contrato completo em [`packages/contracts/openapi.yaml`](packages/contracts/openapi.yaml).
+
+- `GET /unidades` · `GET /unidades/{id}/cardapio?data=hoje` · `GET /unidades/{id}/ranking`
+- `POST /chat` (`{unidade_id, session_id?, usuario_id?, mensagem}`; header `Idempotency-Key` opcional) · `DELETE /chat/{sessionId}`
+- Usuários: `POST/GET/PUT /usuarios[/{id}]` (devolve IMC + meta calórica) · `GET /usuarios/{id}/gamificacao`
+- Admin (`X-Admin-Token`): unidades (CRUD + ativo), alimentos, cardápio-semana, `GET /admin/usuarios`,
+  `GET /admin/unidades/{id}/desperdicio?de=&ate=` (índice de resto-ingesta, série diária, top alimentos)
+- Internos (consumidos pela IA): cardápio dia/semana, perfil, gamificação, medidas caseiras,
+  `POST /internal/consumo/registrar` (persiste, pontua e alimenta o desperdício), vínculo Telegram
+
+## Telegram
+
+O canal Telegram roda no serviço `ai-api` (`POST /webhook/telegram`). Configure `TELEGRAM_BOT_TOKEN`
+(e opcionalmente `TELEGRAM_WEBHOOK_SECRET`) no `.env`:
+
+- **Produção (webhook):** `python -m app.channels.telegram_polling set-webhook https://SEU_HOST/webhook/telegram`
+- **Dev local (sem URL pública):** `python -m app.channels.telegram_polling`
+- Comandos do bot: `/start` e `/unidade` (seletor de unidade via botões), `/vincular <id>` (conecta o
+  perfil criado no site → personalização + pontos), `/reset`, `/ajuda`.

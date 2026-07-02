@@ -36,6 +36,8 @@ export default function Admin() {
             </div>
           </div>
           <div className="header-actions">
+            <Link className="btn-ghost" to="/admin/unidades">Unidades</Link>
+            <Link className="btn-ghost" to="/admin/usuarios">Usuários</Link>
             <Link className="btn-ghost" to="/">Início</Link>
           </div>
         </header>
@@ -73,6 +75,9 @@ export default function Admin() {
                   </button>
                   <button className="btn-ghost btn-mini" onClick={() => navigate(`/admin/u/${u.id}/alimentos`)}>
                     Alimentos
+                  </button>
+                  <button className="btn-ghost btn-mini" onClick={() => navigate(`/admin/u/${u.id}/desperdicio`)}>
+                    Desperdício
                   </button>
                 </div>
               </div>

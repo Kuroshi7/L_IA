@@ -1,10 +1,11 @@
 openapi: 3.0.3
 info:
-  title: Menu-AI — API Go (pública)
-  version: "2.0.0"
+  title: Menu-AI — API Go
+  version: "2.1.0"
   description: >
-    Contrato da API pública consumida pelo front. Fonte da verdade do domínio.
-    Endpoints internos (/internal/*) são consumidos pelo serviço de IA em rede privada.
+    Contrato da API consumida pelo front (pública e admin). Fonte da verdade do domínio.
+    Endpoints internos (/internal/*) são consumidos pelo serviço de IA em rede privada
+    e não fazem parte deste contrato.
 servers:
   - url: http://localhost:8080
 paths:
@@ -12,6 +13,8 @@ paths:
     get:
       summary: Healthcheck
       responses: { "200": { description: ok } }
+
+  # ---------------------------------------------------------------- público
   /unidades:
     get:
       summary: Lista unidades ativas (para o seletor do front)
@@ -38,6 +41,27 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CardapioDia" }
+  /unidades/{unidadeId}/ranking:
+    get:
+      summary: Ranking de pontos (gamificação) da unidade
+      parameters:
+        - { name: unidadeId, in: path, required: true, schema: { type: integer } }
+        - { name: limit, in: query, required: false, schema: { type: integer, default: 10 } }
+      responses:
+        "200":
+          description: top usuários por pontos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ranking:
+                    type: array
+                    items: { $ref: "#/components/schemas/RankingEntry" }
+  /chat/saudacao:
+    get:
+      summary: Mensagem inicial exibida pelo front
+      responses: { "200": { description: "{mensagem}" } }
   /chat:
     post:
       summary: Envia mensagem ao agente (RPC via fila)
@@ -53,6 +77,7 @@ paths:
               properties:
                 unidade_id: { type: integer }
                 session_id: { type: string }
+                usuario_id: { type: integer, description: "usuário identificado — personaliza e pontua" }
                 mensagem: { type: string }
       responses:
         "200":
@@ -66,7 +91,191 @@ paths:
       parameters:
         - { name: sessionId, in: path, required: true, schema: { type: string } }
       responses: { "200": { description: ok } }
+
+  /usuarios:
+    post:
+      summary: Cadastro de usuário (cliente do refeitório)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UsuarioInput" }
+      responses:
+        "201":
+          description: usuário criado + perfil derivado (IMC, meta calórica)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UsuarioComPerfil" }
+  /usuarios/{usuarioId}:
+    get:
+      summary: Usuário + perfil derivado
+      parameters:
+        - { name: usuarioId, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: usuário + perfil
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UsuarioComPerfil" }
+    put:
+      summary: Atualiza o usuário
+      parameters:
+        - { name: usuarioId, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UsuarioInput" }
+      responses:
+        "200":
+          description: usuário atualizado + perfil
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UsuarioComPerfil" }
+  /usuarios/{usuarioId}/gamificacao:
+    get:
+      summary: Estado de gamificação (pontos, nível, streak) + eventos recentes
+      parameters:
+        - { name: usuarioId, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: gamificação
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gamificacao: { $ref: "#/components/schemas/Gamificacao" }
+                  eventos:
+                    type: array
+                    items: { $ref: "#/components/schemas/EventoPontuacao" }
+
+  # ------------------------------------------------------------------ admin
+  # Todas as rotas /admin/* exigem o header X-Admin-Token (quando configurado).
+  /admin/unidades:
+    get:
+      summary: Lista todas as unidades (inclui inativas)
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: "{unidades: Unidade[]}" } }
+    post:
+      summary: Cria unidade
+      security: [{ AdminToken: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, slug]
+              properties:
+                nome: { type: string }
+                slug: { type: string, pattern: "^[a-z0-9-]+$" }
+      responses:
+        "201": { description: unidade criada }
+        "409": { description: slug já em uso }
+  /admin/unidades/{unidadeId}:
+    put:
+      summary: Atualiza nome/slug da unidade
+      security: [{ AdminToken: [] }]
+      parameters:
+        - { name: unidadeId, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: unidade atualizada }
+        "409": { description: slug já em uso }
+  /admin/unidades/{unidadeId}/ativo:
+    patch:
+      summary: Ativa/desativa a unidade (soft-delete; preserva histórico)
+      security: [{ AdminToken: [] }]
+      parameters:
+        - { name: unidadeId, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { ativo: { type: boolean } }
+      responses: { "200": { description: ok } }
+  /admin/usuarios:
+    get:
+      summary: Lista usuários com resumo de gamificação
+      security: [{ AdminToken: [] }]
+      parameters:
+        - { name: unidade_id, in: query, required: false, schema: { type: integer } }
+      responses: { "200": { description: "{usuarios: [...]}" } }
+  /admin/unidades/{unidadeId}/desperdicio:
+    get:
+      summary: Dashboard de desperdício (índice de resto-ingesta proxy, série diária, top alimentos)
+      security: [{ AdminToken: [] }]
+      parameters:
+        - { name: unidadeId, in: path, required: true, schema: { type: integer } }
+        - { name: de, in: query, required: false, schema: { type: string, format: date } }
+        - { name: ate, in: query, required: false, schema: { type: string, format: date } }
+      responses:
+        "200":
+          description: resumo do período (default últimos 14 dias)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DesperdicioResumo" }
+  /admin/unidades/{unidadeId}/alimentos:
+    get:
+      summary: Catálogo de alimentos da unidade
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: "{alimentos: Alimento[]}" } }
+    post:
+      summary: Cria alimento (exige vínculo ou criação de referência nutricional)
+      security: [{ AdminToken: [] }]
+      responses: { "201": { description: alimento criado } }
+  /admin/alimentos/{alimentoId}:
+    put:
+      summary: Atualiza alimento
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: alimento atualizado } }
+  /admin/alimentos/{alimentoId}/ativo:
+    patch:
+      summary: Ativa/desativa alimento (soft-delete)
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: ok } }
+  /admin/nutri-alimentos:
+    get:
+      summary: Busca referência nutricional (medidas caseiras) por nome
+      security: [{ AdminToken: [] }]
+      parameters:
+        - { name: q, in: query, required: false, schema: { type: string } }
+      responses: { "200": { description: "{nutri_alimentos: [...]}" } }
+    post:
+      summary: Cria referência nutricional com porções
+      security: [{ AdminToken: [] }]
+      responses: { "201": { description: criada } }
+  /admin/nutri-alimentos/{nutriId}:
+    get:
+      summary: Referência nutricional com porções
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: detalhe } }
+  /admin/unidades/{unidadeId}/cardapio-semana:
+    get:
+      summary: Grade seg–sex do cardápio
+      security: [{ AdminToken: [] }]
+      parameters:
+        - { name: inicio, in: query, required: false, schema: { type: string, format: date }, description: "segunda-feira" }
+      responses: { "200": { description: semana } }
+  /admin/unidades/{unidadeId}/cardapio-dia/{data}/itens:
+    put:
+      summary: Define os itens do cardápio de um dia (máx. 1 proteína do dia)
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: dia atualizado } }
+  /admin/unidades/{unidadeId}/cardapio-semana/copiar:
+    post:
+      summary: Copia uma semana de cardápio para outra
+      security: [{ AdminToken: [] }]
+      responses: { "200": { description: semana copiada } }
+
 components:
+  securitySchemes:
+    AdminToken:
+      type: apiKey
+      in: header
+      name: X-Admin-Token
   schemas:
     Unidade:
       type: object
@@ -84,10 +293,108 @@ components:
         dia_semana: { type: string }
         pratos:
           type: array
-          items: { type: object }
+          items: { $ref: "#/components/schemas/Prato" }
+    Prato:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        categoria: { type: string }
+        ingredientes: { type: array, items: { type: string } }
+        alergenos: { type: array, items: { type: string } }
+        restricoes_atendidas: { type: array, items: { type: string } }
+        nao_indicado_para: { type: array, items: { type: string } }
+        calorias: { type: integer }
+        proteinas_g: { type: number }
+        carboidratos_g: { type: number }
+        gorduras_g: { type: number }
+        is_proteina_do_dia: { type: boolean }
     ChatResponse:
       type: object
       properties:
         session_id: { type: string }
         resposta: { type: string }
         fora_de_escopo: { type: boolean }
+    UsuarioInput:
+      type: object
+      required: [nome]
+      properties:
+        nome: { type: string }
+        unidade_id: { type: integer }
+        peso_kg: { type: number }
+        altura_cm: { type: number }
+        idade: { type: integer }
+        sexo: { type: string, enum: [M, F, O] }
+        nivel_atividade: { type: string, enum: [sedentario, leve, moderado, intenso, muito_intenso] }
+        restricoes: { type: array, items: { type: string } }
+        preferencias: { type: array, items: { type: string } }
+        alergias: { type: array, items: { type: string } }
+    UsuarioComPerfil:
+      type: object
+      properties:
+        usuario: { $ref: "#/components/schemas/UsuarioInput" }
+        perfil:
+          type: object
+          properties:
+            imc: { type: number }
+            classificacao_imc: { type: string }
+            meta_calorica_kcal: { type: integer }
+    Gamificacao:
+      type: object
+      properties:
+        usuario_id: { type: integer }
+        pontos: { type: integer }
+        nivel: { type: integer }
+        streak_dias: { type: integer }
+        ultimo_registro: { type: string, format: date }
+    EventoPontuacao:
+      type: object
+      properties:
+        id: { type: integer }
+        pontos: { type: integer }
+        motivo: { type: string }
+        created_at: { type: string, format: date-time }
+    RankingEntry:
+      type: object
+      properties:
+        usuario_id: { type: integer }
+        nome: { type: string }
+        pontos: { type: integer }
+        nivel: { type: integer }
+    DesperdicioResumo:
+      type: object
+      description: >
+        Índice de resto-ingesta proxy = resto / (consumido + resto), a partir do
+        consumo auto-reportado. Classificação (referências de UAN — Vaz 2006 /
+        Teixeira 1990): otimo ≤3%, bom ≤10%, atencao ≤15%, critico >15%.
+      properties:
+        unidade_id: { type: integer }
+        de: { type: string, format: date }
+        ate: { type: string, format: date }
+        refeicoes: { type: integer }
+        consumido_g: { type: number }
+        resto_g: { type: number }
+        resto_kcal: { type: number }
+        indice_resto_perc: { type: number }
+        classificacao: { type: string, enum: [otimo, bom, atencao, critico] }
+        resto_per_capita_g: { type: number }
+        dias:
+          type: array
+          items:
+            type: object
+            properties:
+              data: { type: string, format: date }
+              refeicoes: { type: integer }
+              consumido_g: { type: number }
+              consumido_kcal: { type: number }
+              resto_g: { type: number }
+              resto_kcal: { type: number }
+        top_desperdicados:
+          type: array
+          items:
+            type: object
+            properties:
+              alimento: { type: string }
+              ocorrencias: { type: integer }
+              resto_g: { type: number }
+              resto_kcal: { type: number }

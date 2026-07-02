@@ -89,7 +89,38 @@ func main() {
 		log.Error("seed nutrição", "err", err)
 		os.Exit(1)
 	}
+	if err := seedUsuarioDemo(ctx, pool, log); err != nil {
+		log.Error("seed usuário demo", "err", err)
+		os.Exit(1)
+	}
 	log.Info("seed concluído")
+}
+
+// seedUsuarioDemo cria um usuário de demonstração (perfil completo → IMC e meta
+// calórica calculáveis) para testar chat personalizado, consumo e gamificação.
+func seedUsuarioDemo(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger) error {
+	var existe bool
+	if err := pool.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM usuarios WHERE nome = 'Ana Demo')`).Scan(&existe); err != nil {
+		return err
+	}
+	if existe {
+		return nil
+	}
+	var unidadeID int64
+	if err := pool.QueryRow(ctx,
+		`SELECT id FROM unidades WHERE slug = 'central'`).Scan(&unidadeID); err != nil {
+		return err
+	}
+	_, err := pool.Exec(ctx,
+		`INSERT INTO usuarios (unidade_id, nome, peso_kg, altura_cm, idade, sexo, nivel_atividade,
+		                       restricoes, preferencias, alergias)
+		 VALUES ($1, 'Ana Demo', 65, 165, 30, 'F', 'moderado',
+		         '{"sem lactose"}', '{"frango","salada"}', '{}')`, unidadeID)
+	if err == nil {
+		log.Info("usuário demo criado", "nome", "Ana Demo")
+	}
+	return err
 }
 
 // ---------------------------------------------------------------------------

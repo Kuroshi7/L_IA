@@ -516,3 +516,108 @@ body {
   .form-grid { grid-template-columns: repeat(2, 1fr); }
   .field-2, .field-3 { grid-column: span 2; }
 }
+
+/* ============ STATUS (classificação) ============ */
+:root {
+  --st-otimo: #2f6b4a;      /* verde */
+  --st-bom: #5c9a6f;        /* verde-claro */
+  --st-atencao: #b3762a;    /* âmbar */
+  --st-critico: #c0533a;    /* vermelho */
+  --danger: #c0533a;
+}
+
+/* ============ PERFIL / GAMIFICAÇÃO ============ */
+.gami-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-soft); border: 1px solid rgba(200, 125, 58, 0.35);
+  color: #8a5a24; padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.perfil-link {
+  font-size: 11.5px; color: var(--text-muted); text-decoration: none;
+  border-bottom: 1px dotted var(--border-strong); padding-bottom: 1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.perfil-link:hover { color: var(--primary-dark); border-color: var(--primary); }
+
+.perfil-result {
+  background: var(--primary-soft);
+  border: 1px solid rgba(47, 107, 74, 0.25);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.perfil-result a { color: var(--primary-dark); font-weight: 600; }
+
+/* ============ STAT TILES ============ */
+.stat-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat-tile {
+  display: flex; flex-direction: column; gap: 2px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 14px 16px; box-shadow: var(--shadow-sm);
+}
+.stat-label { font-size: 11.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
+.stat-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.stat-hint { font-size: 12px; color: var(--text-soft); }
+.tile-otimo   { border-left: 4px solid var(--st-otimo); }
+.tile-bom     { border-left: 4px solid var(--st-bom); }
+.tile-atencao { border-left: 4px solid var(--st-atencao); }
+.tile-critico { border-left: 4px solid var(--st-critico); }
+.tile-otimo .stat-hint,   .tile-otimo .stat-value   { color: var(--st-otimo); }
+.tile-bom .stat-hint,     .tile-bom .stat-value     { color: var(--st-bom); }
+.tile-atencao .stat-hint, .tile-atencao .stat-value { color: var(--st-atencao); }
+.tile-critico .stat-hint, .tile-critico .stat-value { color: var(--st-critico); }
+.tile-otimo .stat-hint, .tile-bom .stat-hint, .tile-atencao .stat-hint, .tile-critico .stat-hint { font-weight: 600; }
+
+/* ============ RANKING ============ */
+.rank-list { display: flex; flex-direction: column; gap: 8px; }
+.rank-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.rank-top { background: var(--surface-soft); }
+.rank-me { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(47, 107, 74, 0.1); }
+.rank-pos { width: 36px; text-align: center; font-size: 17px; font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
+.rank-top .rank-pos { font-size: 20px; }
+.rank-nome { flex: 1; font-weight: 600; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-voce { font-weight: 400; color: var(--text-muted); font-size: 12px; }
+.rank-nivel { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.rank-pontos { font-weight: 600; color: var(--primary-dark); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ============ TABELAS ADMIN ============ */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: #fff; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.admin-table th {
+  text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-muted); background: var(--surface-soft);
+  padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.admin-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover td { background: var(--surface-soft); }
+.celula-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th.celula-num { text-align: right; }
+.celula-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--text-muted); }
+.celula-acoes { text-align: right; white-space: nowrap; }
+.celula-acoes .btn-mini { margin-left: 6px; }
+.linha-inativa td { opacity: 0.55; }
+
+.status-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.status-badge-on { background: var(--primary-soft); color: var(--primary-dark); }
+.status-badge-off { background: rgba(0, 0, 0, 0.06); color: var(--text-muted); }
+
+.field-error { font-size: 11.5px; color: var(--danger); }
+
+/* ============ GRÁFICO DE BARRAS (desperdício) ============ */
+.chart-bars { display: flex; align-items: flex-end; gap: 2px; padding-top: 4px; }
+.chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; cursor: default; }
+.chart-track { height: 150px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
+.chart-bar { width: 100%; max-width: 24px; background: var(--primary); border-radius: 4px 4px 0 0; }
+.chart-col:hover .chart-bar { background: var(--primary-dark); }
+.chart-value { font-size: 11px; font-weight: 600; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.chart-label { font-size: 10px; color: var(--text-soft); white-space: nowrap; height: 13px; overflow: visible; }
