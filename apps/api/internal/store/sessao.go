@@ -68,6 +68,29 @@ func (s *Store) ListMensagens(ctx context.Context, sessaoID string, limit int) (
 	return out, rows.Err()
 }
 
+// PrimeiraMensagemDoDia diz se esta é a primeira mensagem do usuário HOJE nesta
+// unidade (regra contratual: a primeira recomendação do dia apresenta o cardápio
+// completo). Usuário identificado → olha todas as sessões dele na unidade; sessão
+// anônima → olha só a própria sessão. Dia calculado no fuso do refeitório.
+func (s *Store) PrimeiraMensagemDoDia(ctx context.Context, unidadeID int64, usuarioID *int64, sessaoID string) (bool, error) {
+	const tz = "America/Sao_Paulo"
+	var existe bool
+	err := s.pool.QueryRow(ctx,
+		`SELECT EXISTS (
+		     SELECT 1
+		       FROM mensagens m
+		       JOIN sessoes se ON se.id = m.sessao_id
+		      WHERE m.papel = 'user'
+		        AND (m.created_at AT TIME ZONE $4)::date = (now() AT TIME ZONE $4)::date
+		        AND se.unidade_id = $1
+		        AND CASE WHEN $2::bigint IS NOT NULL THEN se.usuario_id = $2
+		                 ELSE m.sessao_id = $3::uuid END
+		 )`,
+		unidadeID, usuarioID, sessaoID, tz,
+	).Scan(&existe)
+	return !existe, err
+}
+
 // AddMensagem persiste uma mensagem e, na MESMA transação, grava um evento no
 // outbox (publicação confiável). Mantém atomicidade entre estado e evento.
 func (s *Store) AddMensagem(ctx context.Context, sessaoID, papel, conteudo string) error {

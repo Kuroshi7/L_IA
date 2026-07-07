@@ -106,6 +106,26 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UsuarioComPerfil" }
+  /usuarios/login:
+    post:
+      summary: Login por telefone + PIN (recupera o perfil em outro aparelho)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [telefone, pin]
+              properties:
+                telefone: { type: string, description: "DDD + número; formatação livre" }
+                pin: { type: string, description: "4–6 dígitos" }
+      responses:
+        "200":
+          description: usuário + perfil derivado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UsuarioComPerfil" }
+        "401": { description: telefone ou PIN incorretos }
   /usuarios/{usuarioId}:
     get:
       summary: Usuário + perfil derivado
@@ -254,7 +274,7 @@ paths:
       responses: { "200": { description: detalhe } }
   /admin/unidades/{unidadeId}/cardapio-semana:
     get:
-      summary: Grade seg–sex do cardápio
+      summary: Grade seg–dom (7 dias) do cardápio
       security: [{ AdminToken: [] }]
       parameters:
         - { name: inicio, in: query, required: false, schema: { type: string, format: date }, description: "segunda-feira" }
@@ -329,6 +349,8 @@ components:
         restricoes: { type: array, items: { type: string } }
         preferencias: { type: array, items: { type: string } }
         alergias: { type: array, items: { type: string } }
+        telefone: { type: string, description: "opcional; com PIN habilita login (409 se já usado)" }
+        pin: { type: string, description: "4–6 dígitos; obrigatório junto do telefone no cadastro; nunca retornado" }
     UsuarioComPerfil:
       type: object
       properties:

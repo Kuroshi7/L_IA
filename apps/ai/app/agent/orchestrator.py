@@ -30,12 +30,21 @@ def _to_messages(historico: list[dict]) -> list:
     return msgs
 
 
+NOTA_PRIMEIRA_DO_DIA = (
+    "[NOTA DO SISTEMA — regra contratual: esta é a PRIMEIRA conversa do usuário hoje. "
+    "Se ele pedir o cardápio, uma recomendação ou qualquer escolha de prato, você DEVE "
+    "apresentar o cardápio COMPLETO do dia (chame listar_pratos_do_dia e liste todos os "
+    "pratos) ANTES da recomendação, mesmo que ele não tenha pedido o cardápio.]"
+)
+
+
 def processar_mensagem(
     session_id: str,
     mensagem: str,
     unidade_id: int,
     usuario_id: int | None = None,
     historico: list[dict] | None = None,
+    primeira_do_dia: bool = False,
 ) -> dict:
     t0 = time.perf_counter()
     historico = historico or []
@@ -49,7 +58,12 @@ def processar_mensagem(
         log.info("REQ END | fora de escopo")
         return {"resposta": RESPOSTA_FORA_DE_ESCOPO, "fora_de_escopo": True}
 
-    messages = _to_messages(historico) + [HumanMessage(content=mensagem)]
+    conteudo = mensagem
+    if primeira_do_dia:
+        # A nota vai junto da mensagem só nesta invocação; o Go persiste a mensagem
+        # crua, então o histórico das próximas rodadas não carrega a nota.
+        conteudo = f"{mensagem}\n\n{NOTA_PRIMEIRA_DO_DIA}"
+    messages = _to_messages(historico) + [HumanMessage(content=conteudo)]
     callback = LiaTimingCallback(session_id=session_id)
 
     token = set_context(RequestContext(unidade_id=unidade_id, usuario_id=usuario_id))

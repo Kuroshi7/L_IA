@@ -30,6 +30,7 @@ def _on_message(ch, method, props, body):
             unidade_id=int(req.get("unidade_id") or 0),
             usuario_id=req.get("usuario_id"),
             historico=req.get("historico"),
+            primeira_do_dia=bool(req.get("primeira_do_dia")),
         )
         resp = {"resposta": result["resposta"], "fora_de_escopo": result["fora_de_escopo"]}
     except Exception as e:  # nunca derruba o worker; devolve erro estruturado

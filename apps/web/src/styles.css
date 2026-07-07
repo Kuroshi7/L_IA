@@ -495,7 +495,11 @@ body {
 /* grade semanal */
 .semana-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .toolbar-spacer { flex: 1; }
-.semana-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.toolbar-date { width: auto; }
+.semana-toolbar .field-label { margin: 0; }
+.header-actions .select-input { width: auto; max-width: 190px; }
+/* 7 dias (seg–dom): colunas um pouco mais estreitas, com wrap em telas menores */
+.semana-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; }
 .dia-col { display: flex; flex-direction: column; gap: 8px; background: var(--surface-soft); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; }
 .dia-head { display: flex; flex-direction: column; }
 .dia-head strong { font-size: 13.5px; color: var(--text); }
@@ -533,6 +537,37 @@ body {
   color: #8a5a24; padding: 6px 12px; border-radius: 999px;
   font-size: 12px; font-weight: 600; white-space: nowrap;
 }
+/* Toast de pontos ganhos no chat (some sozinho após ~6s) */
+.gami-toast {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(200, 125, 58, 0.35);
+  color: #8a5a24;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  animation: gami-toast-in 0.25s ease;
+}
+.gami-toast-nivel {
+  background: var(--primary-soft);
+  border-color: rgba(47, 107, 74, 0.35);
+  color: var(--primary-dark);
+}
+.gami-toast-icon { font-size: 14px; }
+@keyframes gami-toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .perfil-link {
   font-size: 11.5px; color: var(--text-muted); text-decoration: none;
   border-bottom: 1px dotted var(--border-strong); padding-bottom: 1px;

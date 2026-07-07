@@ -39,6 +39,7 @@ func (s *Server) Router() http.Handler {
 
 	// Usuários (cadastro/perfil) e gamificação.
 	r.Post("/usuarios", s.handleCreateUsuario)
+	r.Post("/usuarios/login", s.handleLoginUsuario)
 	r.Get("/usuarios/{usuarioID}", s.handleGetUsuario)
 	r.Put("/usuarios/{usuarioID}", s.handleUpdateUsuario)
 	r.Get("/usuarios/{usuarioID}/gamificacao", s.handleGetGamificacao)

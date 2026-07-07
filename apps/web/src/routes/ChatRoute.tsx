@@ -87,15 +87,51 @@ export default function ChatRoute() {
   const [erroConexao, setErroConexao] = useState(false);
   const [usuarioId] = useState<number | null>(() => getUsuarioIdSalvo());
   const [gami, setGami] = useState<Gamificacao | null>(null);
+  const [gamiToast, setGamiToast] = useState<{ texto: string; nivelUp: boolean } | null>(null);
   const fimRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const gamiAnteriorRef = useRef<Gamificacao | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
-  const atualizarGamificacao = useCallback(() => {
-    if (!usuarioId) return;
-    getGamificacao(usuarioId)
-      .then((d) => setGami(d.gamificacao))
-      .catch(() => undefined);
-  }, [usuarioId]);
+  useEffect(
+    () => () => {
+      if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+    },
+    [],
+  );
+
+  // Busca a gamificação; com notificar=true, compara com os pontos anteriores e
+  // mostra um toast temporário quando o usuário ganhou pontos com a mensagem.
+  const atualizarGamificacao = useCallback(
+    (notificar = false) => {
+      if (!usuarioId) return;
+      getGamificacao(usuarioId)
+        .then((d) => {
+          const anterior = gamiAnteriorRef.current;
+          gamiAnteriorRef.current = d.gamificacao;
+          setGami(d.gamificacao);
+
+          if (!notificar || !anterior || d.gamificacao.pontos <= anterior.pontos) return;
+
+          const delta = d.gamificacao.pontos - anterior.pontos;
+          const nivelUp = d.gamificacao.nivel > anterior.nivel;
+          const partes = [`+${delta} pts`];
+          const ev = d.eventos?.[0];
+          if (ev?.bonus_prato_limpo) partes.push(`prato limpo +${ev.bonus_prato_limpo}`);
+          if (ev?.bonus_streak) partes.push(`streak +${ev.bonus_streak}`);
+          partes.push(`nível ${d.gamificacao.nivel}`);
+          const texto = nivelUp
+            ? `Subiu para o nível ${d.gamificacao.nivel}! 🎉 · ${partes.slice(0, -1).join(" · ")}`
+            : partes.join(" · ");
+
+          setGamiToast({ texto, nivelUp });
+          if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+          toastTimerRef.current = window.setTimeout(() => setGamiToast(null), 6000);
+        })
+        .catch(() => undefined);
+    },
+    [usuarioId],
+  );
 
   useEffect(() => {
     atualizarGamificacao();
@@ -136,7 +172,7 @@ export default function ChatRoute() {
       setMensagens((prev) => [...prev, { role: "ai", text: data.resposta, foraDeEscopo: data.fora_de_escopo }]);
       setErroConexao(false);
       // O usuário pode ter registrado consumo pelo chat — pontos podem ter mudado.
-      atualizarGamificacao();
+      atualizarGamificacao(true);
     } catch {
       setErroConexao(true);
       setMensagens((prev) => [...prev, { role: "ai", text: "⚠️ Não consegui me conectar agora. Verifique se o backend está rodando." }]);
@@ -194,6 +230,12 @@ export default function ChatRoute() {
         </header>
 
         <main className="messages">
+          {gamiToast && (
+            <div className={`gami-toast${gamiToast.nivelUp ? " gami-toast-nivel" : ""}`} role="status">
+              <span className="gami-toast-icon">⭐</span>
+              <span>{gamiToast.texto}</span>
+            </div>
+          )}
           {mensagens.map((msg, i) => (
             <div key={i} className={`row row-${msg.role}`}>
               {msg.role === "ai" && <AvatarLia />}
