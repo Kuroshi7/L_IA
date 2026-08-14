@@ -165,16 +165,21 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
     if not confirmado:
         # Prévia determinística, sem efeito colateral: erro de extração da LLM é
         # corrigido pelo usuário ANTES de virar pontuação e métrica de desperdício.
+        # As SOBRAS entram na prévia — são elas que alimentam o índice de resto, então
+        # o usuário precisa confirmar o que sobrou, não só o que comeu.
         try:
-            previa = go_api.calcular_consumo(itens)
+            previa: dict = {"consumido": go_api.calcular_consumo(itens)}
+            if sobras:
+                previa["resto"] = go_api.calcular_consumo(sobras)
         except Exception:
             return "Não foi possível calcular a prévia agora."
         return {
             "previa": previa,
             "instrucao": (
-                "PRÉVIA — nada foi salvo. Mostre os itens interpretados e as calorias ao "
-                "usuário e pergunte se está correto. Só depois da confirmação dele, chame "
-                "registrar_consumo de novo com os MESMOS itens/sobras e confirmado=true."
+                "PRÉVIA — nada foi salvo. Mostre ao usuário os itens interpretados e as "
+                "calorias do que ele COMEU e, se houver, do que SOBROU no prato, e pergunte "
+                "se está correto. Só depois da confirmação dele, chame registrar_consumo de "
+                "novo com os MESMOS itens/sobras e confirmado=true."
             ),
         }
 

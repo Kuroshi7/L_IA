@@ -1,19 +1,23 @@
 """Filtro de escopo em duas camadas: keywords (instantâneo) → LLM classificador (fallback).
 
-Limite honesto: keywords não bloqueiam prompt injection — quem quer contornar
-inclui uma palavra do domínio. O fast-path serve para LATÊNCIA (aprovar sem LLM o
-que é claramente do domínio); a defesa real contra injection é o escopo das tools
-(dados só da unidade/usuário da sessão). Por isso a lista contém APENAS termos
-específicos do domínio — palavras genéricas ("tem", "qual", "hoje", "valor")
-davam passe-livre a qualquer frase e tornavam o classificador letra morta.
-"""
+Duas decisões guiam esta lista:
 
-import os
-import unicodedata
+1. Keywords não bloqueiam prompt injection — quem quer contornar inclui uma
+   palavra do domínio. O fast-path serve para LATÊNCIA (aprovar sem LLM o que é
+   claramente do domínio); a defesa real contra injection é o escopo das tools
+   (dados só da unidade/usuário da sessão).
+2. Por isso a lista contém termos ESPECÍFICOS do domínio (inclusive substantivos
+   que carregam tráfego real: "pontos", "nivel", "meta", "registrar", "carne",
+   "ovo", "leve", "sobra"), mas NÃO palavras puramente genéricas ("tem", "qual",
+   "valor", "detalhe") que davam passe-livre a qualquer frase. Frases genuinamente
+   ambíguas ("o que tem hoje?") caem no classificador — e, se ele falhar, o
+   fail-OPEN em is_in_scope evita rejeitar a pergunta mais comum do produto.
+"""
 
 from langchain_ollama import ChatOllama
 
 from app import config
+from app.agent.filters import normalizar
 from app.agent.prompts import SYSTEM_GUARDRAIL
 
 _KEYWORDS_BASE = {
@@ -21,16 +25,18 @@ _KEYWORDS_BASE = {
     "prato", "pratos", "vegano", "vegetariano", "celiaco", "gluten", "lactose",
     "alergia", "alergico", "alergica", "intolerante", "intolerancia", "restricao",
     "proteina", "proteico", "caloria", "calorias", "carboidrato", "carb", "gordura",
-    "saudavel", "nutricao", "nutricional",
+    "saudavel", "leve", "nutricao", "nutricional",
     "comi", "consumi", "consumo", "comendo", "almocei", "jantei", "porcao", "concha",
-    "amendoim", "soja", "peixe", "frango", "salada", "sopa",
+    "amendoim", "soja", "peixe", "frango", "carne", "ovo", "salada", "sopa",
     "low carb", "fit", "diet", "dieta", "lia",
     "recomenda", "recomendacao", "sugere", "sugestao", "indica", "indicacao",
     "ingrediente", "ingredientes", "contem",
     "diferenca", "comparar", "comparacao",
-    # Gamificação e desperdício (registro de consumo/sobras):
-    "pontuacao", "ranking", "streak", "sobrou", "sobras", "desperdicio",
-    "prato limpo",
+    # Gamificação e desperdício (registro de consumo/sobras) — substantivos que
+    # o próprio produto roteia para tools (meus_pontos, registrar_consumo):
+    "ponto", "pontos", "pontuacao", "nivel", "meta", "ranking", "streak",
+    "registrar", "registro", "sobra", "sobrou", "sobras", "deixei", "resto",
+    "desperdicio", "prato limpo",
 }
 
 # Continuações curtas (≤4 palavras, TODAS deste conjunto, só com histórico):
@@ -41,13 +47,9 @@ _CONTINUACAO = {"ok", "obrigado", "obrigada", "valeu", "sim", "nao", "claro",
                 "outro", "outra", "mais", "menos", "esse", "essa", "esses", "aquele",
                 "e", "hoje", "amanha"}
 
-_LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower().strip()
-_OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
-_ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
-
 # Tipo amplo: pode ser ChatOllama ou ChatAnthropic. Importa lazy para não exigir
-# o pacote do provider que não está em uso.
+# o pacote do provider que não está em uso. Config (provider/modelo/url) vem de
+# app.config — fonte única, já com load_dotenv.
 _classificador = None
 
 
@@ -56,11 +58,11 @@ def _get_classificador():
     if _classificador is not None:
         return _classificador
 
-    if _LLM_PROVIDER == "anthropic":
+    if config.LLM_PROVIDER == "anthropic":
         from langchain_anthropic import ChatAnthropic
 
         _classificador = ChatAnthropic(
-            model=_ANTHROPIC_MODEL,
+            model=config.ANTHROPIC_MODEL,
             max_tokens=4,
             temperature=0,
             timeout=config.LLM_TIMEOUT_SECONDS,
@@ -68,8 +70,8 @@ def _get_classificador():
         )
     else:
         _classificador = ChatOllama(
-            model=_OLLAMA_MODEL,
-            base_url=_OLLAMA_BASE_URL,
+            model=config.OLLAMA_MODEL,
+            base_url=config.OLLAMA_BASE_URL,
             temperature=0,
             num_predict=4,
             # Mesma janela do agent — evita o Ollama subir runner extra com
@@ -79,11 +81,6 @@ def _get_classificador():
             keep_alive="30m",
         )
     return _classificador
-
-
-def _normalizar(texto: str) -> str:
-    s = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
-    return s.lower().strip()
 
 
 def _bate_keyword(texto_norm: str) -> bool:
@@ -104,7 +101,7 @@ def is_in_scope(texto: str, tem_historico: bool = False) -> bool:
     if not texto or not texto.strip():
         return False
 
-    texto_norm = _normalizar(texto)
+    texto_norm = normalizar(texto)
 
     if _bate_keyword(texto_norm):
         return True
@@ -117,8 +114,11 @@ def is_in_scope(texto: str, tem_historico: bool = False) -> bool:
             ("system", SYSTEM_GUARDRAIL),
             ("human", texto),
         ])
-        veredicto = _normalizar(getattr(resp, "content", str(resp)))
+        veredicto = normalizar(getattr(resp, "content", str(resp)))
         return veredicto.startswith("sim")
     except Exception:
-        # Falha no Ollama: fail-open seria abrir brecha; preferimos fail-closed.
-        return False
+        # Fail-OPEN: se o classificador está fora/lento, rejeitar deixaria o usuário
+        # sem resposta para a pergunta mais comum ("o que tem hoje?"). Deixamos passar
+        # — o agente tem instrução de escopo no próprio prompt e a defesa real contra
+        # abuso é o escopo das tools, não este guardrail.
+        return True

@@ -78,9 +78,7 @@ def _system_prompt(com_nota: bool):
         if com_nota:
             blocos.append({"type": "text", "text": NOTA_PRIMEIRA_DO_DIA})
         return SystemMessage(content=blocos)
-    texto = SYSTEM_AGENT
-    if com_nota:
-        texto = f"{SYSTEM_AGENT}\n\n{NOTA_PRIMEIRA_DO_DIA}"
+    texto = f"{SYSTEM_AGENT}\n\n{NOTA_PRIMEIRA_DO_DIA}" if com_nota else SYSTEM_AGENT
     return SystemMessage(content=texto)
 
 

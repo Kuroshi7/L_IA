@@ -12,10 +12,17 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
 
-# Limites do LLM. LLM_TIMEOUT_SECONDS deve ser MENOR que o CHAT_TIMEOUT_SECONDS do
-# Go (default 60s), senão o Go desiste antes de o LLM responder e o turno vira 502.
+# Limites do LLM. O pior caso de UMA chamada é LLM_TIMEOUT_SECONDS × (LLM_MAX_RETRIES+1)
+# e precisa caber no CHAT_TIMEOUT_SECONDS do Go (default 60s), senão o Go desiste antes,
+# devolve 502 e o worker segue queimando uma resposta que ninguém lê. Com 45s × 2 =
+# 90s isso era violado; 45s × (1+1) mantém 1 retentativa útil (para 429/rede) sem
+# estourar o orçamento numa única chamada.
+# NOTA: um turno pode fazer VÁRIAS chamadas (recursion_limit), então o orçamento total
+# ainda pode ser excedido. A proteção para quem espera é a expiração da fila
+# (REQUEST_MAX_AGE_SECONDS) + réplicas do worker. O fix completo — propagar o deadline
+# absoluto do Go por requisição e abortar quando esgotar — está no follow-up (ver PR).
 LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "45"))
-LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "2"))
+LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "1"))
 # Resposta completa = cardápio inteiro + recomendação + porções; 512 truncava.
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "1024"))
 # Prefill mínimo do agente ≈ 2.5k tokens (system + schemas das 10 tools); 2048

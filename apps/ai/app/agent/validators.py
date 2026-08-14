@@ -11,7 +11,8 @@ eval set rodando em CI, a mesma função vira gate de regressão.
 
 import logging
 import re
-import unicodedata
+
+from app.agent.filters import normalizar
 
 log = logging.getLogger("validators")
 
@@ -33,14 +34,9 @@ _PADRAO_RECOMENDACAO = re.compile(
 )
 
 
-def _normalizar(texto: str) -> str:
-    s = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
-    return s.lower()
-
-
 def resposta_recomenda(resposta: str) -> bool:
     """True se a resposta aparenta recomendar prato ou afirmar o cardápio."""
-    return bool(_PADRAO_RECOMENDACAO.search(_normalizar(resposta)))
+    return bool(_PADRAO_RECOMENDACAO.search(normalizar(resposta)))
 
 
 def verificar_resposta(resposta: str, tools_chamadas: list[str], session_id: str = "") -> bool:
