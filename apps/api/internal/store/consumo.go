@@ -95,8 +95,8 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	// cardapio_dia de hoje (se existir) para correlação com o cardápio servido.
 	var cardapioDiaID *int64
 	_ = s.pool.QueryRow(ctx,
-		`SELECT id FROM cardapio_dias WHERE unidade_id = $1 AND data = CURRENT_DATE`,
-		in.UnidadeID,
+		`SELECT id FROM cardapio_dias WHERE unidade_id = $1 AND data = $2::date`,
+		in.UnidadeID, agoraLocal().Format("2006-01-02"),
 	).Scan(&cardapioDiaID)
 
 	err = tx.QueryRow(ctx,
@@ -125,7 +125,7 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	payload, _ := json.Marshal(map[string]any{
 		"consumo_id":  out.ConsumoID,
 		"unidade_id":  in.UnidadeID,
-		"data":        time.Now().Format("2006-01-02"),
+		"data":        agoraLocal().Format("2006-01-02"),
 		"consumido_g": consumido.GramasTotais, "consumido_kcal": consumido.Kcal,
 		"resto_g": resto.GramasTotais, "resto_kcal": resto.Kcal,
 	})
@@ -151,8 +151,11 @@ func (s *Store) streakAtualizado(ctx context.Context, usuarioID int64) int {
 	if err != nil || ultimo == nil {
 		return 1
 	}
-	hoje := time.Now().Truncate(24 * time.Hour)
-	dias := int(hoje.Sub(ultimo.Truncate(24 * time.Hour)).Hours() / 24)
+	// ultimo_registro é DATE (sem fuso): pgx devolve meia-noite UTC. Lemos a data
+	// "crua" em UTC e comparamos com a data-calendário local do refeitório.
+	uy, um, ud := ultimo.UTC().Date()
+	ultimoDia := time.Date(uy, um, ud, 0, 0, 0, 0, locRefeitorio)
+	dias := int(dataDe(agoraLocal()).Sub(ultimoDia).Hours() / 24)
 	switch dias {
 	case 0:
 		return streak
@@ -167,14 +170,17 @@ func (s *Store) aplicarPontuacaoTx(ctx context.Context, tx pgx.Tx, usuarioID, co
 	p domain.PontuacaoConsumo, streak int) (domain.Gamificacao, error) {
 
 	var g domain.Gamificacao
+	// data local do refeitório (não CURRENT_DATE do servidor, que roda em UTC):
+	// registro às 22h não pode contar como "amanhã".
+	hoje := agoraLocal().Format("2006-01-02")
 	err := tx.QueryRow(ctx,
 		`INSERT INTO gamificacao (usuario_id, pontos, nivel, streak_dias, ultimo_registro, updated_at)
-		 VALUES ($1, $2, 1, $3, CURRENT_DATE, now())
+		 VALUES ($1, $2, 1, $3, $4::date, now())
 		 ON CONFLICT (usuario_id) DO UPDATE
 		    SET pontos = gamificacao.pontos + EXCLUDED.pontos,
-		        streak_dias = $3, ultimo_registro = CURRENT_DATE, updated_at = now()
+		        streak_dias = $3, ultimo_registro = $4::date, updated_at = now()
 		 RETURNING usuario_id, pontos, streak_dias, ultimo_registro`,
-		usuarioID, p.Pontos, streak,
+		usuarioID, p.Pontos, streak, hoje,
 	).Scan(&g.UsuarioID, &g.Pontos, &g.StreakDias, &g.UltimoRegistro)
 	if err != nil {
 		return g, err

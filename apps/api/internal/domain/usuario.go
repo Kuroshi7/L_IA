@@ -18,6 +18,21 @@ type UsuarioInput struct {
 	Restricoes     []string `json:"restricoes"`
 	Preferencias   []string `json:"preferencias"`
 	Alergias       []string `json:"alergias"`
+	// Identidade leve (opcional): telefone + PIN permitem recuperar o perfil em
+	// outro aparelho. O PIN nunca é armazenado em claro (bcrypt no store).
+	Telefone *string `json:"telefone,omitempty"`
+	Pin      *string `json:"pin,omitempty"`
+}
+
+// NormalizarTelefone mantém só os dígitos (aceita "(11) 98888-7777" etc.).
+func NormalizarTelefone(t string) string {
+	var b strings.Builder
+	for _, r := range t {
+		if r >= '0' && r <= '9' {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }
 
 var niveisAtividade = map[string]bool{
@@ -42,6 +57,33 @@ func (in UsuarioInput) Validar() error {
 	}
 	if in.NivelAtividade != nil && *in.NivelAtividade != "" && !niveisAtividade[*in.NivelAtividade] {
 		return errors.New("nivel_atividade inválido")
+	}
+	if in.Telefone != nil && *in.Telefone != "" {
+		d := NormalizarTelefone(*in.Telefone)
+		if len(d) < 10 || len(d) > 13 {
+			return errors.New("telefone inválido (use DDD + número)")
+		}
+	}
+	if in.Pin != nil && *in.Pin != "" {
+		p := strings.TrimSpace(*in.Pin)
+		if len(p) < 4 || len(p) > 6 {
+			return errors.New("PIN deve ter de 4 a 6 dígitos")
+		}
+		for _, r := range p {
+			if r < '0' || r > '9' {
+				return errors.New("PIN deve conter apenas números")
+			}
+		}
+	}
+	return nil
+}
+
+// ValidarCadastroComTelefone é a regra extra da CRIAÇÃO: telefone sem PIN não
+// permite login depois, então o PIN é obrigatório junto. Na edição o PIN atual
+// é mantido quando não reenviado.
+func (in UsuarioInput) ValidarCadastroComTelefone() error {
+	if in.Telefone != nil && *in.Telefone != "" && (in.Pin == nil || *in.Pin == "") {
+		return errors.New("informe um PIN junto com o telefone")
 	}
 	return nil
 }

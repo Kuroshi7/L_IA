@@ -24,13 +24,48 @@ func (s *Server) handleCreateUsuario(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if err := in.ValidarCadastroComTelefone(); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	u, err := s.store.CreateUsuario(r.Context(), in)
+	if errors.Is(err, store.ErrTelefoneEmUso) {
+		writeError(w, http.StatusConflict, err.Error())
+		return
+	}
 	if err != nil {
 		s.log.Error("criar usuário", "err", err)
 		writeError(w, http.StatusInternalServerError, "erro ao criar usuário")
 		return
 	}
 	writeJSON(w, http.StatusCreated, usuarioComPerfil(u))
+}
+
+// handleLoginUsuario recupera o perfil por telefone+PIN (identidade leve — permite
+// ao cliente usar o próprio perfil em outro aparelho/navegador).
+func (s *Server) handleLoginUsuario(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Telefone string `json:"telefone"`
+		Pin      string `json:"pin"`
+	}
+	if !decodeJSON(w, r, &in) {
+		return
+	}
+	if in.Telefone == "" || in.Pin == "" {
+		writeError(w, http.StatusBadRequest, "telefone e pin são obrigatórios")
+		return
+	}
+	u, err := s.store.LoginPorTelefone(r.Context(), in.Telefone, in.Pin)
+	if errors.Is(err, store.ErrCredenciais) {
+		writeError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+	if err != nil {
+		s.log.Error("login usuário", "err", err)
+		writeError(w, http.StatusInternalServerError, "erro ao fazer login")
+		return
+	}
+	writeJSON(w, http.StatusOK, usuarioComPerfil(u))
 }
 
 func (s *Server) handleGetUsuario(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +104,10 @@ func (s *Server) handleUpdateUsuario(w http.ResponseWriter, r *http.Request) {
 	u, err := s.store.UpdateUsuario(r.Context(), id, in)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "usuário não encontrado")
+		return
+	}
+	if errors.Is(err, store.ErrTelefoneEmUso) {
+		writeError(w, http.StatusConflict, err.Error())
 		return
 	}
 	if err != nil {

@@ -42,6 +42,10 @@ type rpcRequest struct {
 	UsuarioID *int64      `json:"usuario_id,omitempty"`
 	Mensagem  string      `json:"mensagem"`
 	Historico []histTurno `json:"historico"`
+	// Regra contratual: na primeira conversa do dia o agente apresenta o
+	// cardápio completo antes de recomendar. Calculado aqui (fonte da verdade)
+	// para não depender do comportamento da LLM.
+	PrimeiraDoDia bool `json:"primeira_do_dia"`
 }
 
 type histTurno struct {
@@ -68,15 +72,21 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		return Output{}, fmt.Errorf("carregar histórico: %w", err)
 	}
 
+	primeiraDoDia, err := s.store.PrimeiraMensagemDoDia(ctx, sess.UnidadeID, sess.UsuarioID, sess.ID)
+	if err != nil {
+		primeiraDoDia = false // regra é best-effort: não derruba o chat
+	}
+
 	if err := s.store.AddMensagem(ctx, sess.ID, "user", in.Mensagem); err != nil {
 		return Output{}, fmt.Errorf("persistir mensagem do usuário: %w", err)
 	}
 
 	req := rpcRequest{
-		SessionID: sess.ID,
-		UnidadeID: sess.UnidadeID,
-		UsuarioID: sess.UsuarioID,
-		Mensagem:  in.Mensagem,
+		SessionID:     sess.ID,
+		UnidadeID:     sess.UnidadeID,
+		UsuarioID:     sess.UsuarioID,
+		Mensagem:      in.Mensagem,
+		PrimeiraDoDia: primeiraDoDia,
 	}
 	for _, m := range historico {
 		req.Historico = append(req.Historico, histTurno{Papel: m.Papel, Conteudo: m.Conteudo})

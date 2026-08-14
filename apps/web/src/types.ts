@@ -136,6 +136,7 @@ export interface Usuario {
   preferencias: string[] | null;
   alergias: string[] | null;
   unidade_id?: number | null;
+  telefone?: string;
 }
 
 export interface UsuarioInput {
@@ -149,6 +150,8 @@ export interface UsuarioInput {
   preferencias: string[];
   alergias: string[];
   unidade_id?: number;
+  telefone?: string;
+  pin?: string;
 }
 
 export interface PerfilNutricional {
@@ -181,6 +184,11 @@ export interface GamificacaoEvento {
   pontos: number;
   motivo: string;
   created_at: string;
+  pontos_base?: number;
+  bonus_prato_limpo?: number;
+  bonus_streak?: number;
+  desvio_perc?: number | null;
+  meta_kcal_refeicao?: number | null;
 }
 
 export interface GamificacaoResumo {

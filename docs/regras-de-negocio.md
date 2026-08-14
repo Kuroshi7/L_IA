@@ -3,7 +3,7 @@
 > **Referência permanente do projeto.** Toda mudança de código deve consultar e respeitar este documento.
 > Capturado a partir das reuniões de definição do produto. Atualize aqui sempre que uma regra mudar.
 
-Última atualização: 2026-07-02
+Última atualização: 2026-07-07
 
 ---
 
@@ -45,8 +45,13 @@ desperdício a partir do consumo registrado.
    a sessão/requisição. **Não há "unit resolver"** nem inferência de unidade pela LLM. Cardápio e RAG
    **sempre filtram pela `unidade_id` selecionada**, isolando as informações e simplificando o contexto da LLM.
 
-1. **Mostrar o cardápio completo primeiro:** ao pedir o cardápio, **sempre** mostrar o cardápio completo do
-   dia, **mesmo que** o usuário tenha restrições.
+1. **Mostrar o cardápio completo primeiro (REGRA CONTRATUAL):** sempre que o usuário pedir o cardápio
+   **ou uma recomendação**, mostrar o cardápio completo do dia, **mesmo que** o usuário tenha restrições.
+   Na **primeira conversa do dia** isso é obrigatório e garantido pelo sistema (não só pelo prompt): a API
+   Go calcula a flag `primeira_do_dia` (primeira mensagem do usuário no dia, no fuso do refeitório) e o
+   agente recebe uma nota de sistema exigindo o cardápio completo antes da recomendação.
+   > Ex.: "olá, gostaria de uma recomendação de alta proteína" → "Olá, X! O cardápio de hoje é ….
+   > Baseado nas suas preferências/restrições, recomendo o prato Y por ter o maior teor de proteína."
 
 2. **Depois recomendar, com justificativa:** a partir do cardápio completo, recomendar o que é indicado e
    **por quê**, no formato:
@@ -55,6 +60,18 @@ desperdício a partir do consumo registrado.
 3. **Self-service → medidas caseiras:** traduzir a recomendação em **medidas caseiras** (colher, concha,
    etc.) com base na **meta calórica calculada** para o usuário.
 
+4. **Persona da Lia:** nutricionista virtual do refeitório — acolhedora, linguagem simples (sem jargão
+   nutricional), pensa em "prato montado" (medidas caseiras), nunca julga o consumo registrado e prioriza
+   pratos compatíveis quando o perfil cita condições de saúde (pressão alta, diabetes etc.), **sem**
+   prescrever dieta nem dar conselho médico. Definida em `apps/ai/app/agent/prompts.py`.
+
+5. **Identidade leve do cliente:** cadastro pode incluir **telefone + PIN (4–6 dígitos)** para recuperar o
+   perfil em outro aparelho (`POST /usuarios/login`). Telefone é único; PIN guardado com bcrypt. Não há
+   senha/e-mail — é identidade de conveniência, não autenticação forte.
+
+6. **Fuso do refeitório:** todo conceito de "dia" (streak, desperdício diário, primeira conversa do dia)
+   usa **America/Sao_Paulo**, não o UTC do servidor.
+
 ---
 
 ## 4. Regras de admin
@@ -62,6 +79,8 @@ desperdício a partir do consumo registrado.
 - **Configurar o cardápio por unidade** — cada unidade tem o seu; o admin configura no nível da unidade.
 - **Cadastrar/editar cardápios** (que mudam semanal/mensalmente).
 - **Cadastrar alimentos** e **organizar o cardápio semanal**, adicionando/removendo alimentos por dia.
+  A grade cobre a semana **completa (seg–dom)**, com navegação para qualquer data e cópia de uma
+  semana para qualquer outra (ex.: falta de insumo → ajustar só o dia; ciclo mensal → copiar semanas).
 - **Criar/remover pratos da base**, mesmo que estejam ativos/inativos em algum cardápio.
 - **Proteína do dia é o único item controlado:** limitada a **1 por pessoa**.
 - **Controle de desperdício:** ter visão do desperdício a partir do **consumo individual registrado**.
@@ -119,6 +138,12 @@ não pesamos resto fisicamente; o usuário informa o que comeu e, opcionalmente,
   transação) → RabbitMQ → worker Go agrega em `desperdicio_diario` (idempotente via inbox)
   → dashboard admin (`GET /admin/unidades/{id}/desperdicio`), com série diária e
   top de alimentos deixados no prato.
+- **Resiliência do worker**: mensagem que falha é retentada até 5×; depois vai para a
+  DLQ `go.worker.events.dlq` (poison message não trava a fila). Datas do agregado e do
+  top de desperdiçados usam o fuso do refeitório (America/Sao_Paulo).
+- **Testes reais**: `apps/api/scripts/test-integration.sh` roda os testes de integração
+  (Postgres descartável) cobrindo pontuação, streak, nível, ranking, ETL de desperdício
+  idempotente e login por telefone+PIN.
 - Ressalva: auto-relato é indicador de **tendência/engajamento**, não medida absoluta;
   agregação semanal reduz o ruído.
 

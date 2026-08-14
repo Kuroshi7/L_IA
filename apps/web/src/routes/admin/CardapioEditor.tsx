@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   adminCopiarSemana,
   adminGetCardapioSemana,
   adminListarAlimentos,
+  adminListarUnidades,
   adminSetCardapioItens,
 } from "../../lib/api";
-import { addDaysISO, mondayISO, rotuloCurto } from "../../lib/datas";
-import type { Alimento, CardapioDia, CardapioItemInput, CardapioSemana } from "../../types";
+import { addDaysISO, mondayISO, parseISO, rotuloCurto } from "../../lib/datas";
+import type { Alimento, CardapioDia, CardapioItemInput, CardapioSemana, Unidade } from "../../types";
 
 function itensDe(dia: CardapioDia): CardapioItemInput[] {
   return dia.pratos.map((p) => ({ alimento_id: p.id, is_proteina_do_dia: p.is_proteina_do_dia }));
@@ -15,12 +16,19 @@ function itensDe(dia: CardapioDia): CardapioItemInput[] {
 
 export default function CardapioEditor() {
   const unidadeId = Number(useParams().unidadeId);
+  const navigate = useNavigate();
   const [inicio, setInicio] = useState(() => mondayISO(new Date()));
   const [semana, setSemana] = useState<CardapioSemana | null>(null);
   const [catalogo, setCatalogo] = useState<Alimento[]>([]);
+  const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [copiaDestino, setCopiaDestino] = useState("");
+
+  useEffect(() => {
+    adminListarUnidades().then(setUnidades).catch(() => setUnidades([]));
+  }, []);
 
   const carregar = useCallback(() => {
     setCarregando(true);
@@ -78,13 +86,41 @@ export default function CardapioEditor() {
     );
   }
 
-  function copiarProximaSemana() {
-    const destino = addDaysISO(inicio, 7);
+  // Copia a semana atual para a semana (segunda-feira) de destino, com confirmação.
+  function copiarPara(destino: string) {
+    if (destino === inicio) {
+      setErro("A semana de destino é a mesma que está sendo editada.");
+      return;
+    }
+    const ok = window.confirm(
+      `Copiar a semana de ${rotuloCurto(inicio)} para a semana de ${rotuloCurto(destino)}?\n\n` +
+        "Isso SUBSTITUI os itens já cadastrados nos dias da semana de destino.",
+    );
+    if (!ok) return;
     setSalvando(true);
+    setErro(null);
     adminCopiarSemana(unidadeId, inicio, destino)
       .then(() => setInicio(destino))
       .catch((e: Error) => setErro(e.message))
       .finally(() => setSalvando(false));
+  }
+
+  function copiarProximaSemana() {
+    copiarPara(addDaysISO(inicio, 7));
+  }
+
+  function copiarParaDestino() {
+    if (!copiaDestino) return;
+    copiarPara(mondayISO(parseISO(copiaDestino)));
+  }
+
+  function irParaData(iso: string) {
+    if (!iso) return;
+    setInicio(mondayISO(parseISO(iso)));
+  }
+
+  function trocarUnidade(id: number) {
+    if (id && id !== unidadeId) navigate(`/admin/u/${id}/cardapio`);
   }
 
   return (
@@ -102,6 +138,21 @@ export default function CardapioEditor() {
             </div>
           </div>
           <div className="header-actions">
+            {unidades.length > 0 && (
+              <select
+                className="select-input"
+                value={unidadeId}
+                onChange={(e) => trocarUnidade(Number(e.target.value))}
+                title="Trocar unidade"
+                aria-label="Unidade"
+              >
+                {unidades.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.nome}{u.ativo ? "" : " (inativa)"}
+                  </option>
+                ))}
+              </select>
+            )}
             <Link className="btn-ghost" to={`/admin/u/${unidadeId}/alimentos`}>Alimentos</Link>
             <Link className="btn-ghost" to="/admin">Admin</Link>
           </div>
@@ -112,10 +163,37 @@ export default function CardapioEditor() {
             <button className="btn-ghost" onClick={() => setInicio(addDaysISO(inicio, -7))}>← Semana anterior</button>
             <button className="btn-ghost" onClick={() => setInicio(mondayISO(new Date()))}>Semana atual</button>
             <button className="btn-ghost" onClick={() => setInicio(addDaysISO(inicio, 7))}>Próxima semana →</button>
+            <label className="field-label" htmlFor="ir-para-data">Ir para data</label>
+            <input
+              id="ir-para-data"
+              className="text-input toolbar-date"
+              type="date"
+              value={inicio}
+              onChange={(e) => irParaData(e.target.value)}
+            />
             <span className="toolbar-spacer" />
             <button className="btn-primary" disabled={salvando} onClick={copiarProximaSemana}>
               Copiar p/ próxima semana
             </button>
+          </div>
+
+          <div className="semana-toolbar">
+            <label className="field-label" htmlFor="copia-destino">Copiar esta semana para</label>
+            <input
+              id="copia-destino"
+              className="text-input toolbar-date"
+              type="date"
+              value={copiaDestino}
+              onChange={(e) => setCopiaDestino(e.target.value)}
+            />
+            <button className="btn-ghost" disabled={salvando || !copiaDestino} onClick={copiarParaDestino}>
+              Copiar para semana escolhida
+            </button>
+            {copiaDestino && (
+              <span className="dia-data">
+                destino: semana de {rotuloCurto(mondayISO(parseISO(copiaDestino)))}
+              </span>
+            )}
           </div>
 
           {erro && <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erro}</p>}

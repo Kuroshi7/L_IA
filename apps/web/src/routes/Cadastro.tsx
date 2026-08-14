@@ -1,12 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
+  ApiError,
   atualizarUsuario,
   criarUsuario,
   getUsuario,
   getUsuarioIdSalvo,
   limparUsuarioIdSalvo,
   listarUnidades,
+  loginUsuario,
   setUsuarioIdSalvo,
 } from "../lib/api";
 import type { NivelAtividade, PerfilNutricional, Sexo, Unidade, UsuarioInput } from "../types";
@@ -41,6 +43,14 @@ export default function Cadastro() {
   const [preferencias, setPreferencias] = useState("");
   const [alergias, setAlergias] = useState("");
   const [unidadeId, setUnidadeId] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [pin, setPin] = useState("");
+
+  // Bloco "Já tenho cadastro" (login por telefone + PIN)
+  const [loginTelefone, setLoginTelefone] = useState("");
+  const [loginPin, setLoginPin] = useState("");
+  const [entrando, setEntrando] = useState(false);
+  const [erroLogin, setErroLogin] = useState<string | null>(null);
 
   useEffect(() => {
     listarUnidades().then(setUnidades).catch(() => setUnidades([]));
@@ -61,6 +71,8 @@ export default function Cadastro() {
         setPreferencias(arrToCsv(usuario.preferencias));
         setAlergias(arrToCsv(usuario.alergias));
         setUnidadeId(usuario.unidade_id ? String(usuario.unidade_id) : "");
+        setTelefone(usuario.telefone ?? "");
+        setPin(""); // na edição o PIN fica vazio — só é enviado se o usuário quiser trocar
         setPerfil(p);
       })
       .catch((err: Error) => {
@@ -89,6 +101,15 @@ export default function Cadastro() {
     if (sexo) body.sexo = sexo;
     if (nivel) body.nivel_atividade = nivel;
     if (Number(unidadeId) > 0) body.unidade_id = Number(unidadeId);
+
+    const tel = telefone.trim();
+    const pinLimpo = pin.trim();
+    if (pinLimpo && !/^\d{4,6}$/.test(pinLimpo)) return "O PIN deve ter de 4 a 6 dígitos.";
+    if (usuarioId === null && tel && !pinLimpo) {
+      return "Para cadastrar um telefone, defina também um PIN (4–6 dígitos).";
+    }
+    if (tel) body.telefone = tel;
+    if (pinLimpo) body.pin = pinLimpo;
     return body;
   }
 
@@ -106,10 +127,44 @@ export default function Cadastro() {
       .then(({ usuario, perfil: p }) => {
         setUsuarioIdSalvo(usuario.id);
         setUsuarioId(usuario.id);
+        setPin("");
         setPerfil(p);
       })
-      .catch((err: Error) => setErro(err.message))
+      .catch((err: Error) => {
+        if (err instanceof ApiError && err.status === 409) {
+          setErro('Este telefone já está cadastrado — use "Já tenho cadastro" para entrar.');
+        } else {
+          setErro(err.message);
+        }
+      })
       .finally(() => setSalvando(false));
+  }
+
+  function entrar(e: FormEvent) {
+    e.preventDefault();
+    setErroLogin(null);
+    const tel = loginTelefone.trim();
+    const pinLogin = loginPin.trim();
+    if (!tel || !pinLogin) {
+      setErroLogin("Informe telefone e PIN para entrar.");
+      return;
+    }
+    setEntrando(true);
+    loginUsuario(tel, pinLogin)
+      .then(({ usuario }) => {
+        setUsuarioIdSalvo(usuario.id);
+        setLoginTelefone("");
+        setLoginPin("");
+        setUsuarioId(usuario.id); // o efeito carrega o perfil, como no fluxo de criação
+      })
+      .catch((err: Error) => {
+        if (err instanceof ApiError && err.status === 401) {
+          setErroLogin("Telefone ou PIN incorretos.");
+        } else {
+          setErroLogin("Não foi possível entrar agora. O backend está rodando?");
+        }
+      })
+      .finally(() => setEntrando(false));
   }
 
   function sair() {
@@ -126,7 +181,10 @@ export default function Cadastro() {
     setPreferencias("");
     setAlergias("");
     setUnidadeId("");
+    setTelefone("");
+    setPin("");
     setErro(null);
+    setErroLogin(null);
   }
 
   const editando = usuarioId !== null;
@@ -179,6 +237,49 @@ export default function Cadastro() {
                 <Link to="/">Escolher unidade e conversar com a Lia →</Link>
               </p>
             </div>
+          )}
+
+          {!carregando && !editando && (
+            <form className="form-card" onSubmit={entrar}>
+              <h3 className="form-section">Já tenho cadastro</h3>
+              <p className="msg-p" style={{ marginTop: 0 }}>
+                Criou seu perfil em outro aparelho? Entre com o telefone e o PIN cadastrados.
+              </p>
+              {erroLogin && (
+                <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erroLogin}</p>
+              )}
+              <div className="form-grid">
+                <div className="field field-2">
+                  <label className="field-label">Telefone (com DDD)</label>
+                  <input
+                    className="text-input"
+                    type="tel"
+                    value={loginTelefone}
+                    onChange={(e) => setLoginTelefone(e.target.value)}
+                    placeholder="11 91234-5678"
+                    autoComplete="tel"
+                  />
+                </div>
+                <div className="field field-2">
+                  <label className="field-label">PIN</label>
+                  <input
+                    className="text-input"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={loginPin}
+                    onChange={(e) => setLoginPin(e.target.value)}
+                    placeholder="••••"
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              <div className="form-actions">
+                <button className="btn-primary" type="submit" disabled={entrando}>
+                  {entrando ? "Entrando…" : "Entrar"}
+                </button>
+              </div>
+            </form>
           )}
 
           {!carregando && (
@@ -241,6 +342,36 @@ export default function Cadastro() {
                 <div className="field field-2">
                   <label className="field-label">Alergias</label>
                   <input className="text-input" value={alergias} onChange={(e) => setAlergias(e.target.value)} placeholder="amendoim, camarão" />
+                </div>
+
+                <div className="field field-2">
+                  <label className="field-label">Telefone (com DDD)</label>
+                  <input
+                    className="text-input"
+                    type="tel"
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
+                    placeholder="11 91234-5678"
+                    autoComplete="tel"
+                  />
+                </div>
+                <div className="field field-2">
+                  <label className="field-label">{editando ? "Novo PIN (4–6 dígitos)" : "PIN (4–6 dígitos)"}</label>
+                  <input
+                    className="text-input"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    placeholder={editando ? "deixe vazio para manter o atual" : "ex.: 1234"}
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="field field-2" style={{ gridColumn: "1 / -1" }}>
+                  <span className="stat-hint">
+                    Telefone e PIN servem para recuperar seu perfil em outro aparelho (em "Já tenho cadastro").
+                  </span>
                 </div>
               </div>
 

@@ -9,6 +9,7 @@ Uso: python -m app.workers.chat_worker
 
 import json
 import logging
+import time
 
 import pika
 
@@ -18,9 +19,31 @@ from app.logging_config import setup_logging
 log = logging.getLogger("worker")
 
 
+def _expirada(props) -> bool:
+    """True se a mensagem esperou na fila mais que REQUEST_MAX_AGE_SECONDS.
+
+    O Go publica com `timestamp` e desiste após CHAT_TIMEOUT_SECONDS (o front já
+    recebeu 502) — processar uma request velha só atrasa quem ainda está esperando
+    (head-of-line blocking). O publisher também seta `expiration`, então o próprio
+    RabbitMQ descarta a maioria; este é o cinto de segurança para brokers/mensagens
+    antigas sem a propriedade."""
+    ts = getattr(props, "timestamp", None)
+    if not ts:
+        return False
+    return (time.time() - float(ts)) > config.REQUEST_MAX_AGE_SECONDS
+
+
 def _on_message(ch, method, props, body):
     # import tardio: evita carregar o LLM antes de a fila estar pronta
     from app.agent.orchestrator import processar_mensagem
+
+    if _expirada(props):
+        log.warning(
+            "mensagem expirada descartada | age>%ss | corr=%s",
+            config.REQUEST_MAX_AGE_SECONDS, props.correlation_id,
+        )
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+        return
 
     try:
         req = json.loads(body)
@@ -30,6 +53,7 @@ def _on_message(ch, method, props, body):
             unidade_id=int(req.get("unidade_id") or 0),
             usuario_id=req.get("usuario_id"),
             historico=req.get("historico"),
+            primeira_do_dia=bool(req.get("primeira_do_dia")),
         )
         resp = {"resposta": result["resposta"], "fora_de_escopo": result["fora_de_escopo"]}
     except Exception as e:  # nunca derruba o worker; devolve erro estruturado

@@ -181,6 +181,11 @@ async function sendJSON<T>(path: string, method: "POST" | "PUT", body: unknown):
 export const criarUsuario = (body: UsuarioInput) =>
   sendJSON<UsuarioComPerfil>("/usuarios", "POST", body);
 
+// Login por telefone + PIN — retorna o mesmo shape de criarUsuario.
+// Erros vêm como ApiError (401 = credenciais incorretas).
+export const loginUsuario = (telefone: string, pin: string) =>
+  sendJSON<UsuarioComPerfil>("/usuarios/login", "POST", { telefone, pin });
+
 export const getUsuario = (id: number) => getJSON<UsuarioComPerfil>(`/usuarios/${id}`);
 
 export const atualizarUsuario = (id: number, body: UsuarioInput) =>

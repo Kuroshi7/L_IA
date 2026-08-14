@@ -15,7 +15,11 @@ import (
 	"github.com/tamy-ai/menu-ai/api/internal/store"
 )
 
-const consumerName = "go-worker"
+const (
+	consumerName  = "go-worker"
+	dlqName       = "go.worker.events.dlq"
+	maxTentativas = 5 // após isso a mensagem vai para a DLQ (evita loop de poison message)
+)
 
 // Worker de efeitos colaterais: consome eventos de domínio (menuai.events) de
 // forma idempotente (inbox). Responsável pelo ETL de desperdício: cada
@@ -56,6 +60,10 @@ func main() {
 		log.Error("declarar fila", "err", err)
 		os.Exit(1)
 	}
+	if _, err := ch.QueueDeclare(dlqName, true, false, false, false, nil); err != nil {
+		log.Error("declarar dlq", "err", err)
+		os.Exit(1)
+	}
 	if err := ch.QueueBind(q.Name, "#", queue.ExchangeEvents, false, nil); err != nil {
 		log.Error("bind fila", "err", err)
 		os.Exit(1)
@@ -80,16 +88,16 @@ func main() {
 			if !ok {
 				return
 			}
-			handle(ctx, st, log, d)
+			handle(ctx, st, ch, log, d)
 		}
 	}
 }
 
-func handle(ctx context.Context, st *store.Store, log *slog.Logger, d amqp.Delivery) {
+func handle(ctx context.Context, st *store.Store, ch *amqp.Channel, log *slog.Logger, d amqp.Delivery) {
 	processed, err := st.AlreadyProcessed(ctx, d.MessageId, consumerName)
 	if err != nil {
 		log.Error("checar inbox", "err", err)
-		_ = d.Nack(false, true)
+		retryOuDLQ(ctx, ch, log, d, err)
 		return
 	}
 	if processed {
@@ -101,7 +109,7 @@ func handle(ctx context.Context, st *store.Store, log *slog.Logger, d amqp.Deliv
 	case "consumo.registrado":
 		if err := st.AplicarConsumoNoAgregado(ctx, d.Body); err != nil {
 			log.Error("agregar desperdício", "err", err, "msg_id", d.MessageId)
-			_ = d.Nack(false, true)
+			retryOuDLQ(ctx, ch, log, d, err)
 			return
 		}
 		log.Info("desperdício agregado", "msg_id", d.MessageId)
@@ -112,6 +120,47 @@ func handle(ctx context.Context, st *store.Store, log *slog.Logger, d amqp.Deliv
 
 	if err := st.MarkProcessed(ctx, d.MessageId, consumerName); err != nil {
 		log.Error("marcar processado", "err", err)
+		retryOuDLQ(ctx, ch, log, d, err)
+		return
+	}
+	_ = d.Ack(false)
+}
+
+// retryOuDLQ limita reprocessamento: republica a mensagem com contador incrementado
+// até maxTentativas; depois disso a manda para a DLQ (poison message não pode travar
+// a fila em loop infinito de Nack+requeue).
+func retryOuDLQ(ctx context.Context, ch *amqp.Channel, log *slog.Logger, d amqp.Delivery, causa error) {
+	tentativas := int32(0)
+	if v, ok := d.Headers["x-retries"]; ok {
+		switch n := v.(type) {
+		case int32:
+			tentativas = n
+		case int64:
+			tentativas = int32(n)
+		}
+	}
+
+	// republica direto na fila (default exchange) — publicar no exchange de eventos
+	// faria fan-out da retentativa para todas as filas vinculadas.
+	destino := "go.worker.events"
+	headers := amqp.Table{"x-retries": tentativas + 1}
+	if tentativas+1 >= maxTentativas {
+		destino = dlqName
+		headers["x-erro"] = causa.Error()
+		log.Error("mensagem enviada para DLQ", "msg_id", d.MessageId, "type", d.Type, "tentativas", tentativas+1)
+	}
+
+	err := ch.PublishWithContext(ctx, "", destino, false, false, amqp.Publishing{
+		ContentType:  d.ContentType,
+		DeliveryMode: amqp.Persistent,
+		MessageId:    d.MessageId,
+		Type:         d.Type,
+		Headers:      headers,
+		Body:         d.Body,
+	})
+	if err != nil {
+		// não conseguiu republicar → devolve para a fila (melhor duplicar tentativa que perder)
+		log.Error("republicar mensagem", "err", err, "msg_id", d.MessageId)
 		_ = d.Nack(false, true)
 		return
 	}
