@@ -98,13 +98,19 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
       WORKER_PREFETCH: ${WORKER_PREFETCH:-1}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-45}
+      CHAT_TIMEOUT_SECONDS: ${CHAT_TIMEOUT_SECONDS:-60}
     depends_on:
       rabbitmq:
         condition: service_healthy
       api:
         condition: service_started
     restart: on-failure:5
-    # Escale a concorrência rodando mais réplicas:  docker compose up -d --scale ai-worker=3
+    # Cada worker processa 1 conversa por vez (prefetch=1): réplicas = conversas
+    # simultâneas. 2 é o mínimo para a fila do almoço não travar atrás de um turno
+    # lento; ajuste com AI_WORKER_REPLICAS ou --scale ai-worker=N.
+    deploy:
+      replicas: ${AI_WORKER_REPLICAS:-2}
 
   # API Python (health + /infer + webhook Telegram). Opcional para o fluxo principal.
   ai-api:

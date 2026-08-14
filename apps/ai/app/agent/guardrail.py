@@ -1,10 +1,19 @@
-"""Filtro de escopo em duas camadas: keywords (instantâneo) → LLM classificador (fallback)."""
+"""Filtro de escopo em duas camadas: keywords (instantâneo) → LLM classificador (fallback).
+
+Limite honesto: keywords não bloqueiam prompt injection — quem quer contornar
+inclui uma palavra do domínio. O fast-path serve para LATÊNCIA (aprovar sem LLM o
+que é claramente do domínio); a defesa real contra injection é o escopo das tools
+(dados só da unidade/usuário da sessão). Por isso a lista contém APENAS termos
+específicos do domínio — palavras genéricas ("tem", "qual", "hoje", "valor")
+davam passe-livre a qualquer frase e tornavam o classificador letra morta.
+"""
 
 import os
 import unicodedata
 
 from langchain_ollama import ChatOllama
 
+from app import config
 from app.agent.prompts import SYSTEM_GUARDRAIL
 
 _KEYWORDS_BASE = {
@@ -12,28 +21,25 @@ _KEYWORDS_BASE = {
     "prato", "pratos", "vegano", "vegetariano", "celiaco", "gluten", "lactose",
     "alergia", "alergico", "alergica", "intolerante", "intolerancia", "restricao",
     "proteina", "proteico", "caloria", "calorias", "carboidrato", "carb", "gordura",
-    "saudavel", "leve", "pesado", "gostoso", "saboroso", "nutricao", "nutricional",
+    "saudavel", "nutricao", "nutricional",
     "comi", "consumi", "consumo", "comendo", "almocei", "jantei", "porcao", "concha",
-    "amendoim", "soja", "ovo", "peixe", "carne", "frango", "salada", "sopa",
-    "low carb", "fit", "diet", "dieta", "lia", "hoje", "amanha", "amanhã",
+    "amendoim", "soja", "peixe", "frango", "salada", "sopa",
+    "low carb", "fit", "diet", "dieta", "lia",
     "recomenda", "recomendacao", "sugere", "sugestao", "indica", "indicacao",
-    # Termos do domínio que aparecem com frequência em perguntas de continuação:
-    # adicionados pra evitar a chamada do classificador LLM (que custa ~5-8s).
-    "ingrediente", "ingredientes", "tem", "ter", "contem", "contém",
-    "vem", "leva", "feito", "feita", "preparo", "preparado", "preparada",
-    "valor", "valores", "info", "informacao", "informacoes", "detalhe", "detalhes",
-    "porcao", "porção", "tamanho", "quantidade", "qual", "qualquer",
-    "diferenca", "diferença", "comparar", "comparacao", "comparação",
+    "ingrediente", "ingredientes", "contem",
+    "diferenca", "comparar", "comparacao",
     # Gamificação e desperdício (registro de consumo/sobras):
-    "ponto", "pontos", "pontuacao", "pontuação", "nivel", "nível", "ranking",
-    "streak", "meta", "sobrou", "sobra", "sobras", "deixei", "desperdicio",
-    "registrar", "registro", "prato limpo",
+    "pontuacao", "ranking", "streak", "sobrou", "sobras", "desperdicio",
+    "prato limpo",
 }
 
+# Continuações curtas (≤4 palavras, TODAS deste conjunto, só com histórico):
+# aqui palavras genéricas são seguras — não há espaço para instrução maliciosa.
 _CONTINUACAO = {"ok", "obrigado", "obrigada", "valeu", "sim", "nao", "claro",
                 "perfeito", "legal", "show", "blz", "beleza", "uhum", "isso",
                 "quero", "vamos", "bora", "qual", "tem", "tudo", "tambem",
-                "outro", "outra", "mais", "menos", "esse", "essa", "esses", "aquele"}
+                "outro", "outra", "mais", "menos", "esse", "essa", "esses", "aquele",
+                "e", "hoje", "amanha"}
 
 _LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower().strip()
 _OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -57,6 +63,8 @@ def _get_classificador():
             model=_ANTHROPIC_MODEL,
             max_tokens=4,
             temperature=0,
+            timeout=config.LLM_TIMEOUT_SECONDS,
+            max_retries=config.LLM_MAX_RETRIES,
         )
     else:
         _classificador = ChatOllama(
@@ -65,8 +73,8 @@ def _get_classificador():
             temperature=0,
             num_predict=4,
             # Mesma janela do agent — evita o Ollama subir runner extra com
-            # n_ctx=4096, fragmentando memória e duplicando KV cache.
-            num_ctx=2048,
+            # n_ctx diferente, fragmentando memória e duplicando KV cache.
+            num_ctx=config.OLLAMA_NUM_CTX,
             # Mesmo keep_alive — para o classificador não causar descarga do modelo.
             keep_alive="30m",
         )
@@ -84,7 +92,7 @@ def _bate_keyword(texto_norm: str) -> bool:
 
 
 def _eh_continuacao_curta(texto_norm: str) -> bool:
-    palavras = texto_norm.replace("?", "").replace("!", "").replace(".", "").split()
+    palavras = texto_norm.replace("?", "").replace("!", "").replace(".", "").replace(",", "").split()
     if len(palavras) > 4:
         return False
     return all(p in _CONTINUACAO for p in palavras)

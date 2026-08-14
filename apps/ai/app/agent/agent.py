@@ -2,7 +2,19 @@
 
 Suporta dois providers de LLM, selecionados pela env `LLM_PROVIDER`:
   - "ollama" (default): roda local com llama3.2 — gratuito, sem internet, mais lento (~30s/turno em CPU).
-  - "anthropic": Claude API — pago (~R$ 0,01/turno em Haiku), rápido (~3s/turno), requer `ANTHROPIC_API_KEY`.
+  - "anthropic": Claude API — pago (~R$ 0,03–0,08/turno em Haiku, menos com o prompt
+    caching abaixo), rápido (~3s/turno), requer `ANTHROPIC_API_KEY`.
+
+Dois executores pré-construídos compartilham o mesmo LLM:
+  - `executor`: turno normal.
+  - `executor_primeira_do_dia`: com a nota da regra contratual (cardápio completo
+    antes da recomendação) como bloco EXTRA do system prompt — autoridade de
+    sistema de verdade, não texto colado na mensagem do usuário (spoofável).
+
+No provider anthropic o bloco base do system leva `cache_control`: o prefixo
+estável (tools + persona ≈ 2.4k tokens) é reaproveitado entre chamadas e turnos,
+e a nota extra fica FORA do bloco cacheado, então os dois executores compartilham
+o mesmo cache.
 """
 
 import logging
@@ -13,7 +25,7 @@ from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app import config
-from app.agent.prompts import SYSTEM_AGENT
+from app.agent.prompts import NOTA_PRIMEIRA_DO_DIA, SYSTEM_AGENT
 from app.agent.tools import TOOLS
 
 log = logging.getLogger("agent")
@@ -36,8 +48,10 @@ def _build_llm():
         log.info(f"LLM provider=anthropic | model={ANTHROPIC_MODEL}")
         return ChatAnthropic(
             model=ANTHROPIC_MODEL,
-            max_tokens=512,
+            max_tokens=config.LLM_MAX_TOKENS,
             temperature=0.3,
+            timeout=config.LLM_TIMEOUT_SECONDS,
+            max_retries=config.LLM_MAX_RETRIES,
         )
 
     # default: ollama
@@ -49,9 +63,25 @@ def _build_llm():
         base_url=OLLAMA_BASE_URL,
         temperature=0.3,
         keep_alive="30m",
-        num_predict=512,
-        num_ctx=2048,
+        num_predict=config.LLM_MAX_TOKENS,
+        num_ctx=config.OLLAMA_NUM_CTX,
+        client_kwargs={"timeout": config.LLM_TIMEOUT_SECONDS},
     )
+
+
+def _system_prompt(com_nota: bool):
+    """System prompt no formato do provider. Anthropic usa blocos com cache_control
+    (o bloco base é idêntico com e sem nota — mesmo prefixo de cache); Ollama usa
+    string simples."""
+    if LLM_PROVIDER == "anthropic":
+        blocos = [{"type": "text", "text": SYSTEM_AGENT, "cache_control": {"type": "ephemeral"}}]
+        if com_nota:
+            blocos.append({"type": "text", "text": NOTA_PRIMEIRA_DO_DIA})
+        return SystemMessage(content=blocos)
+    texto = SYSTEM_AGENT
+    if com_nota:
+        texto = f"{SYSTEM_AGENT}\n\n{NOTA_PRIMEIRA_DO_DIA}"
+    return SystemMessage(content=texto)
 
 
 _llm = _build_llm()
@@ -59,7 +89,13 @@ _llm = _build_llm()
 executor = create_agent(
     model=_llm,
     tools=TOOLS,
-    system_prompt=SYSTEM_AGENT,
+    system_prompt=_system_prompt(com_nota=False),
+)
+
+executor_primeira_do_dia = create_agent(
+    model=_llm,
+    tools=TOOLS,
+    system_prompt=_system_prompt(com_nota=True),
 )
 
 

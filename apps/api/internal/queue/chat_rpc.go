@@ -3,7 +3,9 @@ package queue
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -79,13 +81,24 @@ func (c *ChatClient) Call(ctx context.Context, body []byte) ([]byte, error) {
 	c.pending[corrID] = respCh
 	c.pendMu.Unlock()
 
-	c.mu.Lock()
-	err := c.pubCh.PublishWithContext(ctx, "", QueueChatRequests, false, false, amqp.Publishing{
+	// Timestamp + Expiration: quando este contexto expirar, o front já recebeu
+	// 502 e ninguém espera mais a resposta — o TTL faz o RabbitMQ descartar a
+	// mensagem parada na fila (evita head-of-line blocking no worker), e o
+	// timestamp deixa o worker descartar as que expiraram já em processamento.
+	pub := amqp.Publishing{
 		ContentType:   "application/json",
 		CorrelationId: corrID,
 		ReplyTo:       c.replyQueue,
+		Timestamp:     time.Now(),
 		Body:          body,
-	})
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		if ttl := time.Until(deadline); ttl > 0 {
+			pub.Expiration = strconv.FormatInt(ttl.Milliseconds(), 10)
+		}
+	}
+	c.mu.Lock()
+	err := c.pubCh.PublishWithContext(ctx, "", QueueChatRequests, false, false, pub)
 	c.mu.Unlock()
 	if err != nil {
 		c.pendMu.Lock()

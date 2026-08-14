@@ -135,10 +135,14 @@ def _parse_itens(itens) -> list[dict] | None:
 
 
 @tool
-def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None) -> dict | str:
-    """REGISTRA a refeição que o usuário consumiu: calcula calorias/macros, salva o
-    registro, PONTUA o usuário (gamificação: proximidade da meta calórica + bônus
-    prato limpo + streak) e alimenta o controle de desperdício da unidade.
+def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confirmado: bool = False) -> dict | str:
+    """Registra a refeição que o usuário consumiu, em DUAS ETAPAS:
+    1) SEM `confirmado` (default): retorna uma PRÉVIA calculada (itens interpretados +
+       kcal/macros), SEM salvar nada. Apresente a prévia ao usuário e PERGUNTE se está
+       correto (ex.: "Entendi: 2 conchas de arroz (~180 kcal)… confirma?").
+    2) Com `confirmado=true` (só após o usuário confirmar): SALVA o registro, PONTUA
+       (gamificação: proximidade da meta calórica + bônus prato limpo + streak) e
+       alimenta o controle de desperdício da unidade.
 
     `itens` = o que a pessoa COMEU. `sobras` (opcional) = o que ela DEIXOU NO PRATO
     (pergunta se sobrou algo — é assim que medimos desperdício). Ambos são listas de:
@@ -148,7 +152,7 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None) -> di
     Exemplo:
       itens=[{"alimento":"arroz","medida":"concha","quantidade":2}], sobras=[{"alimento":"arroz","medida":"colher de sopa","quantidade":1}]
 
-    Retorna: consumido (totais/itens), resto, indice_resto_perc, pontuacao
+    Retorno confirmado: consumido (totais/itens), resto, indice_resto_perc, pontuacao
     {pontos, pontos_base, bonus_prato_limpo, bonus_streak, meta_kcal_refeicao, desvio_perc}
     e gamificacao {pontos acumulados, nivel, streak_dias}. Os NÚMEROS vêm da base — não invente.
     """
@@ -157,6 +161,23 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None) -> di
         return "Envie ao menos um item {alimento, medida, quantidade}."
     sobras = _parse_itens(sobras) if sobras else []
     ctx = current_context()
+
+    if not confirmado:
+        # Prévia determinística, sem efeito colateral: erro de extração da LLM é
+        # corrigido pelo usuário ANTES de virar pontuação e métrica de desperdício.
+        try:
+            previa = go_api.calcular_consumo(itens)
+        except Exception:
+            return "Não foi possível calcular a prévia agora."
+        return {
+            "previa": previa,
+            "instrucao": (
+                "PRÉVIA — nada foi salvo. Mostre os itens interpretados e as calorias ao "
+                "usuário e pergunte se está correto. Só depois da confirmação dele, chame "
+                "registrar_consumo de novo com os MESMOS itens/sobras e confirmado=true."
+            ),
+        }
+
     try:
         return go_api.registrar_consumo(ctx.unidade_id, itens, ctx.usuario_id, sobras)
     except Exception:
