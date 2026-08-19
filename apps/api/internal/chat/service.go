@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,6 +12,10 @@ import (
 )
 
 const windowSize = 6 // últimas 6 mensagens (3 turnos) de memória curta
+
+// ErrEntradaInvalida marca erro de entrada do cliente (→ 4xx), distinguindo-o de
+// falha interna/upstream (→ 5xx) no handler.
+var ErrEntradaInvalida = errors.New("entrada inválida")
 
 type Service struct {
 	store   *store.Store
@@ -113,7 +118,7 @@ func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, e
 		// sessão informada não existe → cria uma nova abaixo
 	}
 	if in.UnidadeID == 0 {
-		return store.Sessao{}, fmt.Errorf("unidade_id é obrigatório para iniciar uma sessão")
+		return store.Sessao{}, fmt.Errorf("%w: unidade_id é obrigatório para iniciar uma sessão", ErrEntradaInvalida)
 	}
 	return s.store.CriarSessao(ctx, in.UnidadeID, nil, "web")
 }

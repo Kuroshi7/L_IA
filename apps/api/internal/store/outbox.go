@@ -12,10 +12,24 @@ type OutboxEvent struct {
 	Payload   json.RawMessage
 }
 
-// FetchPendingOutbox seleciona eventos pendentes para publicação, usando
-// FOR UPDATE SKIP LOCKED para permitir múltiplos relays sem dupla publicação.
-func (s *Store) FetchPendingOutbox(ctx context.Context, limit int) ([]OutboxEvent, error) {
-	rows, err := s.pool.Query(ctx,
+// ProcessPendingOutbox seleciona eventos pendentes (FOR UPDATE SKIP LOCKED) e,
+// SEGURANDO o lock numa única transação, chama `publish` para cada um e marca o
+// resultado (published/failed) na MESMA transação. O lock só é liberado no commit,
+// então dois relays concorrentes nunca pegam o mesmo evento — a garantia que o
+// FetchPendingOutbox anterior prometia mas não cumpria (o lock morria no fim da
+// query, antes do mark).
+//
+// `publish` faz I/O de rede segurando o lock; por isso o batch é modesto e o
+// relay roda a cada ~1s. Um erro de publish marca o evento como failed/retry e não
+// interrompe os demais do lote.
+func (s *Store) ProcessPendingOutbox(ctx context.Context, limit int, publish func(OutboxEvent) error) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx,
 		`SELECT id, aggregate, event_type, payload
 		   FROM outbox
 		  WHERE status = 'pending'
@@ -25,33 +39,40 @@ func (s *Store) FetchPendingOutbox(ctx context.Context, limit int) ([]OutboxEven
 		limit,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer rows.Close()
-
-	var out []OutboxEvent
+	// pgx: numa mesma conexão/tx não dá para executar UPDATE com o cursor aberto —
+	// coletamos todos os eventos e fechamos o cursor antes de publicar/marcar.
+	var events []OutboxEvent
 	for rows.Next() {
 		var e OutboxEvent
 		if err := rows.Scan(&e.ID, &e.Aggregate, &e.EventType, &e.Payload); err != nil {
-			return nil, err
+			rows.Close()
+			return err
 		}
-		out = append(out, e)
+		events = append(events, e)
 	}
-	return out, rows.Err()
-}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
 
-func (s *Store) MarkOutboxPublished(ctx context.Context, id string) error {
-	_, err := s.pool.Exec(ctx,
-		`UPDATE outbox SET status = 'published', published_at = now() WHERE id = $1`, id)
-	return err
-}
-
-func (s *Store) MarkOutboxFailed(ctx context.Context, id string) error {
-	_, err := s.pool.Exec(ctx,
-		`UPDATE outbox SET attempts = attempts + 1,
-		        status = CASE WHEN attempts + 1 >= 5 THEN 'failed' ELSE 'pending' END
-		  WHERE id = $1`, id)
-	return err
+	for _, e := range events {
+		if perr := publish(e); perr != nil {
+			if _, err := tx.Exec(ctx,
+				`UPDATE outbox SET attempts = attempts + 1,
+				        status = CASE WHEN attempts + 1 >= 5 THEN 'failed' ELSE 'pending' END
+				  WHERE id = $1`, e.ID); err != nil {
+				return err
+			}
+			continue
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE outbox SET status = 'published', published_at = now() WHERE id = $1`, e.ID); err != nil {
+			return err
+		}
+	}
+	return tx.Commit(ctx)
 }
 
 // AlreadyProcessed indica se uma mensagem já foi tratada por um consumidor (inbox).

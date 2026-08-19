@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -38,4 +39,17 @@ func (s *Store) SaveIdempotent(ctx context.Context, chave, requestHash string, s
 		chave, requestHash, status, response,
 	)
 	return err
+}
+
+// PurgeIdempotentKeys apaga chaves de idempotência mais antigas que `maxIdade`.
+// Sem isto a tabela cresce sem limite. Retorna quantas linhas foram removidas.
+func (s *Store) PurgeIdempotentKeys(ctx context.Context, maxIdade time.Duration) (int64, error) {
+	tag, err := s.pool.Exec(ctx,
+		`DELETE FROM idempotency_keys WHERE created_at < now() - make_interval(secs => $1)`,
+		maxIdade.Seconds(),
+	)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
 }

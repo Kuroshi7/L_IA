@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -25,8 +26,46 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 
 func hoje() string { return time.Now().Format("2006-01-02") }
 
+// handleHealth é liveness: responde 200 se o processo está de pé (usado pelo
+// orquestrador para reiniciar container travado). NÃO toca dependências.
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "servico": "menu-ai api"})
+}
+
+// handleReady é readiness: só responde 200 se as dependências (Postgres e, quando
+// registrado, RabbitMQ) estão acessíveis. Sem isto, /health respondia "ok" com o
+// banco fora — monitoramento cego. Detalhe do erro fica no log, não na resposta.
+func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+
+	checks := map[string]string{}
+	ready := true
+
+	if err := s.store.Pool().Ping(ctx); err != nil {
+		s.log.Error("ready: postgres", "err", err)
+		checks["postgres"] = "indisponível"
+		ready = false
+	} else {
+		checks["postgres"] = "ok"
+	}
+
+	if s.rabbitOK != nil {
+		if s.rabbitOK() {
+			checks["rabbitmq"] = "ok"
+		} else {
+			checks["rabbitmq"] = "desconectado"
+			ready = false
+		}
+	}
+
+	status := http.StatusOK
+	estado := "ready"
+	if !ready {
+		status = http.StatusServiceUnavailable
+		estado = "degraded"
+	}
+	writeJSON(w, status, map[string]any{"status": estado, "checks": checks})
 }
 
 func (s *Server) handleListUnidades(w http.ResponseWriter, r *http.Request) {
@@ -96,6 +135,10 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Mensagem:  body.Mensagem,
 	})
 	if err != nil {
+		if errors.Is(err, chat.ErrEntradaInvalida) {
+			writeError(w, http.StatusBadRequest, "unidade_id é obrigatório para iniciar a conversa")
+			return
+		}
 		s.log.Error("chat", "err", err)
 		writeError(w, http.StatusBadGateway, "não foi possível processar a mensagem agora")
 		return

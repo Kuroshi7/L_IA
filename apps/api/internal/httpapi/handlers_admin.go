@@ -209,7 +209,7 @@ func (s *Server) handleGetCardapioSemana(w http.ResponseWriter, r *http.Request)
 	sem, err := s.store.GetCardapioSemana(r.Context(), unidadeID, inicio)
 	if err != nil {
 		s.log.Error("cardapio semana", "err", err)
-		writeError(w, http.StatusBadRequest, "não foi possível montar a semana: "+err.Error())
+		writeError(w, http.StatusInternalServerError, "não foi possível montar a semana")
 		return
 	}
 	writeJSON(w, http.StatusOK, sem)
@@ -241,7 +241,7 @@ func (s *Server) handleSetCardapioItens(w http.ResponseWriter, r *http.Request) 
 	dia, err := s.store.SetCardapioItens(r.Context(), unidadeID, data, body.Itens)
 	if err != nil {
 		s.log.Error("set cardapio itens", "err", err)
-		writeError(w, http.StatusBadRequest, "não foi possível salvar o cardápio: "+err.Error())
+		writeError(w, http.StatusInternalServerError, "não foi possível salvar o cardápio")
 		return
 	}
 	writeJSON(w, http.StatusOK, dia)
@@ -267,7 +267,7 @@ func (s *Server) handleCopiarSemana(w http.ResponseWriter, r *http.Request) {
 	sem, err := s.store.CopiarSemana(r.Context(), unidadeID, body.Origem, body.Destino)
 	if err != nil {
 		s.log.Error("copiar semana", "err", err)
-		writeError(w, http.StatusBadRequest, "não foi possível copiar a semana: "+err.Error())
+		writeError(w, http.StatusInternalServerError, "não foi possível copiar a semana")
 		return
 	}
 	writeJSON(w, http.StatusOK, sem)
