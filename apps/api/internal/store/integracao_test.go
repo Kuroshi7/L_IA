@@ -421,3 +421,98 @@ func TestIntegracaoLoginTelefonePin(t *testing.T) {
 		t.Errorf("telefone duplicado: err = %v, esperado ErrTelefoneEmUso", err)
 	}
 }
+
+// TestIntegracaoItemNaoResolvidoNaoPontua cobre o buraco que existia no cálculo:
+// um alimento fora da base entrava no registro com nutrientes zerados e NÃO
+// somava ao total, mas a pontuação era calculada em cima desse total menor — e
+// a refeição ainda contaminava o índice de resto do dashboard.
+func TestIntegracaoItemNaoResolvidoNaoPontua(t *testing.T) {
+	limpar(t)
+	unidadeID := seedBase(t)
+	u := criarUsuario(t, unidadeID, "Seu João")
+	ctx := context.Background()
+
+	out, err := st.RegistrarConsumo(ctx, store.RegistroConsumoInput{
+		UsuarioID: &u.ID, UnidadeID: unidadeID,
+		Itens: []domain.ConsumoItemEntrada{
+			{Alimento: "arroz", Medida: "concha", Quantidade: 2},
+			{Alimento: "xyzabc que nao existe", Medida: "concha", Quantidade: 1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("registrar consumo: %v", err)
+	}
+
+	if out.Consumido.Completo {
+		t.Error("total deveria se declarar incompleto: um item não resolveu")
+	}
+	if len(out.Consumido.ItensIgnorados) != 1 || out.Consumido.ItensIgnorados[0] != "xyzabc que nao existe" {
+		t.Errorf("itens ignorados = %v, esperado o termo cru do usuário", out.Consumido.ItensIgnorados)
+	}
+	if out.Pontuacao != nil {
+		t.Errorf("não deveria pontuar sobre total incompleto, pontuou: %+v", out.Pontuacao)
+	}
+	if out.PontuacaoPendente == nil || len(out.PontuacaoPendente.ItensIgnorados) == 0 {
+		t.Errorf("faltou explicar por que não pontuou: %+v", out.PontuacaoPendente)
+	}
+
+	// O consumo É gravado (é histórico do usuário), mas marcado como incompleto
+	// para o agregado de desperdício poder deixá-lo de fora.
+	var completo bool
+	if err := pool.QueryRow(ctx, `SELECT completo FROM consumos WHERE id = $1`, out.ConsumoID).Scan(&completo); err != nil {
+		t.Fatalf("ler consumo: %v", err)
+	}
+	if completo {
+		t.Error("linha de consumos deveria estar marcada como incompleta")
+	}
+
+	// Sem pontuação, também não há evento de pontuação nem streak.
+	var eventos int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM eventos_pontuacao WHERE usuario_id = $1`, u.ID).Scan(&eventos); err != nil {
+		t.Fatalf("contar eventos: %v", err)
+	}
+	if eventos != 0 {
+		t.Errorf("eventos de pontuação = %d, esperado 0", eventos)
+	}
+}
+
+// TestIntegracaoAgregadoIgnoraConsumoIncompleto garante que o KPI do gestor
+// (índice de resto, resto per capita) só some refeições com cobertura total.
+func TestIntegracaoAgregadoIgnoraConsumoIncompleto(t *testing.T) {
+	limpar(t)
+	unidadeID := seedBase(t)
+	ctx := context.Background()
+
+	incompleto := false
+	payload, _ := json.Marshal(map[string]any{
+		"consumo_id": 1, "unidade_id": unidadeID, "data": "2026-08-23",
+		"consumido_g": 100.0, "consumido_kcal": 200.0,
+		"resto_g": 50.0, "resto_kcal": 80.0, "completo": incompleto,
+	})
+	if err := st.AplicarConsumoNoAgregado(ctx, payload); err != nil {
+		t.Fatalf("aplicar agregado: %v", err)
+	}
+
+	var n int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM desperdicio_diario WHERE unidade_id = $1`, unidadeID).Scan(&n); err != nil {
+		t.Fatalf("contar agregado: %v", err)
+	}
+	if n != 0 {
+		t.Errorf("agregado somou refeição incompleta (%d linhas) — contamina o índice de resto", n)
+	}
+
+	// Evento antigo (sem o campo `completo`) continua sendo aplicado.
+	antigo, _ := json.Marshal(map[string]any{
+		"consumo_id": 2, "unidade_id": unidadeID, "data": "2026-08-23",
+		"consumido_g": 100.0, "consumido_kcal": 200.0, "resto_g": 50.0, "resto_kcal": 80.0,
+	})
+	if err := st.AplicarConsumoNoAgregado(ctx, antigo); err != nil {
+		t.Fatalf("aplicar agregado (evento antigo): %v", err)
+	}
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM desperdicio_diario WHERE unidade_id = $1`, unidadeID).Scan(&n); err != nil {
+		t.Fatalf("contar agregado: %v", err)
+	}
+	if n != 1 {
+		t.Errorf("evento sem o campo `completo` deveria contar; linhas = %d", n)
+	}
+}

@@ -100,7 +100,7 @@ func menorConfianca(a, b string) string {
 
 // CalcularConsumo resolve cada item contra a base e soma os nutrientes consumidos.
 func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemEntrada) (domain.ConsumoTotais, error) {
-	var tot domain.ConsumoTotais
+	tot := domain.ConsumoTotais{Completo: true}
 	for _, it := range itens {
 		qtd := it.Quantidade
 		if qtd <= 0 {
@@ -110,9 +110,13 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 
 		alimento, score, err := s.ResolverAlimento(ctx, it.Alimento)
 		if errors.Is(err, ErrNotFound) {
+			// O item entra na lista (para o usuário ver que foi lido) mas NÃO
+			// soma — e é por isso que o total precisa se declarar incompleto.
 			res.Confianca = "baixa"
 			res.Obs = "alimento não encontrado na base"
 			tot.Itens = append(tot.Itens, res)
+			tot.ItensIgnorados = append(tot.ItensIgnorados, it.Alimento)
+			tot.Completo = false
 			continue
 		}
 		if err != nil {
@@ -128,6 +132,12 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 		}
 
 		porcao, confPorcao, obs := s.ResolverPorcao(ctx, alimento.ID, it.Medida)
+		if porcao.ID == 0 {
+			// Alimento existe, mas sem nenhuma porção utilizável: os nutrientes
+			// seriam todos zero. Mesma consequência do caso acima.
+			tot.ItensIgnorados = append(tot.ItensIgnorados, it.Alimento)
+			tot.Completo = false
+		}
 
 		res.AlimentoResolvido = alimento.Nome
 		res.PorcaoResolvida = porcao.MedidaLabel

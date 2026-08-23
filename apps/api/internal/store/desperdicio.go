@@ -18,6 +18,10 @@ type ConsumoRegistradoEvento struct {
 	ConsumidoKcal float64 `json:"consumido_kcal"`
 	RestoG        float64 `json:"resto_g"`
 	RestoKcal     float64 `json:"resto_kcal"`
+
+	// false = algum item não resolveu e os totais estão subestimados.
+	// Ponteiro para distinguir "veio false" de "evento antigo, sem o campo".
+	Completo *bool `json:"completo,omitempty"`
 }
 
 // AplicarConsumoNoAgregado incrementa o agregado diário de desperdício da unidade.
@@ -30,6 +34,14 @@ func (s *Store) AplicarConsumoNoAgregado(ctx context.Context, raw []byte) error 
 	}
 	if ev.UnidadeID == 0 || ev.Data == "" {
 		return fmt.Errorf("evento consumo.registrado sem unidade/data")
+	}
+	// Refeição com item não reconhecido tem gramas/kcal subestimados; somá-la ao
+	// agregado contamina o índice de resto e o resto per capita, que são o
+	// número que o gestor usa para decidir. Melhor cobrir menos refeições e
+	// responder certo. Retorna nil (não erro) para o inbox marcar como
+	// processado e não ficar retentando um evento que nunca vai ser aplicado.
+	if ev.Completo != nil && !*ev.Completo {
+		return nil
 	}
 	_, err := s.pool.Exec(ctx,
 		`INSERT INTO desperdicio_diario (unidade_id, data, refeicoes, consumido_g, consumido_kcal, resto_g, resto_kcal)
@@ -106,6 +118,7 @@ func (s *Store) topDesperdicados(ctx context.Context, unidadeID int64, de, ate s
 		        COALESCE(sum((item->>'kcal')::numeric), 0) AS resto_kcal
 		   FROM consumos c, jsonb_array_elements(c.resto_itens) AS item
 		  WHERE c.unidade_id = $1
+		    AND c.completo
 	    AND (c.created_at AT TIME ZONE '`+TZRefeitorio+`')::date BETWEEN $2::date AND $3::date
 		  GROUP BY 1
 		  ORDER BY resto_g DESC

@@ -31,6 +31,9 @@ type RegistroConsumoResultado struct {
 	IndiceResto float64                  `json:"indice_resto_perc"`
 	Pontuacao   *domain.PontuacaoConsumo `json:"pontuacao,omitempty"`
 	Gamificacao *domain.Gamificacao      `json:"gamificacao,omitempty"`
+
+	// Preenchido quando o registro foi salvo mas NÃO pontuou.
+	PontuacaoPendente *domain.PontuacaoPendente `json:"pontuacao_pendente,omitempty"`
 }
 
 // RegistrarConsumo calcula os nutrientes (determinístico, via base de medidas
@@ -44,7 +47,9 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	if err != nil {
 		return out, err
 	}
-	resto := domain.ConsumoTotais{}
+	// Completo: true — conjunto vazio de sobras é trivialmente completo. O zero
+	// value diria o contrário e reprovaria toda refeição sem sobra.
+	resto := domain.ConsumoTotais{Completo: true}
 	if len(in.Sobras) > 0 {
 		resto, err = s.CalcularConsumo(ctx, in.Sobras)
 		if err != nil {
@@ -79,12 +84,27 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	itensJSON, _ := json.Marshal(consumido.Itens)
 	restoJSON, _ := json.Marshal(resto.Itens)
 
+	// O registro é sempre gravado (é histórico do usuário), mas a PONTUAÇÃO
+	// depende de o total estar completo: pontuar é medir a distância entre o que
+	// a pessoa comeu e a meta dela, e com item fora da soma essa distância é
+	// falsa. Pontos são a moeda do produto — distribuí-los sobre número errado
+	// corrompe o ranking e não tem como ser desfeito depois.
+	completo := consumido.Completo && resto.Completo
+
 	var pontuacao domain.PontuacaoConsumo
 	pontos := 0
-	if in.UsuarioID != nil {
+	pontua := in.UsuarioID != nil && completo
+	if pontua {
 		pontuacao = domain.PontuarConsumo(consumido.Kcal, resto.Kcal, metaDiaria, streak)
 		pontos = pontuacao.Pontos
 		out.Pontuacao = &pontuacao
+	} else if in.UsuarioID != nil {
+		ignorados := append(append([]string{}, consumido.ItensIgnorados...), resto.ItensIgnorados...)
+		out.PontuacaoPendente = &domain.PontuacaoPendente{
+			Motivo: "não reconhecemos todos os itens informados, então o total calórico " +
+				"está incompleto e a pontuação não pôde ser calculada",
+			ItensIgnorados: ignorados,
+		}
 	}
 
 	metaRefeicao := 0
@@ -102,19 +122,20 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	err = tx.QueryRow(ctx,
 		`INSERT INTO consumos (usuario_id, unidade_id, cardapio_dia_id, sessao_id, refeicao,
 		                       itens, kcal_estimada, gramas_estimadas, proteina_g, carboidrato_g,
-		                       gordura_g, meta_kcal_refeicao, resto_itens, resto_g, resto_kcal, pontos)
-		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+		                       gordura_g, meta_kcal_refeicao, resto_itens, resto_g, resto_kcal, pontos,
+		                       completo)
+		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
 		 RETURNING id`,
 		in.UsuarioID, in.UnidadeID, cardapioDiaID, in.SessaoID, refeicao,
 		itensJSON, consumido.Kcal, consumido.GramasTotais, consumido.ProteinaG,
 		consumido.CarboidratoG, consumido.GorduraG, metaRefeicao,
-		restoJSON, resto.GramasTotais, resto.Kcal, pontos,
+		restoJSON, resto.GramasTotais, resto.Kcal, pontos, completo,
 	).Scan(&out.ConsumoID)
 	if err != nil {
 		return out, err
 	}
 
-	if in.UsuarioID != nil {
+	if pontua {
 		g, err := s.aplicarPontuacaoTx(ctx, tx, *in.UsuarioID, out.ConsumoID, pontuacao, streak)
 		if err != nil {
 			return out, err
@@ -128,6 +149,7 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 		"data":        agoraLocal().Format("2006-01-02"),
 		"consumido_g": consumido.GramasTotais, "consumido_kcal": consumido.Kcal,
 		"resto_g": resto.GramasTotais, "resto_kcal": resto.Kcal,
+		"completo": completo,
 	})
 	if _, err := tx.Exec(ctx,
 		`INSERT INTO outbox (aggregate, event_type, payload) VALUES ('consumo', 'consumo.registrado', $1)`,
