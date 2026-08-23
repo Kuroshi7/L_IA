@@ -47,3 +47,18 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgres://menuai:menuai@localhost:543
 # Fila consumida por este worker (deve casar com a do serviço Go).
 CHAT_REQUESTS_QUEUE = os.getenv("CHAT_REQUESTS_QUEUE", "chat.requests")
 PREFETCH = int(os.getenv("WORKER_PREFETCH", "1"))
+
+# --- Validação pós-resposta -------------------------------------------------
+# Ids de regra que BLOQUEIAM a resposta (CSV). Vazio = todas apenas registram em
+# log. O default é log-only de propósito: bloquear sem poder REPARAR troca uma
+# resposta provavelmente boa por uma mensagem de erro, e reparar exigiria mais
+# uma chamada de modelo dentro de um orçamento de 60s. Promover uma regra só
+# depois de medir a taxa de falso positivo nos logs `VALIDACAO | regra=`.
+VALIDACAO_BLOQUEANTE = frozenset(
+    r.strip() for r in os.getenv("VALIDACAO_BLOQUEANTE", "").split(",") if r.strip()
+)
+
+# Repetição exata de tool (mesmo nome, mesmos argumentos) devolve um marcador em
+# vez do corpo. Kill-switch para desligar em produção sem deploy caso um modelo
+# pequeno se confunda com o marcador.
+COMPRIMIR_REPETICOES = os.getenv("COMPRIMIR_REPETICOES", "1").lower() not in ("0", "false", "nao", "no")

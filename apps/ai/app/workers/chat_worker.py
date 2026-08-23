@@ -35,6 +35,7 @@ def _expirada(props) -> bool:
 
 def _on_message(ch, method, props, body):
     # import tardio: evita carregar o LLM antes de a fila estar pronta
+    from app.agent.motor.turn import prazo_a_partir_de
     from app.agent.orchestrator import processar_mensagem
 
     if _expirada(props):
@@ -54,8 +55,16 @@ def _on_message(ch, method, props, body):
             usuario_id=req.get("usuario_id"),
             historico=req.get("historico"),
             primeira_do_dia=bool(req.get("primeira_do_dia")),
+            # Mesmo orçamento que o `_expirada` acima usa para DESCARTAR: a
+            # diferença é que aquele só age antes de começar, e um turno pode
+            # encadear várias chamadas de modelo e estourar o tempo no meio.
+            deadline=prazo_a_partir_de(
+                getattr(props, "timestamp", None), config.REQUEST_MAX_AGE_SECONDS
+            ),
         )
         resp = {"resposta": result["resposta"], "fora_de_escopo": result["fora_de_escopo"]}
+        if result.get("confianca"):
+            resp["confianca"] = result["confianca"]
     except Exception as e:  # nunca derruba o worker; devolve erro estruturado
         log.exception("falha ao processar mensagem")
         resp = {"resposta": "", "fora_de_escopo": False, "erro": f"{type(e).__name__}: {e}"}
@@ -76,7 +85,7 @@ def _on_message(ch, method, props, body):
 def main():
     setup_logging()
     # aquece o modelo (Ollama) antes de aceitar mensagens — evita cold start no 1º usuário
-    from app.agent.agent import prewarm
+    from app.agent.orchestrator import prewarm
     prewarm()
 
     params = pika.URLParameters(config.RABBITMQ_URL)

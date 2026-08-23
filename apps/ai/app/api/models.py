@@ -14,6 +14,14 @@ class InferRequest(BaseModel):
     historico: list[Turno] = Field(default_factory=list)
 
 
+class Confianca(BaseModel):
+    """Sinal de incerteza do turno. Ausente quando tudo foi reconhecido."""
+
+    nivel: str
+    nao_reconhecidos: list[str] = Field(default_factory=list)
+
+
 class InferResponse(BaseModel):
     resposta: str
     fora_de_escopo: bool = False
+    confianca: Confianca | None = None

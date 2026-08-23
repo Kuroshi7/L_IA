@@ -27,7 +27,7 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 
 from app.agent.orchestrator import processar_mensagem
-from app.agent.prompts import MENSAGEM_INICIAL
+from app.agent.dominio.refeitorio.prompts import MENSAGEM_INICIAL
 from app.clients import go_api
 from app.memory import session_store
 

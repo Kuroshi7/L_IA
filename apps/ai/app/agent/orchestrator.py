@@ -1,28 +1,27 @@
-"""Orquestração de uma mensagem: guardrail → agente (com contexto de unidade) → resposta.
+"""Fachada de processamento de uma mensagem: guardrail → turno → resposta.
 
-A memória de curto prazo (histórico) é fornecida pelo serviço Go a cada requisição;
-este serviço é stateless quanto a sessão.
+Esta é a única superfície de `app.agent` consumida de fora (worker, `/infer`,
+Telegram) — e `app/channels/telegram.py` a chama POSICIONALMENTE, então a ordem
+dos parâmetros é contrato, não só os nomes. Por isso a fachada não se move nem
+muda de assinatura quando as camadas internas mudam; `deadline` entrou como
+keyword-only justamente para não deslocar nada.
+
+A memória de curto prazo (histórico) é fornecida pelo serviço Go a cada
+requisição; este serviço é stateless quanto a sessão.
 """
 
 import logging
 import time
 
-from langchain_core.messages import AIMessage, HumanMessage
-
-from app import config
-from app.agent.agent import executor, executor_primeira_do_dia
-from app.agent.callbacks import LiaTimingCallback
 from app.agent.context import RequestContext, reset_context, set_context
-from app.agent.guardrail import is_in_scope
-from app.agent.prompts import RESPOSTA_FORA_DE_ESCOPO
-from app.agent.validators import verificar_resposta
+from app.agent.dominio.refeitorio.perfil import PERFIL
+from app.agent.dominio.refeitorio.perfil import prewarm  # noqa: F401 — reexport p/ o worker
+from app.agent.dominio.refeitorio.tools import CACHE_NAO_RECONHECIDOS
+from app.agent.dominio.refeitorio.validators import verificar_resposta
+from app.agent.motor import turn
+from app.agent.motor.reminders import Gatilhos
 
 log = logging.getLogger("chat")
-
-RESPOSTA_ERRO_TRANSIENTE = (
-    "Desculpe, tive um problema para consultar as informações agora. "
-    "Pode tentar de novo em instantes?"
-)
 
 
 def processar_mensagem(
@@ -32,6 +31,8 @@ def processar_mensagem(
     usuario_id: int | None = None,
     historico: list[dict] | None = None,
     primeira_do_dia: bool = False,
+    *,
+    deadline: float | None = None,
 ) -> dict:
     t0 = time.perf_counter()
     historico = historico or []
@@ -40,76 +41,61 @@ def processar_mensagem(
         session_id[:12], unidade_id, mensagem[:120],
     )
 
-    in_scope = is_in_scope(mensagem, tem_historico=len(historico) > 0)
-    if not in_scope:
+    if not PERFIL.esta_no_escopo(mensagem, len(historico) > 0):
         log.info("REQ END | fora de escopo")
-        return {"resposta": RESPOSTA_FORA_DE_ESCOPO, "fora_de_escopo": True}
+        return {"resposta": PERFIL.resposta_fora_de_escopo, "fora_de_escopo": True}
 
-    # A nota da regra contratual entra como bloco de SYSTEM (executor dedicado),
-    # nunca misturada à mensagem do usuário — autoridade de prompt correta e
-    # imune a spoofing pelo texto do usuário.
-    agente = executor_primeira_do_dia if primeira_do_dia else executor
-    messages = _to_messages(historico) + [HumanMessage(content=mensagem)]
-    callback = LiaTimingCallback(session_id=session_id)
-
-    token = set_context(RequestContext(unidade_id=unidade_id, usuario_id=usuario_id))
+    contexto = RequestContext(unidade_id=unidade_id, usuario_id=usuario_id)
+    token = set_context(contexto)
     try:
-        resultado = agente.invoke(
-            {"messages": messages},
-            config={
-                "callbacks": [callback],
-                "recursion_limit": config.AGENT_RECURSION_LIMIT,
-            },
+        resultado = turn.executar_turno(
+            PERFIL,
+            mensagem,
+            contexto=contexto,
+            historico=historico,
+            gatilhos=Gatilhos(primeira_interacao_do_dia=primeira_do_dia),
+            prazo=deadline,
+            session_id=session_id,
         )
-    except Exception as e:
-        # GraphRecursionError (loop de tools) ou erro terminal do LLM após os
-        # retries do client. Resposta amigável; o erro completo fica no log.
-        log.exception("agente falhou | session=%s", session_id[:12])
-        return {
-            "resposta": RESPOSTA_ERRO_TRANSIENTE,
-            "fora_de_escopo": False,
-            "erro_interno": f"{type(e).__name__}",
-        }
     finally:
         reset_context(token)
 
-    final = resultado.get("messages", [])
-    resposta_raw = getattr(final[-1], "content", "") if final else ""
-    resposta = _texto(resposta_raw).strip() or "Desculpe, não consegui processar sua pergunta. Pode reformular?"
-
-    # Pós-validação (log-only): sinaliza resposta que recomenda sem ter consultado
-    # o cardápio — o indicador mais barato de prato inventado.
-    verificar_resposta(resposta, tools_chamadas=callback.tools_chamadas, session_id=session_id)
+    # Pós-validação. Log-only por padrão: as regras ainda não têm taxa de falso
+    # positivo medida, e trocar uma resposta provavelmente boa por uma mensagem
+    # de erro é pior que registrar a suspeita. `VALIDACAO_BLOQUEANTE` promove
+    # regra a regra quando o log mostrar que vale.
+    veredicto = verificar_resposta(
+        resultado.resposta,
+        tools_chamadas=resultado.tools_chamadas,
+        session_id=session_id,
+        observacoes=resultado.observacoes,
+    )
+    if veredicto.bloqueia:
+        log.error("REQ BLOCK | regras=%s | session=%s", veredicto.ids, session_id[:12])
+        return {"resposta": PERFIL.resposta_erro_transiente, "fora_de_escopo": False,
+                "erro_interno": "ValidacaoBloqueou"}
 
     log.info(
-        "REQ END | total=%.2fs | llm_calls=%s | resp_chars=%d",
-        time.perf_counter() - t0, callback.llm_calls, len(resposta),
+        "REQ END | total=%.2fs | llm_calls=%s | resp_chars=%d | erro=%s",
+        time.perf_counter() - t0, resultado.llm_calls, len(resultado.resposta), resultado.erro,
     )
-    return {"resposta": resposta, "fora_de_escopo": False}
+
+    resposta = {"resposta": resultado.resposta, "fora_de_escopo": False}
+    if resultado.erro:
+        resposta["erro_interno"] = resultado.erro
+    if confianca := _confianca(resultado):
+        resposta["confianca"] = confianca
+    return resposta
 
 
-def _to_messages(historico: list[dict]) -> list:
-    msgs = []
-    for h in historico or []:
-        papel = h.get("papel")
-        conteudo = h.get("conteudo", "")
-        if papel == "assistant":
-            msgs.append(AIMessage(content=conteudo))
-        else:
-            msgs.append(HumanMessage(content=conteudo))
-    return msgs
+def _confianca(resultado) -> dict | None:
+    """Sinal de incerteza para o cliente exibir.
 
-
-def _texto(conteudo) -> str:
-    """Content pode ser string ou lista de blocos (Anthropic)."""
-    if isinstance(conteudo, str):
-        return conteudo
-    if isinstance(conteudo, list):
-        partes = []
-        for bloco in conteudo:
-            if isinstance(bloco, str):
-                partes.append(bloco)
-            elif isinstance(bloco, dict) and bloco.get("type") == "text":
-                partes.append(bloco.get("text", ""))
-        return "".join(partes)
-    return str(conteudo or "")
+    Omitido quando não há nada a relatar — o campo é opcional no contrato, então
+    consumidores que ainda não o conhecem seguem funcionando. Só reportamos o
+    que é acionável pelo usuário: os termos que ele escreveu e a base não
+    reconheceu, porque a ação é reescrever o alimento de outro jeito."""
+    nao_reconhecidos = (resultado.cache or {}).get(CACHE_NAO_RECONHECIDOS) or []
+    if not nao_reconhecidos:
+        return None
+    return {"nivel": "parcial", "nao_reconhecidos": list(nao_reconhecidos)}

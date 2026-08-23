@@ -5,8 +5,8 @@ Regressão do achado da revisão de produto (IA-06): palavras genéricas ("tem",
 de injection — e o classificador LLM nunca rodava.
 """
 
-from app.agent.filters import normalizar
-from app.agent.guardrail import _bate_keyword, _eh_continuacao_curta, is_in_scope
+from app.agent.dominio.refeitorio.filters import normalizar
+from app.agent.dominio.refeitorio.guardrail import _bate_keyword, _eh_continuacao_curta, is_in_scope
 
 
 def test_frases_do_dominio_passam_no_fast_path():
@@ -67,7 +67,7 @@ def test_mensagem_vazia_fora_de_escopo():
 def test_fail_open_quando_classificador_indisponivel(monkeypatch):
     # Frase ambígua sem keyword e sem histórico → iria ao classificador. Se ele
     # falha, is_in_scope deve deixar passar (fail-open), não rejeitar o usuário.
-    import app.agent.guardrail as g
+    import app.agent.dominio.refeitorio.guardrail as g
 
     def _boom():
         raise RuntimeError("classificador fora")

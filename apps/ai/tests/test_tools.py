@@ -1,6 +1,6 @@
 """Tools: parsing tolerante de itens e o contrato de confirmação em duas etapas."""
 
-from app.agent.tools import _parse_itens, registrar_consumo
+from app.agent.dominio.refeitorio.tools import _parse_itens, registrar_consumo
 
 
 def test_parse_itens_aceita_lista():
@@ -37,7 +37,7 @@ def test_registrar_consumo_tem_parametro_confirmado():
 def test_previa_inclui_sobras(monkeypatch):
     # Regressão do review: a prévia (confirmado=False) precisa calcular também as
     # sobras — são elas que alimentam o índice de resto-ingesta que o usuário confirma.
-    import app.agent.tools as t
+    import app.agent.dominio.refeitorio.tools as t
 
     chamadas = []
 

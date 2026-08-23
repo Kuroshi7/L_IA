@@ -15,7 +15,7 @@ def _truncate(s: str, n: int = 200) -> str:
     return s if len(s) <= n else s[:n] + "…"
 
 
-class LiaTimingCallback(BaseCallbackHandler):
+class TimingCallback(BaseCallbackHandler):
     """Imprime uma linha por evento (LLM start/end, tool start/end/error) com
     tempo relativo ao início da request e duração de cada chamada."""
 

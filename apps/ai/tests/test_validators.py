@@ -1,6 +1,6 @@
 """Pós-validação: recomendação sem tool de cardápio no turno = possível alucinação."""
 
-from app.agent.validators import resposta_recomenda, verificar_resposta
+from app.agent.dominio.refeitorio.validators import resposta_recomenda, verificar_resposta
 
 
 RESPOSTA_COM_RECOMENDACAO = (

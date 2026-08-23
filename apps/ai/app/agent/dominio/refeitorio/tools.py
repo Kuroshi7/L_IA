@@ -6,14 +6,20 @@ LLMs pequenos). A filtragem por restrição/alergia é determinística em Python
 """
 
 import json as _json
+import logging
+from dataclasses import dataclass, field
 from typing import Literal
 
 from langchain_core.tools import tool
 
-from app.agent import filters
+from app.agent.dominio.refeitorio import filters
 from app.agent.context import current_context
+from app.agent.motor.observacao import cache_do_turno, observado
+from app.agent.motor.reminders import anexar_ao_resultado
 from app.clients import go_api
 from app.rag import retriever
+
+log = logging.getLogger("agent")
 
 
 def _csv(s: str | None) -> list[str]:
@@ -22,17 +28,130 @@ def _csv(s: str | None) -> list[str]:
     return [item.strip() for item in s.split(",") if item.strip()]
 
 
+@dataclass
+class Qualidade:
+    """Cobertura do cálculo devolvido pela API Go.
+
+    A base nutricional não cobre tudo o que uma pessoa diz ter comido. Quando um
+    termo não resolve, o item entra na resposta ZERADO e fica de fora do total —
+    ou seja, o número sai menor que o real. Apresentar esse número como final é
+    exatamente o comportamento de um LLM genérico que "chuta calorias"; declarar
+    a incerteza é o que diferencia este produto.
+    """
+
+    ignorados: list[str] = field(default_factory=list)   # não entraram na conta
+    imprecisos: list[str] = field(default_factory=list)  # entraram, com ressalva
+    total_itens: int = 0
+
+    @property
+    def tudo_ignorado(self) -> bool:
+        return self.total_itens > 0 and len(self.ignorados) == self.total_itens
+
+    @property
+    def ha_incerteza(self) -> bool:
+        return bool(self.ignorados or self.imprecisos)
+
+
+def _qualidade(*totais: dict) -> Qualidade:
+    q = Qualidade()
+    for tot in totais:
+        if not isinstance(tot, dict):
+            continue
+        itens = tot.get("itens") or []
+        q.total_itens += len(itens)
+
+        # Caminho normal: a API Go informa o que ficou de fora.
+        ignorados = list(tot.get("itens_ignorados") or [])
+
+        for item in itens:
+            entrada = (item.get("entrada") or {}).get("alimento") or "?"
+            resolvido = item.get("alimento_resolvido")
+            if not resolvido:
+                # Compatibilidade: se a API ainda não manda `itens_ignorados`,
+                # o sintoma continua visível item a item.
+                if entrada not in ignorados:
+                    ignorados.append(entrada)
+            elif item.get("confianca") != "alta" or item.get("obs"):
+                q.imprecisos.append(f"{entrada} → {resolvido}")
+
+        q.ignorados.extend(ignorados)
+    return q
+
+
+# Chave do cache do turno onde guardamos os termos que a base não reconheceu.
+# É o cache genérico do motor: o domínio guarda o que quiser, sem o motor
+# precisar de um campo novo para isso.
+CACHE_NAO_RECONHECIDOS = "nao_reconhecidos"
+
+
+def _logar_nao_resolvidos(q: Qualidade) -> None:
+    """Os termos que o usuário usou e a base não conhece são exatamente os
+    aliases que faltam em `nutri_alimentos`. Logar em WARNING transforma cada
+    falha de reconhecimento em insumo de melhoria da base."""
+    if not q.ignorados:
+        return
+    termos = sorted(set(q.ignorados))
+    log.warning("CONSUMO | itens_nao_resolvidos | termos=%s", termos)
+
+    # Também sobe para a resposta do chat: é o sinal de incerteza que o usuário
+    # precisa ver. Sem isto, o produto se comporta como um LLM genérico — dá o
+    # número com a mesma cara de certeza, tenha reconhecido tudo ou não.
+    cache = cache_do_turno()
+    if cache is not None:
+        acumulado = cache.setdefault(CACHE_NAO_RECONHECIDOS, [])
+        for termo in termos:
+            if termo not in acumulado:
+                acumulado.append(termo)
+
+
+def _nota_de_incerteza(q: Qualidade) -> str:
+    partes = []
+    if q.ignorados:
+        partes.append(
+            "NÃO reconheci na base: " + ", ".join(sorted(set(q.ignorados))) + ". "
+            "Esses itens NÃO entraram no total — diga isso ao usuário com estas "
+            "palavras, NÃO apresente o total como final e peça que ele descreva o "
+            "item de outro jeito (ex.: 'file de frango grelhado' → 'frango')."
+        )
+    if q.imprecisos:
+        partes.append(
+            "Interpretei por aproximação: " + "; ".join(sorted(set(q.imprecisos))) + ". "
+            "Confirme com o usuário antes de tratar esses números como certos."
+        )
+    return " ".join(partes)
+
+
+def _pratos(dia: str) -> list[dict]:
+    """Uma leitura do cardápio por turno.
+
+    Quatro tools (`listar_pratos_do_dia`, `filtrar_pratos`, `detalhar_prato`,
+    `comparar_pratos`) consultam o MESMO dia no mesmo turno; sem isto são até 4
+    GETs idênticos na API Go dentro de um orçamento de 60s. Fora de um turno
+    (teste, script) não há cache e o comportamento é o de sempre.
+    """
+    ctx = current_context()
+    dia = dia or "hoje"
+    cache = cache_do_turno()
+    if cache is None:
+        return go_api.get_pratos(ctx.unidade_id, dia)
+    chave = ("pratos", ctx.unidade_id, dia)
+    if chave not in cache:
+        cache[chave] = go_api.get_pratos(ctx.unidade_id, dia)
+    return cache[chave]
+
+
 @tool
+@observado
 def listar_pratos_do_dia(dia: str = "hoje") -> list[dict]:
     """Lista TODOS os pratos do cardápio do dia da unidade atual. `dia` aceita 'hoje'
     ou data ISO '2026-05-28'. Retorna [{id, nome, categoria}, ...]. Use SEMPRE quando o
     usuário pedir o cardápio — mostre a lista completa antes de recomendar."""
-    ctx = current_context()
-    pratos = go_api.get_pratos(ctx.unidade_id, dia or "hoje")
+    pratos = _pratos(dia)
     return [filters.resumir(p) for p in pratos]
 
 
 @tool
+@observado
 def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str = "", dia: str = "hoje") -> list[dict]:
     """Filtra os pratos do dia (da unidade atual) que atendem TODAS as restrições, são
     seguros para TODAS as alergias e combinam com as preferências. Use ao recomendar.
@@ -40,9 +159,8 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
     Args (CSV string): restricoes ex "vegetariano,sem gluten"; alergias ex "peixe,lactose";
     preferencias ex "proteico,frango"; dia "hoje" (default) ou data ISO.
     Retorna pratos completos compatíveis. Lista vazia = nenhum atende."""
-    ctx = current_context()
     rest, alerg, pref = _csv(restricoes), _csv(alergias), _csv(preferencias)
-    pratos = go_api.get_pratos(ctx.unidade_id, dia or "hoje")
+    pratos = _pratos(dia)
 
     compativeis = []
     for p in pratos:
@@ -57,16 +175,17 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
 
 
 @tool
+@observado
 def detalhar_prato(prato_id: int, dia: str = "hoje") -> dict | str:
     """Detalhes completos de um prato do cardápio do dia (ingredientes, alérgenos, nutrição)."""
-    ctx = current_context()
-    for p in go_api.get_pratos(ctx.unidade_id, dia or "hoje"):
+    for p in _pratos(dia):
         if p["id"] == prato_id:
             return p
     return f"Prato com id {prato_id} não encontrado no cardápio de hoje."
 
 
 @tool
+@observado
 def comparar_pratos(
     criterio: Literal["proteinas", "calorias", "carboidratos", "gorduras"] = "proteinas",
     prato_ids: str = "",
@@ -74,11 +193,10 @@ def comparar_pratos(
 ) -> list[dict]:
     """Compara pratos do dia por critério nutricional (decrescente). Use para "qual tem mais/menos X?".
     prato_ids: CSV de ids; vazio = compara todos do dia."""
-    ctx = current_context()
     chave = {"proteinas": "proteinas_g", "calorias": "calorias",
              "carboidratos": "carboidratos_g", "gorduras": "gorduras_g"}.get(criterio, "proteinas_g")
 
-    pratos = go_api.get_pratos(ctx.unidade_id, dia or "hoje")
+    pratos = _pratos(dia)
     ids = {int(x) for x in _csv(prato_ids) if x.isdigit()}
     if ids:
         pratos = [p for p in pratos if p["id"] in ids]
@@ -89,6 +207,7 @@ def comparar_pratos(
 
 
 @tool
+@observado
 def meu_perfil() -> dict | str:
     """Retorna o perfil do usuário atual (restrições, preferências, alergias, IMC e meta
     calórica diária), quando disponível. Use para personalizar recomendações e porções."""
@@ -102,6 +221,7 @@ def meu_perfil() -> dict | str:
 
 
 @tool
+@observado
 def consultar_medidas_caseiras() -> list[dict]:
     """Tabela de medidas caseiras (medida → gramas → kcal) para traduzir recomendações em
     porções práticas no self-service (ex.: '2 colheres de arroz')."""
@@ -112,6 +232,7 @@ def consultar_medidas_caseiras() -> list[dict]:
 
 
 @tool
+@observado
 def buscar_informacao(consulta: str) -> str:
     """Busca semântica (RAG) em guias de medidas caseiras e referência nutricional da unidade.
     Use para dúvidas sobre porções, cálculo calórico/IMC e orientações gerais de consumo."""
@@ -135,6 +256,7 @@ def _parse_itens(itens) -> list[dict] | None:
 
 
 @tool
+@observado
 def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confirmado: bool = False) -> dict | str:
     """Registra a refeição que o usuário consumiu, em DUAS ETAPAS:
     1) SEM `confirmado` (default): retorna uma PRÉVIA calculada (itens interpretados +
@@ -168,12 +290,17 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
         # As SOBRAS entram na prévia — são elas que alimentam o índice de resto, então
         # o usuário precisa confirmar o que sobrou, não só o que comeu.
         try:
-            previa: dict = {"consumido": go_api.calcular_consumo(itens)}
+            consumido = go_api.calcular_consumo(itens)
+            previa: dict = {"consumido": consumido}
+            resto = go_api.calcular_consumo(sobras) if sobras else {}
             if sobras:
-                previa["resto"] = go_api.calcular_consumo(sobras)
+                previa["resto"] = resto
         except Exception:
             return "Não foi possível calcular a prévia agora."
-        return {
+
+        q = _qualidade(consumido, resto)
+        _logar_nao_resolvidos(q)
+        resultado = {
             "previa": previa,
             "instrucao": (
                 "PRÉVIA — nada foi salvo. Mostre ao usuário os itens interpretados e as "
@@ -182,14 +309,40 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
                 "novo com os MESMOS itens/sobras e confirmado=true."
             ),
         }
+        return anexar_ao_resultado(resultado, _nota_de_incerteza(q))
+
+    # Confirmado: antes de gravar, checa a cobertura. O cálculo é sem efeito
+    # colateral, então custa uma chamada a mais só no caminho de escrita.
+    try:
+        conferencia = _qualidade(go_api.calcular_consumo(itens))
+    except Exception:
+        conferencia = Qualidade()
+
+    if conferencia.tudo_ignorado:
+        # Gravar aqui produziria um registro de 0 kcal: desvio máximo na
+        # pontuação e índice de resto sem sentido. Isso é dado corrompido, não
+        # dado impreciso — e, uma vez gravado, não há como desfazer.
+        _logar_nao_resolvidos(conferencia)
+        return (
+            "Não reconheci nenhum dos itens informados ("
+            + ", ".join(sorted(set(conferencia.ignorados)))
+            + "), então NÃO salvei nada — salvar daria 0 kcal e estragaria a pontuação. "
+            "Peça ao usuário para descrever os alimentos de forma mais simples "
+            "(ex.: 'frango', 'arroz', 'feijão') e refaça a prévia."
+        )
 
     try:
-        return go_api.registrar_consumo(ctx.unidade_id, itens, ctx.usuario_id, sobras)
+        registro = go_api.registrar_consumo(ctx.unidade_id, itens, ctx.usuario_id, sobras)
     except Exception:
         return "Não foi possível registrar o consumo agora."
 
+    q = _qualidade(registro.get("consumido") or {}, registro.get("resto") or {})
+    _logar_nao_resolvidos(q)
+    return anexar_ao_resultado(registro, _nota_de_incerteza(q))
+
 
 @tool
+@observado
 def cardapio_da_semana(inicio: str = "") -> dict | str:
     """Cardápio da SEMANA (segunda a sexta) da unidade atual. Use quando o usuário
     perguntar sobre outros dias ("o que tem amanhã/na quarta?", "qual o cardápio da semana?").
@@ -214,6 +367,7 @@ def cardapio_da_semana(inicio: str = "") -> dict | str:
 
 
 @tool
+@observado
 def meus_pontos() -> dict | str:
     """Pontuação de gamificação do usuário atual: pontos acumulados, nível, streak de
     dias registrando consumo e os últimos eventos de pontuação. Use quando perguntarem

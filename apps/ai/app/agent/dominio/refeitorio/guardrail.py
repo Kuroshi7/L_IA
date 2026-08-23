@@ -17,8 +17,8 @@ Duas decisões guiam esta lista:
 from langchain_ollama import ChatOllama
 
 from app import config
-from app.agent.filters import normalizar
-from app.agent.prompts import SYSTEM_GUARDRAIL
+from app.agent.dominio.refeitorio.filters import normalizar
+from app.agent.dominio.refeitorio.prompts import SYSTEM_GUARDRAIL
 
 _KEYWORDS_BASE = {
     "cardapio", "menu", "comer", "comida", "almoco", "jantar", "refeicao", "refeicoes",

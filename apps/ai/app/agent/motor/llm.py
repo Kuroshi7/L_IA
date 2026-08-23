@@ -1,20 +1,18 @@
-"""Tool-calling agent (LangChain 1.x).
+"""Construção do modelo e do executor de tools (LangChain 1.x).
 
-Suporta dois providers de LLM, selecionados pela env `LLM_PROVIDER`:
-  - "ollama" (default): roda local com llama3.2 — gratuito, sem internet, mais lento (~30s/turno em CPU).
-  - "anthropic": Claude API — pago (~R$ 0,03–0,08/turno em Haiku, menos com o prompt
-    caching abaixo), rápido (~3s/turno), requer `ANTHROPIC_API_KEY`.
+Suporta dois providers, selecionados pela env `LLM_PROVIDER`:
+  - "ollama" (default): roda local com llama3.2 — gratuito, sem internet, mais
+    lento (~30s/turno em CPU).
+  - "anthropic": Claude API — pago (~R$ 0,03–0,08/turno em Haiku, menos com o
+    prompt caching abaixo), rápido (~3s/turno), requer `ANTHROPIC_API_KEY`.
 
-Dois executores pré-construídos compartilham o mesmo LLM:
-  - `executor`: turno normal.
-  - `executor_primeira_do_dia`: com a nota da regra contratual (cardápio completo
-    antes da recomendação) como bloco EXTRA do system prompt — autoridade de
-    sistema de verdade, não texto colado na mensagem do usuário (spoofável).
+Este módulo é do MOTOR: ele não sabe qual é o assunto da conversa. Prompt e tools
+chegam por parâmetro, vindos do `PerfilDeDominio`.
 
 No provider anthropic o bloco base do system leva `cache_control`: o prefixo
-estável (tools + persona ≈ 2.4k tokens) é reaproveitado entre chamadas e turnos,
-e a nota extra fica FORA do bloco cacheado, então os dois executores compartilham
-o mesmo cache.
+estável (tools + persona) é reaproveitado entre chamadas e turnos. A nota extra
+fica FORA do bloco cacheado, então executores com e sem nota compartilham o mesmo
+prefixo de cache.
 """
 
 import logging
@@ -25,8 +23,6 @@ from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app import config
-from app.agent.prompts import NOTA_PRIMEIRA_DO_DIA, SYSTEM_AGENT
-from app.agent.tools import TOOLS
 
 log = logging.getLogger("agent")
 
@@ -69,35 +65,42 @@ def _build_llm():
     )
 
 
-def _system_prompt(com_nota: bool):
-    """System prompt no formato do provider. Anthropic usa blocos com cache_control
-    (o bloco base é idêntico com e sem nota — mesmo prefixo de cache); Ollama usa
-    string simples."""
+_llm = None
+
+
+def obter_llm():
+    """Construção preguiçosa. No import, `LLM_PROVIDER=anthropic` sem chave
+    derrubaria qualquer processo que apenas importasse este módulo — inclusive a
+    suíte de testes e o runner de eval."""
+    global _llm
+    if _llm is None:
+        _llm = _build_llm()
+    return _llm
+
+
+def _mensagem_system(system_prompt: str, nota_extra: str | None):
+    """System prompt no formato do provider. Anthropic usa blocos com
+    `cache_control` (o bloco base é idêntico com e sem nota — mesmo prefixo de
+    cache); Ollama usa string simples."""
     if LLM_PROVIDER == "anthropic":
-        blocos = [{"type": "text", "text": SYSTEM_AGENT, "cache_control": {"type": "ephemeral"}}]
-        if com_nota:
-            blocos.append({"type": "text", "text": NOTA_PRIMEIRA_DO_DIA})
+        blocos = [{"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}]
+        if nota_extra:
+            blocos.append({"type": "text", "text": nota_extra})
         return SystemMessage(content=blocos)
-    texto = f"{SYSTEM_AGENT}\n\n{NOTA_PRIMEIRA_DO_DIA}" if com_nota else SYSTEM_AGENT
+    texto = f"{system_prompt}\n\n{nota_extra}" if nota_extra else system_prompt
     return SystemMessage(content=texto)
 
 
-_llm = _build_llm()
-
-executor = create_agent(
-    model=_llm,
-    tools=TOOLS,
-    system_prompt=_system_prompt(com_nota=False),
-)
-
-executor_primeira_do_dia = create_agent(
-    model=_llm,
-    tools=TOOLS,
-    system_prompt=_system_prompt(com_nota=True),
-)
+def construir_executor(system_prompt: str, tools, nota_extra: str | None = None):
+    """Monta um agente de tool-calling com o prompt e as tools do domínio."""
+    return create_agent(
+        model=obter_llm(),
+        tools=list(tools),
+        system_prompt=_mensagem_system(system_prompt, nota_extra),
+    )
 
 
-def prewarm() -> None:
+def prewarm(system_prompt: str, tools) -> None:
     """Pré-aquecimento — só faz sentido pro Ollama local (cold start de modelo).
     Em providers de API (Anthropic) não há cold start, então pulamos."""
     if LLM_PROVIDER == "anthropic":
@@ -106,11 +109,32 @@ def prewarm() -> None:
 
     t0 = time.perf_counter()
     try:
-        llm_com_tools = _llm.bind_tools(TOOLS)
+        llm_com_tools = obter_llm().bind_tools(list(tools))
         llm_com_tools.invoke([
-            SystemMessage(content=SYSTEM_AGENT),
+            SystemMessage(content=system_prompt),
             HumanMessage(content="oi"),
         ])
         log.info(f"PREWARM done | dur={time.perf_counter()-t0:.2f}s")
     except Exception as e:
         log.warning(f"PREWARM failed | {type(e).__name__}: {e}")
+
+
+# Um executor por (perfil, conjunto de tools). São poucas combinações — 2 no
+# produto atual — e o grafo é imutável, então uma corrida entre threads no
+# máximo constrói duas vezes.
+#
+# TRADE-OFF (Anthropic): o prefixo com `cache_control` inclui as DEFINIÇÕES das
+# tools, logo dois conjuntos de tools são duas linhagens de cache. Aceito: um
+# cache miss custa o write de ~2.4k tokens, enquanto cada tool inútil no schema
+# custa um round-trip inteiro do modelo.
+_executores: dict[tuple, object] = {}
+
+
+def obter_executor(perfil_nome: str, system_prompt: str, specs):
+    from app.agent.motor.registry import assinatura
+
+    chave = (perfil_nome, assinatura(specs))
+    if chave not in _executores:
+        log.info("EXECUTOR build | perfil=%s | tools=%s", perfil_nome, len(specs))
+        _executores[chave] = construir_executor(system_prompt, [spec.tool for spec in specs])
+    return _executores[chave]
