@@ -15,7 +15,7 @@ var diasPT = []string{"Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira"
 
 func diaSemanaPT(t time.Time) string { return diasPT[int(t.Weekday())] }
 
-// GetCardapioSemana monta a grade seg–sex (5 dias) a partir de `inicio` (segunda, YYYY-MM-DD).
+// GetCardapioSemana monta a grade seg–dom (7 dias) a partir de `inicio` (segunda, YYYY-MM-DD).
 // Inclui itens ativos e inativos (a grade é a fonte da verdade para edição).
 func (s *Store) GetCardapioSemana(ctx context.Context, unidadeID int64, inicio string) (domain.CardapioSemana, error) {
 	base, err := time.Parse("2006-01-02", inicio)
@@ -24,7 +24,7 @@ func (s *Store) GetCardapioSemana(ctx context.Context, unidadeID int64, inicio s
 	}
 	sem := domain.CardapioSemana{UnidadeID: unidadeID, Inicio: inicio, Dias: []domain.CardapioDia{}}
 
-	for d := 0; d < 5; d++ {
+	for d := 0; d < 7; d++ {
 		dt := base.AddDate(0, 0, d)
 		ds := dt.Format("2006-01-02")
 		dia := domain.CardapioDia{UnidadeID: unidadeID, Data: ds, DiaSemana: diaSemanaPT(dt), Pratos: []domain.Alimento{}}
@@ -126,7 +126,7 @@ func upsertCardapioDiaTx(ctx context.Context, tx pgx.Tx, unidadeID int64, data, 
 	return id, err
 }
 
-// CopiarSemana copia o cardápio seg–sex de `origemInicio` para `destinoInicio` (datas de segunda).
+// CopiarSemana copia o cardápio seg–dom de `origemInicio` para `destinoInicio` (datas de segunda).
 func (s *Store) CopiarSemana(ctx context.Context, unidadeID int64, origemInicio, destinoInicio string) (domain.CardapioSemana, error) {
 	origem, err := s.GetCardapioSemana(ctx, unidadeID, origemInicio)
 	if err != nil {

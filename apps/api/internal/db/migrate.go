@@ -74,13 +74,25 @@ func Migrate(ctx context.Context, pool *pgxpool.Pool) error {
 		if err != nil {
 			return fmt.Errorf("read migration %s: %w", name, err)
 		}
-		if _, err := conn.Exec(ctx, string(sqlBytes)); err != nil {
+		// aplicação + registro na MESMA transação (sem estado parcial), rodando na
+		// conexão que já segura o advisory lock — mutual exclusion entre instâncias
+		// da API + DDL atômico por migração.
+		tx, err := conn.Begin(ctx)
+		if err != nil {
+			return fmt.Errorf("begin migration %s: %w", name, err)
+		}
+		if _, err := tx.Exec(ctx, string(sqlBytes)); err != nil {
+			_ = tx.Rollback(ctx)
 			return fmt.Errorf("apply migration %s: %w", name, err)
 		}
-		if _, err := conn.Exec(ctx,
+		if _, err := tx.Exec(ctx,
 			`INSERT INTO schema_migrations (version) VALUES ($1)`, name,
 		); err != nil {
+			_ = tx.Rollback(ctx)
 			return fmt.Errorf("record migration %s: %w", name, err)
+		}
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("commit migration %s: %w", name, err)
 		}
 	}
 	return nil

@@ -22,6 +22,16 @@ func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	cfg := config.Load()
 
+	// Admin sem token = área administrativa aberta. Nunca silencioso: ou há token,
+	// ou o operador desligou o gate explicitamente (só para desenvolvimento local).
+	if cfg.AdminToken == "" {
+		if os.Getenv("ADMIN_AUTH_DISABLED") != "1" {
+			log.Error("ADMIN_TOKEN vazio — defina ADMIN_TOKEN ou, apenas em dev, ADMIN_AUTH_DISABLED=1")
+			os.Exit(1)
+		}
+		log.Warn("ADMIN_AUTH_DISABLED=1 — rotas /admin SEM autenticação (somente desenvolvimento)")
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

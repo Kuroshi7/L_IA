@@ -117,3 +117,137 @@ export interface CardapioItemInput {
   alimento_id: number;
   is_proteina_do_dia: boolean;
 }
+
+// ---- Usuário e perfil nutricional ----
+
+export type Sexo = "M" | "F" | "O";
+
+export type NivelAtividade = "sedentario" | "leve" | "moderado" | "intenso" | "muito_intenso";
+
+export interface Usuario {
+  id: number;
+  nome: string;
+  peso_kg?: number | null;
+  altura_cm?: number | null;
+  idade?: number | null;
+  sexo?: Sexo | null;
+  nivel_atividade?: NivelAtividade | null;
+  restricoes: string[] | null;
+  preferencias: string[] | null;
+  alergias: string[] | null;
+  unidade_id?: number | null;
+  telefone?: string;
+}
+
+export interface UsuarioInput {
+  nome: string;
+  peso_kg?: number;
+  altura_cm?: number;
+  idade?: number;
+  sexo?: Sexo;
+  nivel_atividade?: NivelAtividade;
+  restricoes: string[];
+  preferencias: string[];
+  alergias: string[];
+  unidade_id?: number;
+  telefone?: string;
+  pin?: string;
+}
+
+export interface PerfilNutricional {
+  nome: string;
+  restricoes: string[] | null;
+  preferencias: string[] | null;
+  alergias: string[] | null;
+  imc?: number | null;
+  classificacao_imc?: string;
+  meta_calorica_kcal?: number | null;
+}
+
+export interface UsuarioComPerfil {
+  usuario: Usuario;
+  perfil: PerfilNutricional;
+}
+
+// ---- Gamificação e ranking ----
+
+export interface Gamificacao {
+  usuario_id: number;
+  pontos: number;
+  nivel: number;
+  streak_dias: number;
+  ultimo_registro?: string | null;
+}
+
+export interface GamificacaoEvento {
+  id: number;
+  pontos: number;
+  motivo: string;
+  created_at: string;
+  pontos_base?: number;
+  bonus_prato_limpo?: number;
+  bonus_streak?: number;
+  desvio_perc?: number | null;
+  meta_kcal_refeicao?: number | null;
+}
+
+export interface GamificacaoResumo {
+  gamificacao: Gamificacao;
+  eventos: GamificacaoEvento[] | null;
+}
+
+export interface RankingEntry {
+  usuario_id: number;
+  nome: string;
+  pontos: number;
+  nivel: number;
+}
+
+// ---- Admin: usuários ----
+
+export interface AdminUsuario {
+  id: number;
+  nome: string;
+  unidade_id?: number | null;
+  restricoes: string[] | null;
+  alergias: string[] | null;
+  pontos: number;
+  nivel: number;
+  streak_dias: number;
+  registros_consumo: number;
+}
+
+// ---- Admin: desperdício ----
+
+export type ClassificacaoDesperdicio = "otimo" | "bom" | "atencao" | "critico";
+
+export interface DesperdicioDia {
+  data: string;
+  refeicoes: number;
+  consumido_g: number;
+  consumido_kcal: number;
+  resto_g: number;
+  resto_kcal: number;
+}
+
+export interface AlimentoDesperdicado {
+  alimento: string;
+  ocorrencias: number;
+  resto_g: number;
+  resto_kcal: number;
+}
+
+export interface DesperdicioRelatorio {
+  unidade_id: number;
+  de: string;
+  ate: string;
+  refeicoes: number;
+  consumido_g: number;
+  resto_g: number;
+  resto_kcal: number;
+  indice_resto_perc: number;
+  classificacao: ClassificacaoDesperdicio;
+  resto_per_capita_g: number;
+  dias: DesperdicioDia[] | null;
+  top_desperdicados: AlimentoDesperdicado[] | null;
+}

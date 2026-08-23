@@ -23,6 +23,7 @@ class LiaTimingCallback(BaseCallbackHandler):
         self.session_id = session_id
         self.t0 = time.perf_counter()
         self.llm_calls = 0
+        self.tools_chamadas: list[str] = []  # nomes, na ordem — usado pela pós-validação
         self._llm_starts: dict[UUID, tuple[float, int]] = {}
         self._tool_starts: dict[UUID, tuple[float, str]] = {}
 
@@ -71,6 +72,7 @@ class LiaTimingCallback(BaseCallbackHandler):
     # ---- Tools ----
     def on_tool_start(self, serialized, input_str, *, run_id: UUID, **kwargs: Any) -> None:
         name = (serialized or {}).get("name", "?")
+        self.tools_chamadas.append(name)
         self._tool_starts[run_id] = (time.perf_counter(), name)
         log.info(f"{self._t()} | TOOL START      | name={name} | args={_truncate(input_str, 200)}")
 

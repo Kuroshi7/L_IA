@@ -21,6 +21,7 @@ type Usuario struct {
 	Restricoes     []string `json:"restricoes"`
 	Preferencias   []string `json:"preferencias"`
 	Alergias       []string `json:"alergias"`
+	Telefone       *string  `json:"telefone,omitempty"`
 }
 
 type Alimento struct {

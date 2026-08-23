@@ -122,40 +122,120 @@ def buscar_informacao(consulta: str) -> str:
     return "\n\n".join(trechos)
 
 
-@tool
-def registrar_consumo(itens: list[dict]) -> dict | str:
-    """Calcula calorias e macronutrientes do que o usuário consumiu (refeição self-service).
-
-    `itens` é uma LISTA de objetos, cada um com:
-      - alimento: nome (ex: "arroz", "frango grelhado", "feijao", "salada de legumes")
-      - medida: medida caseira (ex: "concha", "colher de sopa", "file", "prato raso", "escumadeira")
-      - quantidade: número (ex: 2)
-    Exemplo:
-      [{"alimento":"arroz","medida":"concha","quantidade":2},{"alimento":"frango grelhado","medida":"file","quantidade":1}]
-
-    Retorna os totais (kcal, proteína, carboidrato, gordura) e o detalhamento por item,
-    com o nível de confiança da resolução. Os NÚMEROS vêm da base nutricional — não invente.
-    """
-    # tolera o caso de o modelo mandar uma string JSON em vez de lista
+def _parse_itens(itens) -> list[dict] | None:
+    """Tolera o modelo mandar string JSON em vez de lista."""
     if isinstance(itens, str):
         try:
             itens = _json.loads(itens)
         except Exception:
-            return "Envie `itens` como lista de {alimento, medida, quantidade}."
-    if not isinstance(itens, list) or not itens:
+            return None
+    if not isinstance(itens, list):
+        return None
+    return itens
+
+
+@tool
+def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confirmado: bool = False) -> dict | str:
+    """Registra a refeição que o usuário consumiu, em DUAS ETAPAS:
+    1) SEM `confirmado` (default): retorna uma PRÉVIA calculada (itens interpretados +
+       kcal/macros), SEM salvar nada. Apresente a prévia ao usuário e PERGUNTE se está
+       correto (ex.: "Entendi: 2 conchas de arroz (~180 kcal)… confirma?").
+    2) Com `confirmado=true` (só após o usuário confirmar): SALVA o registro, PONTUA
+       (gamificação: proximidade da meta calórica + bônus prato limpo + streak) e
+       alimenta o controle de desperdício da unidade.
+
+    `itens` = o que a pessoa COMEU. `sobras` (opcional) = o que ela DEIXOU NO PRATO
+    (pergunta se sobrou algo — é assim que medimos desperdício). Ambos são listas de:
+      - alimento: nome (ex: "arroz", "frango grelhado", "feijao")
+      - medida: medida caseira (ex: "concha", "colher de sopa", "file", "prato raso")
+      - quantidade: número (ex: 2)
+    Exemplo:
+      itens=[{"alimento":"arroz","medida":"concha","quantidade":2}], sobras=[{"alimento":"arroz","medida":"colher de sopa","quantidade":1}]
+
+    Retorno confirmado: consumido (totais/itens), resto, indice_resto_perc, pontuacao
+    {pontos, pontos_base, bonus_prato_limpo, bonus_streak, meta_kcal_refeicao, desvio_perc}
+    e gamificacao {pontos acumulados, nivel, streak_dias}. Os NÚMEROS vêm da base — não invente.
+    """
+    itens = _parse_itens(itens)
+    if not itens:
         return "Envie ao menos um item {alimento, medida, quantidade}."
+    sobras = _parse_itens(sobras) if sobras else []
+    ctx = current_context()
+
+    if not confirmado:
+        # Prévia determinística, sem efeito colateral: erro de extração da LLM é
+        # corrigido pelo usuário ANTES de virar pontuação e métrica de desperdício.
+        # As SOBRAS entram na prévia — são elas que alimentam o índice de resto, então
+        # o usuário precisa confirmar o que sobrou, não só o que comeu.
+        try:
+            previa: dict = {"consumido": go_api.calcular_consumo(itens)}
+            if sobras:
+                previa["resto"] = go_api.calcular_consumo(sobras)
+        except Exception:
+            return "Não foi possível calcular a prévia agora."
+        return {
+            "previa": previa,
+            "instrucao": (
+                "PRÉVIA — nada foi salvo. Mostre ao usuário os itens interpretados e as "
+                "calorias do que ele COMEU e, se houver, do que SOBROU no prato, e pergunte "
+                "se está correto. Só depois da confirmação dele, chame registrar_consumo de "
+                "novo com os MESMOS itens/sobras e confirmado=true."
+            ),
+        }
+
     try:
-        return go_api.calcular_consumo(itens)
+        return go_api.registrar_consumo(ctx.unidade_id, itens, ctx.usuario_id, sobras)
     except Exception:
-        return "Não foi possível calcular o consumo agora."
+        return "Não foi possível registrar o consumo agora."
+
+
+@tool
+def cardapio_da_semana(inicio: str = "") -> dict | str:
+    """Cardápio da SEMANA (segunda a sexta) da unidade atual. Use quando o usuário
+    perguntar sobre outros dias ("o que tem amanhã/na quarta?", "qual o cardápio da semana?").
+    `inicio` = segunda-feira em ISO (ex: "2026-07-06"); vazio usa a semana atual.
+    Retorna {inicio, dias: [{data, dia_semana, pratos: [{nome, categoria}]}]}."""
+    ctx = current_context()
+    try:
+        semana = go_api.get_cardapio_semana(ctx.unidade_id, inicio or "")
+    except Exception:
+        return "Não foi possível carregar o cardápio da semana agora."
+    return {
+        "inicio": semana.get("inicio"),
+        "dias": [
+            {
+                "data": d.get("data"),
+                "dia_semana": d.get("dia_semana"),
+                "pratos": [filters.resumir(p) for p in (d.get("pratos") or [])],
+            }
+            for d in (semana.get("dias") or [])
+        ],
+    }
+
+
+@tool
+def meus_pontos() -> dict | str:
+    """Pontuação de gamificação do usuário atual: pontos acumulados, nível, streak de
+    dias registrando consumo e os últimos eventos de pontuação. Use quando perguntarem
+    "quantos pontos eu tenho?", "qual meu nível?", "como funciona a pontuação?"."""
+    ctx = current_context()
+    if not ctx.usuario_id:
+        return ("Usuário não identificado nesta sessão — para acumular pontos é preciso "
+                "criar um perfil (no site) e conversar identificado.")
+    try:
+        return go_api.get_gamificacao(ctx.usuario_id)
+    except Exception:
+        return "Não foi possível carregar sua pontuação agora."
 
 
 TOOLS = [
     listar_pratos_do_dia,
+    cardapio_da_semana,
     filtrar_pratos,
     detalhar_prato,
     comparar_pratos,
     meu_perfil,
+    meus_pontos,
     consultar_medidas_caseiras,
     buscar_informacao,
     registrar_consumo,

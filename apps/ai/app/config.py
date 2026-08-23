@@ -12,6 +12,29 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
 
+# Limites do LLM. O pior caso de UMA chamada é LLM_TIMEOUT_SECONDS × (LLM_MAX_RETRIES+1)
+# e precisa caber no CHAT_TIMEOUT_SECONDS do Go (default 60s), senão o Go desiste antes,
+# devolve 502 e o worker segue queimando uma resposta que ninguém lê. Com 45s × 2 =
+# 90s isso era violado; 45s × (1+1) mantém 1 retentativa útil (para 429/rede) sem
+# estourar o orçamento numa única chamada.
+# NOTA: um turno pode fazer VÁRIAS chamadas (recursion_limit), então o orçamento total
+# ainda pode ser excedido. A proteção para quem espera é a expiração da fila
+# (REQUEST_MAX_AGE_SECONDS) + réplicas do worker. O fix completo — propagar o deadline
+# absoluto do Go por requisição e abortar quando esgotar — está no follow-up (ver PR).
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "45"))
+LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "1"))
+# Resposta completa = cardápio inteiro + recomendação + porções; 512 truncava.
+LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "1024"))
+# Prefill mínimo do agente ≈ 2.5k tokens (system + schemas das 10 tools); 2048
+# truncava o system prompt silenciosamente no Ollama.
+OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
+# Teto de passos do grafo do agente (cada tool call = 2 passos). 12 ≈ 5 tool calls
+# por turno — acima disso é loop, não conversa.
+AGENT_RECURSION_LIMIT = int(os.getenv("AGENT_RECURSION_LIMIT", "12"))
+# Mensagem mais velha que isso na fila é descartada sem processar: quem pediu já
+# recebeu 502 do Go e não está mais esperando a resposta.
+REQUEST_MAX_AGE_SECONDS = int(os.getenv("REQUEST_MAX_AGE_SECONDS", os.getenv("CHAT_TIMEOUT_SECONDS", "60")))
+
 # Embeddings (RAG). nomic-embed-text => 768 dimensões (bate com a coluna vector(768)).
 EMBED_PROVIDER = os.getenv("EMBED_PROVIDER", "ollama").lower().strip()
 EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")

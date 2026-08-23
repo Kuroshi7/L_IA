@@ -3,7 +3,7 @@
 # Seed:  docker compose run --rm api-seed
 # Index RAG: docker compose run --rm ai-indexer
 #
-# restart:"no" → containers não sobem sozinhos no boot da máquina.
+# restart: infra "no" (não sobe no boot); serviços de app "on-failure" (voltam após crash).
 
 services:
   postgres:
@@ -39,12 +39,13 @@ services:
   api:
     build:
       context: ../apps/api
-    restart: "no"
+    restart: on-failure:5
     environment:
       API_HTTP_PORT: "8080"
       DATABASE_URL: postgres://${POSTGRES_USER:-menuai}:${POSTGRES_PASSWORD:-menuai}@postgres:5432/${POSTGRES_DB:-menuai}?sslmode=disable
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       CHAT_TIMEOUT_SECONDS: ${CHAT_TIMEOUT_SECONDS:-60}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-admin}
     depends_on:
       postgres:
         condition: service_healthy
@@ -78,7 +79,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    restart: "no"
+    restart: on-failure:5
 
   # Worker de IA — consome chat.requests, roda o agente, responde via RPC.
   ai-worker:
@@ -97,13 +98,19 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
       WORKER_PREFETCH: ${WORKER_PREFETCH:-1}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-45}
+      CHAT_TIMEOUT_SECONDS: ${CHAT_TIMEOUT_SECONDS:-60}
     depends_on:
       rabbitmq:
         condition: service_healthy
       api:
         condition: service_started
-    restart: "no"
-    # Escale a concorrência rodando mais réplicas:  docker compose up -d --scale ai-worker=3
+    restart: on-failure:5
+    # Cada worker processa 1 conversa por vez (prefetch=1): réplicas = conversas
+    # simultâneas. 2 é o mínimo para a fila do almoço não travar atrás de um turno
+    # lento; ajuste com AI_WORKER_REPLICAS ou --scale ai-worker=N.
+    deploy:
+      replicas: ${AI_WORKER_REPLICAS:-2}
 
   # API Python (health + /infer + webhook Telegram). Opcional para o fluxo principal.
   ai-api:
@@ -125,7 +132,7 @@ services:
         condition: service_started
     ports:
       - "${MENUAI_AI_PORT:-8000}:8000"
-    restart: "no"
+    restart: on-failure:5
 
   # Indexador RAG one-shot (chunk + embed dos guias → pgvector).
   ai-indexer:
@@ -147,7 +154,7 @@ services:
       context: ../apps/web
       args:
         VITE_API_URL: ${VITE_API_URL:-/api}
-    restart: "no"
+    restart: on-failure:5
     depends_on:
       - api
     ports:

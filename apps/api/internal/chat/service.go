@@ -30,6 +30,7 @@ func New(st *store.Store, rpc *queue.ChatClient, timeout time.Duration) *Service
 type Input struct {
 	SessionID string
 	UnidadeID int64
+	UsuarioID *int64
 	Mensagem  string
 }
 
@@ -46,6 +47,10 @@ type rpcRequest struct {
 	UsuarioID *int64      `json:"usuario_id,omitempty"`
 	Mensagem  string      `json:"mensagem"`
 	Historico []histTurno `json:"historico"`
+	// Regra contratual: na primeira conversa do dia o agente apresenta o
+	// cardápio completo antes de recomendar. Calculado aqui (fonte da verdade)
+	// para não depender do comportamento da LLM.
+	PrimeiraDoDia bool `json:"primeira_do_dia"`
 }
 
 type histTurno struct {
@@ -72,15 +77,21 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		return Output{}, fmt.Errorf("carregar histórico: %w", err)
 	}
 
+	primeiraDoDia, err := s.store.PrimeiraMensagemDoDia(ctx, sess.UnidadeID, sess.UsuarioID, sess.ID)
+	if err != nil {
+		primeiraDoDia = false // regra é best-effort: não derruba o chat
+	}
+
 	if err := s.store.AddMensagem(ctx, sess.ID, "user", in.Mensagem); err != nil {
 		return Output{}, fmt.Errorf("persistir mensagem do usuário: %w", err)
 	}
 
 	req := rpcRequest{
-		SessionID: sess.ID,
-		UnidadeID: sess.UnidadeID,
-		UsuarioID: sess.UsuarioID,
-		Mensagem:  in.Mensagem,
+		SessionID:     sess.ID,
+		UnidadeID:     sess.UnidadeID,
+		UsuarioID:     sess.UsuarioID,
+		Mensagem:      in.Mensagem,
+		PrimeiraDoDia: primeiraDoDia,
 	}
 	for _, m := range historico {
 		req.Historico = append(req.Historico, histTurno{Papel: m.Papel, Conteudo: m.Conteudo})
@@ -113,6 +124,12 @@ func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, e
 	if in.SessionID != "" {
 		sess, err := s.store.GetSessao(ctx, in.SessionID)
 		if err == nil {
+			// sessão anônima que passou a ter usuário identificado → vincula.
+			if sess.UsuarioID == nil && in.UsuarioID != nil {
+				if err := s.store.VincularSessaoUsuario(ctx, sess.ID, *in.UsuarioID); err == nil {
+					sess.UsuarioID = in.UsuarioID
+				}
+			}
 			return sess, nil
 		}
 		// sessão informada não existe → cria uma nova abaixo
@@ -120,7 +137,7 @@ func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, e
 	if in.UnidadeID == 0 {
 		return store.Sessao{}, fmt.Errorf("%w: unidade_id é obrigatório para iniciar uma sessão", ErrEntradaInvalida)
 	}
-	return s.store.CriarSessao(ctx, in.UnidadeID, nil, "web")
+	return s.store.CriarSessao(ctx, in.UnidadeID, in.UsuarioID, "web")
 }
 
 func (s *Service) ResetarSessao(ctx context.Context, id string) error {
