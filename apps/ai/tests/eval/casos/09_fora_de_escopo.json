@@ -1,0 +1,11 @@
+{
+  "nome": "fora de escopo",
+  "porque": "o guardrail e a primeira barreira; sem ele o produto responde sobre qualquer coisa",
+  "dados": "padrao",
+  "usuario_id": 7,
+  "primeira_do_dia": false,
+  "mensagem": "me explica como funciona o algoritmo de ordenacao quicksort",
+  "esperado": {
+    "deve_ser_fora_de_escopo": true
+  }
+}

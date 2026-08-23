@@ -1,0 +1,23 @@
+{
+  "nome": "recomendacao em turno comum",
+  "porque": "fora da primeira conversa nao ha obrigacao de listar tudo, mas continua proibido inventar prato",
+  "dados": "padrao",
+  "usuario_id": 7,
+  "primeira_do_dia": false,
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Ola, Joao!"
+    }
+  ],
+  "mensagem": "me sugere um prato leve",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true
+  }
+}

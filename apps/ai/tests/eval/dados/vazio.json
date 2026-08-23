@@ -1,0 +1,71 @@
+{
+  "pratos": [],
+  "perfil": {
+    "nome": "Joao",
+    "restricoes": [],
+    "preferencias": [],
+    "alergias": [],
+    "imc": 26.1,
+    "classificacao_imc": "sobrepeso",
+    "meta_calorica_kcal": 2200
+  },
+  "medidas": [
+    {
+      "medida": "concha",
+      "alimento": "arroz integral",
+      "gramas": 90,
+      "kcal": 99
+    },
+    {
+      "medida": "file",
+      "alimento": "frango grelhado",
+      "gramas": 100,
+      "kcal": 180
+    },
+    {
+      "medida": "colher de sopa",
+      "alimento": "abobrinha refogada",
+      "gramas": 25,
+      "kcal": 11
+    }
+  ],
+  "gamificacao": {
+    "gamificacao": {
+      "usuario_id": 7,
+      "pontos": 140,
+      "nivel": 2,
+      "streak_dias": 3
+    },
+    "eventos": []
+  },
+  "rag": [
+    "Uma concha media de arroz corresponde a cerca de 90 g."
+  ],
+  "consumo": {
+    "itens": [
+      {
+        "entrada": {
+          "alimento": "arroz",
+          "medida": "concha",
+          "quantidade": 2
+        },
+        "alimento_resolvido": "Arroz integral",
+        "porcao_resolvida": "concha",
+        "gramas_totais": 180.0,
+        "kcal": 198.0,
+        "proteina_g": 4.5,
+        "carboidrato_g": 46.0,
+        "gordura_g": 1.8,
+        "confianca": "alta",
+        "obs": ""
+      }
+    ],
+    "kcal": 198.0,
+    "proteina_g": 4.5,
+    "carboidrato_g": 46.0,
+    "gordura_g": 1.8,
+    "gramas_totais": 180.0,
+    "itens_ignorados": [],
+    "completo": true
+  }
+}

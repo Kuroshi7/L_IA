@@ -1,0 +1,32 @@
+{
+  "nome": "alimento fora da base — declara a incerteza",
+  "porque": "o diferencial do produto: item nao reconhecido fica fora do total e isso PRECISA ser dito",
+  "dados": "consumo_fora_da_base",
+  "usuario_id": 7,
+  "primeira_do_dia": false,
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Ola!"
+    }
+  ],
+  "mensagem": "comi 2 conchas de arroz e um escondidinho da vovo",
+  "esperado": {
+    "tools_obrigatorias": [
+      "registrar_consumo"
+    ],
+    "ressalva_incerteza": true,
+    "deve_conter_algum": [
+      "nao reconheci",
+      "nao encontrei",
+      "nao entrou",
+      "nao identifiquei",
+      "fora da conta",
+      "nao achei"
+    ]
+  }
+}

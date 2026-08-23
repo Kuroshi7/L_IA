@@ -1,0 +1,26 @@
+{
+  "nome": "comparacao por criterio",
+  "porque": "'qual tem mais proteina' deve sair da tool, com o numero exato — e o caso classico de chute",
+  "dados": "padrao",
+  "usuario_id": 7,
+  "primeira_do_dia": false,
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Ola!"
+    }
+  ],
+  "mensagem": "qual prato de hoje tem mais proteina?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true,
+    "deve_conter_algum": [
+      "frango"
+    ]
+  }
+}

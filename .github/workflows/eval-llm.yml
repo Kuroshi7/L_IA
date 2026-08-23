@@ -1,0 +1,58 @@
+# Eval com LLM real — gate de regressão de PROMPT.
+#
+# Separado do ci.yml de propósito: gasta API, é estocástico e leva minutos.
+# Misturar com o CI faria o merge depender do humor de um modelo, e um gate que
+# fica vermelho por ruído é um gate que todo mundo aprende a ignorar.
+name: Eval (LLM real)
+
+on:
+  schedule:
+    # 06:10 UTC = 03:10 em São Paulo, dias úteis. Resultado pronto antes do dia começar.
+    - cron: '10 6 * * 1-5'
+  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize]
+
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    name: eval das regras de negócio
+    # Em PR só roda com o label `eval` — quem quer o sinal pede por ele.
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'eval')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ai
+    steps:
+      - uses: actions/checkout@v4
+
+      # PR vindo de fork não recebe secret: o job precisa ser PULADO, não vermelho.
+      # Falhar aqui puniria um contribuidor por algo fora do controle dele.
+      - id: chave
+        run: echo "tem=${{ secrets.ANTHROPIC_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
+      - if: steps.chave.outputs.tem != 'true'
+        run: echo "::notice::ANTHROPIC_API_KEY indisponível (provável PR de fork) — eval pulado."
+
+      - if: steps.chave.outputs.tem == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: apps/ai/requirements-dev.txt
+
+      - if: steps.chave.outputs.tem == 'true'
+        run: pip install -r requirements-dev.txt
+
+      - if: steps.chave.outputs.tem == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_PROVIDER: anthropic
+          ANTHROPIC_MODEL: claude-haiku-4-5
+          # Sem prazo de fila aqui: o eval não tem ninguém esperando do outro lado.
+          REQUEST_MAX_AGE_SECONDS: '600'
+        # `-s` para a tabela caso-a-caso aparecer no log do job.
+        run: python -m pytest tests/eval -m llm -s

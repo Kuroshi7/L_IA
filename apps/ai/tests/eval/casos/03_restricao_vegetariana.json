@@ -1,0 +1,15 @@
+{
+  "nome": "respeita restricao do perfil",
+  "porque": "vegetariano nunca pode receber prato com carne — a regra e deterministica em filters.py",
+  "dados": "vegetariano_alergico",
+  "usuario_id": 7,
+  "primeira_do_dia": false,
+  "mensagem": "o que voce me recomenda pra hoje?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "nao_deve_recomendar": [
+      "Estrogonofe de carne"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "nome": "registro em duas etapas",
+  "porque": "IA-07: a primeira chamada e previa; gravar sem confirmacao vira pontuacao errada sem desfazer",
+  "dados": "padrao",
+  "usuario_id": 7,
+  "primeira_do_dia": false,
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Ola!"
+    }
+  ],
+  "mensagem": "comi 2 conchas de arroz integral",
+  "esperado": {
+    "tools_obrigatorias": [
+      "registrar_consumo"
+    ],
+    "nao_pode_confirmar_sozinho": true,
+    "deve_conter_algum": [
+      "confirma",
+      "esta certo",
+      "correto",
+      "confere",
+      "sobrou"
+    ]
+  }
+}

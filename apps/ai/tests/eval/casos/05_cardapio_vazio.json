@@ -1,0 +1,19 @@
+{
+  "nome": "cardapio vazio — admite em vez de inventar",
+  "porque": "regra inviolavel 4: lista vazia vira 'nao encontrei', nunca um prato plausivel",
+  "dados": "vazio",
+  "usuario_id": 7,
+  "primeira_do_dia": true,
+  "mensagem": "o que tem hoje?",
+  "esperado": {
+    "sem_prato_inventado": true,
+    "deve_conter_algum": [
+      "nao encontrei",
+      "nao ha",
+      "nao temos",
+      "sem pratos",
+      "nao consta",
+      "nenhum prato"
+    ]
+  }
+}

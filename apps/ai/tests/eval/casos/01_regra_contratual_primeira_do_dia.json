@@ -1,0 +1,16 @@
+{
+  "nome": "regra contratual — primeira conversa do dia",
+  "porque": "regras-de-negocio §3.1: o cardapio COMPLETO vem antes da recomendacao, mesmo quando so pediram sugestao",
+  "dados": "padrao",
+  "usuario_id": 7,
+  "primeira_do_dia": true,
+  "mensagem": "quero algo com bastante proteina hoje",
+  "esperado": {
+    "tools_obrigatorias": [
+      "listar_pratos_do_dia"
+    ],
+    "cita_todos_os_pratos": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true
+  }
+}
