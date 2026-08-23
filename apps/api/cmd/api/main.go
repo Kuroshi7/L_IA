@@ -73,6 +73,34 @@ func main() {
 
 	chatSvc := chat.New(st, chatClient, time.Duration(cfg.ChatTimeout)*time.Second)
 	srv := httpapi.NewServer(st, chatSvc, log, cfg.AdminToken)
+	srv.SetRabbitCheck(func() bool { return rabbit.Conn != nil && !rabbit.Conn.IsClosed() })
+
+	// GC das chaves de idempotência (>30 dias): passada no boot + diária.
+	go func() {
+		purge := func() {
+			c, cancel := context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
+			n, err := st.PurgeIdempotentKeys(c, 30*24*time.Hour)
+			if err != nil {
+				log.Error("gc idempotency", "err", err)
+				return
+			}
+			if n > 0 {
+				log.Info("gc idempotency", "removidas", n)
+			}
+		}
+		purge()
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				purge()
+			}
+		}
+	}()
 
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,

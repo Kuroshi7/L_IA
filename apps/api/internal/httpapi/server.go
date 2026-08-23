@@ -16,11 +16,17 @@ type Server struct {
 	chat       *chat.Service
 	log        *slog.Logger
 	adminToken string
+	// rabbitOK reporta se a conexão com o RabbitMQ está viva (checado em /ready).
+	// Opcional: se nil, /ready só verifica o Postgres.
+	rabbitOK func() bool
 }
 
 func NewServer(st *store.Store, chatSvc *chat.Service, log *slog.Logger, adminToken string) *Server {
 	return &Server{store: st, chat: chatSvc, log: log, adminToken: adminToken}
 }
+
+// SetRabbitCheck registra a checagem de readiness do RabbitMQ (chamada em /ready).
+func (s *Server) SetRabbitCheck(fn func() bool) { s.rabbitOK = fn }
 
 func (s *Server) Router() http.Handler {
 	r := chi.NewRouter()
@@ -29,6 +35,7 @@ func (s *Server) Router() http.Handler {
 	r.Use(s.cors)
 
 	r.Get("/health", s.handleHealth)
+	r.Get("/ready", s.handleReady)
 
 	// API pública (consumida pelo front).
 	r.Get("/unidades", s.handleListUnidades)

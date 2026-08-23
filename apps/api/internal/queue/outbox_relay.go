@@ -41,26 +41,24 @@ func (rl *Relay) Run(ctx context.Context) {
 }
 
 func (rl *Relay) drain(ctx context.Context) {
-	events, err := rl.store.FetchPendingOutbox(ctx, 50)
-	if err != nil {
-		rl.log.Error("outbox fetch", "err", err)
-		return
-	}
-	for _, e := range events {
-		err := rl.ch.PublishWithContext(ctx, ExchangeEvents, e.EventType, false, false, amqp.Publishing{
+	// fetch + publish + mark rodam na mesma transação (lock segurado até o commit),
+	// então dois relays concorrentes não pegam o mesmo evento. A entrega segue
+	// at-least-once (uma falha de commit após o publish reenvia o evento); a
+	// deduplicação final é do inbox do consumidor.
+	err := rl.store.ProcessPendingOutbox(ctx, 50, func(e store.OutboxEvent) error {
+		perr := rl.ch.PublishWithContext(ctx, ExchangeEvents, e.EventType, false, false, amqp.Publishing{
 			ContentType:  "application/json",
 			MessageId:    e.ID,
 			Type:         e.EventType,
 			Body:         e.Payload,
 			DeliveryMode: amqp.Persistent,
 		})
-		if err != nil {
-			rl.log.Error("outbox publish", "id", e.ID, "err", err)
-			_ = rl.store.MarkOutboxFailed(ctx, e.ID)
-			continue
+		if perr != nil {
+			rl.log.Error("outbox publish", "id", e.ID, "err", perr)
 		}
-		if err := rl.store.MarkOutboxPublished(ctx, e.ID); err != nil {
-			rl.log.Error("outbox mark published", "id", e.ID, "err", err)
-		}
+		return perr
+	})
+	if err != nil {
+		rl.log.Error("outbox drain", "err", err)
 	}
 }
