@@ -8,6 +8,7 @@ interface Msg {
   text: string;
   foraDeEscopo?: boolean;
   naoReconhecidos?: string[];
+  aproximados?: string[];
 }
 
 const SUGESTOES = [
@@ -76,25 +77,48 @@ function MarkdownMessage({ text }: { text: string }) {
  * Nota de incerteza.
  *
  * A Lia nunca inventa número nutricional: ela resolve o que a pessoa escreveu
- * contra a base de medidas caseiras. Quando um termo não resolve, o item fica
- * de fora da conta — e é isso que a nota diz.
+ * contra a base de medidas caseiras. Isso falha de dois jeitos diferentes, e a
+ * pessoa precisa distinguir:
  *
- * Deliberadamente NÃO é um badge de alerta como o "fora de escopo": não houve
- * erro, houve honestidade. Um aviso amarelo aqui puniria visualmente a pessoa
- * por ter escrito "macarronada" em vez de "macarrão". É uma marginália: filete
- * terracota, texto miúdo, minúscula, colada embaixo da fala.
+ *   não reconhecido → o item NÃO entrou na conta; o total está incompleto.
+ *   aproximado      → o item entrou, mas a base não garante aquele número.
+ *
+ * Deliberadamente não é um badge de alerta como o "fora de escopo": não houve
+ * erro, houve honestidade. Um aviso amarelo puniria visualmente a pessoa por ter
+ * escrito "macarronada" em vez de "macarrão". É marginália: filete terracota,
+ * texto miúdo, minúscula, colado embaixo da fala.
  */
-function NotaIncerteza({ termos }: { termos?: string[] }) {
-  if (!termos || termos.length === 0) return null;
+function Termos({ lista }: { lista: string[] }) {
   return (
-    <p className="nota-incerteza">
-      não achei {termos.map((t, i) => (
+    <>
+      {lista.map((t, i) => (
         <span key={t}>
-          {i > 0 && (i === termos.length - 1 ? " nem " : ", ")}
+          {i > 0 && (i === lista.length - 1 ? " nem " : ", ")}
           <span className="nota-termo">{t}</span>
         </span>
-      ))} na tabela — {termos.length > 1 ? "esses itens ficaram" : "esse item ficou"} fora da conta
-    </p>
+      ))}
+    </>
+  );
+}
+
+function NotaIncerteza({ fora, aprox }: { fora?: string[]; aprox?: string[] }) {
+  const semFora = !fora || fora.length === 0;
+  const semAprox = !aprox || aprox.length === 0;
+  if (semFora && semAprox) return null;
+  return (
+    <div className="nota-incerteza">
+      {!semFora && (
+        <p className="nota-linha">
+          não achei <Termos lista={fora!} /> na tabela —{" "}
+          {fora!.length > 1 ? "esses itens ficaram" : "esse item ficou"} fora da conta
+        </p>
+      )}
+      {!semAprox && (
+        <p className="nota-linha">
+          o valor de <Termos lista={aprox!} /> é aproximado
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -201,6 +225,7 @@ export default function ChatRoute() {
         text: data.resposta,
         foraDeEscopo: data.fora_de_escopo,
         naoReconhecidos: data.confianca?.nao_reconhecidos,
+        aproximados: data.confianca?.aproximados,
       }]);
       setErroConexao(false);
       // O usuário pode ter registrado consumo pelo chat — pontos podem ter mudado.
@@ -274,7 +299,7 @@ export default function ChatRoute() {
               <div className={`bubble bubble-${msg.role}${msg.foraDeEscopo ? " bubble-warning" : ""}`}>
                 <MarkdownMessage text={msg.text} />
                 {msg.foraDeEscopo && <span className="badge">fora de escopo</span>}
-                <NotaIncerteza termos={msg.naoReconhecidos} />
+                <NotaIncerteza fora={msg.naoReconhecidos} aprox={msg.aproximados} />
               </div>
               {msg.role === "user" && <div className="avatar avatar-user" title="Você">🙂</div>}
             </div>

@@ -7,6 +7,8 @@ LLMs pequenos). A filtragem por restrição/alergia é determinística em Python
 
 import json as _json
 import logging
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -82,6 +84,18 @@ def _qualidade(*totais: dict) -> Qualidade:
 # É o cache genérico do motor: o domínio guarda o que quiser, sem o motor
 # precisar de um campo novo para isso.
 CACHE_NAO_RECONHECIDOS = "nao_reconhecidos"
+# Itens que a base reconheceu, mas cujo número é aproximado (casamento
+# incerto ou porção marcada para revisão nutricional).
+CACHE_APROXIMADOS = "aproximados"
+
+
+def _registrar_qualidade(q: Qualidade) -> None:
+    """Leva a qualidade do cálculo para o log E para a resposta do chat."""
+    _logar_nao_resolvidos(q)
+    if q.imprecisos:
+        # Só o termo que a pessoa escreveu — é o que ela reconhece e pode
+        # reescrever; "Arroz Integral Cozido → concha M" não diz nada a ela.
+        _acumular(CACHE_APROXIMADOS, [i.split(" → ")[0] for i in q.imprecisos])
 
 
 def _logar_nao_resolvidos(q: Qualidade) -> None:
@@ -96,12 +110,17 @@ def _logar_nao_resolvidos(q: Qualidade) -> None:
     # Também sobe para a resposta do chat: é o sinal de incerteza que o usuário
     # precisa ver. Sem isto, o produto se comporta como um LLM genérico — dá o
     # número com a mesma cara de certeza, tenha reconhecido tudo ou não.
+    _acumular(CACHE_NAO_RECONHECIDOS, termos)
+
+
+def _acumular(chave: str, termos) -> None:
     cache = cache_do_turno()
-    if cache is not None:
-        acumulado = cache.setdefault(CACHE_NAO_RECONHECIDOS, [])
-        for termo in termos:
-            if termo not in acumulado:
-                acumulado.append(termo)
+    if cache is None:
+        return
+    acumulado = cache.setdefault(chave, [])
+    for termo in termos:
+        if termo not in acumulado:
+            acumulado.append(termo)
 
 
 def _nota_de_incerteza(q: Qualidade) -> str:
@@ -299,7 +318,7 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
             return "Não foi possível calcular a prévia agora."
 
         q = _qualidade(consumido, resto)
-        _logar_nao_resolvidos(q)
+        _registrar_qualidade(q)
         resultado = {
             "previa": previa,
             "instrucao": (
@@ -337,18 +356,59 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
         return "Não foi possível registrar o consumo agora."
 
     q = _qualidade(registro.get("consumido") or {}, registro.get("resto") or {})
-    _logar_nao_resolvidos(q)
+    _registrar_qualidade(q)
     return anexar_ao_resultado(registro, _nota_de_incerteza(q))
+
+
+# Fuso do refeitório: "hoje" e "amanhã" são do ponto de vista de quem está na
+# fila, não do relógio UTC do servidor.
+_TZ = ZoneInfo("America/Sao_Paulo")
+
+
+def _hoje_local() -> date:
+    return datetime.now(_TZ).date()
+
+
+def _resolver_dia(texto: str) -> date | None:
+    """Converte 'hoje', 'amanha' ou uma data ISO em data-calendário local."""
+    t = filters.normalizar(texto or "").strip()
+    if not t:
+        return None
+    if t in ("hoje",):
+        return _hoje_local()
+    if t in ("amanha", "amanhã"):
+        return _hoje_local() + timedelta(days=1)
+    try:
+        return date.fromisoformat(t)
+    except ValueError:
+        return None
+
+
+def _segunda_da_semana(d: date) -> date:
+    return d - timedelta(days=d.weekday())
 
 
 @tool
 @observado
-def cardapio_da_semana(inicio: str = "") -> dict | str:
-    """Cardápio da SEMANA (segunda a sexta) da unidade atual. Use quando o usuário
-    perguntar sobre outros dias ("o que tem amanhã/na quarta?", "qual o cardápio da semana?").
-    `inicio` = segunda-feira em ISO (ex: "2026-07-06"); vazio usa a semana atual.
+def cardapio_da_semana(inicio: str = "", data_alvo: str = "") -> dict | str:
+    """Cardápio da SEMANA da unidade atual. Use quando o usuário perguntar sobre outros
+    dias ("o que tem amanhã/na quarta?", "qual o cardápio da semana?").
+
+    PREFIRA `data_alvo`: o dia que o usuário quer ver ("amanha", "hoje" ou data ISO).
+    A semana que CONTÉM esse dia é escolhida automaticamente — necessário porque
+    "amanhã" num domingo cai na semana seguinte, e pedir a semana atual devolveria
+    dias que já passaram.
+
+    `inicio` = segunda-feira em ISO, só se você já souber a semana exata; vazio e sem
+    `data_alvo` usa a semana atual.
     Retorna {inicio, dias: [{data, dia_semana, pratos: [{nome, categoria}]}]}."""
     ctx = current_context()
+
+    if not inicio and data_alvo:
+        alvo = _resolver_dia(data_alvo)
+        if alvo:
+            inicio = _segunda_da_semana(alvo).isoformat()
+
     try:
         semana = go_api.get_cardapio_semana(ctx.unidade_id, inicio or "")
     except Exception:

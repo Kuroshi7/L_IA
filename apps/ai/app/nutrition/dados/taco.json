@@ -1,0 +1,5321 @@
+[
+ {
+  "nome": "Arroz, integral, cozido",
+  "categoria": "Cereais e derivados",
+  "kcal": 123.53,
+  "proteina_g": 2.59,
+  "carboidrato_g": 25.81,
+  "gordura_g": 1.0,
+  "umidade_perc": 70.14
+ },
+ {
+  "nome": "Arroz, integral, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 359.68,
+  "proteina_g": 7.32,
+  "carboidrato_g": 77.45,
+  "gordura_g": 1.86,
+  "umidade_perc": 12.18
+ },
+ {
+  "nome": "Arroz, tipo 1, cozido",
+  "categoria": "Cereais e derivados",
+  "kcal": 128.26,
+  "proteina_g": 2.52,
+  "carboidrato_g": 28.06,
+  "gordura_g": 0.23,
+  "umidade_perc": 69.11
+ },
+ {
+  "nome": "Arroz, tipo 1, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 357.79,
+  "proteina_g": 7.16,
+  "carboidrato_g": 78.76,
+  "gordura_g": 0.34,
+  "umidade_perc": 13.22
+ },
+ {
+  "nome": "Arroz, tipo 2, cozido",
+  "categoria": "Cereais e derivados",
+  "kcal": 130.12,
+  "proteina_g": 2.57,
+  "carboidrato_g": 28.19,
+  "gordura_g": 0.36,
+  "umidade_perc": 68.73
+ },
+ {
+  "nome": "Arroz, tipo 2, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 358.12,
+  "proteina_g": 7.24,
+  "carboidrato_g": 78.88,
+  "gordura_g": 0.28,
+  "umidade_perc": 13.16
+ },
+ {
+  "nome": "Aveia, flocos, crua",
+  "categoria": "Cereais e derivados",
+  "kcal": 393.82,
+  "proteina_g": 13.92,
+  "carboidrato_g": 66.64,
+  "gordura_g": 8.5,
+  "umidade_perc": 9.13
+ },
+ {
+  "nome": "Biscoito, doce, maisena",
+  "categoria": "Cereais e derivados",
+  "kcal": 442.82,
+  "proteina_g": 8.07,
+  "carboidrato_g": 75.23,
+  "gordura_g": 11.97,
+  "umidade_perc": 3.22
+ },
+ {
+  "nome": "Biscoito, doce, recheado com chocolate",
+  "categoria": "Cereais e derivados",
+  "kcal": 471.82,
+  "proteina_g": 6.4,
+  "carboidrato_g": 70.55,
+  "gordura_g": 19.58,
+  "umidade_perc": 2.18
+ },
+ {
+  "nome": "Biscoito, doce, recheado com morango",
+  "categoria": "Cereais e derivados",
+  "kcal": 471.17,
+  "proteina_g": 5.72,
+  "carboidrato_g": 71.01,
+  "gordura_g": 19.57,
+  "umidade_perc": 2.73
+ },
+ {
+  "nome": "Biscoito, doce, wafer, recheado de chocolate",
+  "categoria": "Cereais e derivados",
+  "kcal": 502.46,
+  "proteina_g": 5.56,
+  "carboidrato_g": 67.54,
+  "gordura_g": 24.67,
+  "umidade_perc": 1.17
+ },
+ {
+  "nome": "Biscoito, doce, wafer, recheado de morango",
+  "categoria": "Cereais e derivados",
+  "kcal": 513.45,
+  "proteina_g": 4.52,
+  "carboidrato_g": 67.35,
+  "gordura_g": 26.4,
+  "umidade_perc": 1.17
+ },
+ {
+  "nome": "Biscoito, salgado, cream cracker",
+  "categoria": "Cereais e derivados",
+  "kcal": 431.73,
+  "proteina_g": 10.06,
+  "carboidrato_g": 68.73,
+  "gordura_g": 14.44,
+  "umidade_perc": 4.06
+ },
+ {
+  "nome": "Bolo, mistura para",
+  "categoria": "Cereais e derivados",
+  "kcal": 418.63,
+  "proteina_g": 6.16,
+  "carboidrato_g": 84.71,
+  "gordura_g": 6.13,
+  "umidade_perc": 1.0
+ },
+ {
+  "nome": "Bolo, pronto, aipim",
+  "categoria": "Cereais e derivados",
+  "kcal": 323.85,
+  "proteina_g": 4.42,
+  "carboidrato_g": 47.86,
+  "gordura_g": 12.75,
+  "umidade_perc": 34.13
+ },
+ {
+  "nome": "Bolo, pronto, chocolate",
+  "categoria": "Cereais e derivados",
+  "kcal": 410.01,
+  "proteina_g": 6.22,
+  "carboidrato_g": 54.72,
+  "gordura_g": 18.47,
+  "umidade_perc": 19.28
+ },
+ {
+  "nome": "Bolo, pronto, coco",
+  "categoria": "Cereais e derivados",
+  "kcal": 333.44,
+  "proteina_g": 5.67,
+  "carboidrato_g": 52.28,
+  "gordura_g": 11.3,
+  "umidade_perc": 29.32
+ },
+ {
+  "nome": "Bolo, pronto, milho",
+  "categoria": "Cereais e derivados",
+  "kcal": 311.39,
+  "proteina_g": 4.8,
+  "carboidrato_g": 45.11,
+  "gordura_g": 12.41,
+  "umidade_perc": 36.69
+ },
+ {
+  "nome": "Canjica, branca, crua",
+  "categoria": "Cereais e derivados",
+  "kcal": 357.6,
+  "proteina_g": 7.2,
+  "carboidrato_g": 78.06,
+  "gordura_g": 0.97,
+  "umidade_perc": 13.56
+ },
+ {
+  "nome": "Canjica, com leite integral",
+  "categoria": "Cereais e derivados",
+  "kcal": 112.46,
+  "proteina_g": 2.36,
+  "carboidrato_g": 23.63,
+  "gordura_g": 1.24,
+  "umidade_perc": 72.49
+ },
+ {
+  "nome": "Cereais, milho, flocos, com sal",
+  "categoria": "Cereais e derivados",
+  "kcal": 369.6,
+  "proteina_g": 7.29,
+  "carboidrato_g": 80.83,
+  "gordura_g": 1.6,
+  "umidade_perc": 9.29
+ },
+ {
+  "nome": "Cereais, milho, flocos, sem sal",
+  "categoria": "Cereais e derivados",
+  "kcal": 363.34,
+  "proteina_g": 6.88,
+  "carboidrato_g": 80.45,
+  "gordura_g": 1.18,
+  "umidade_perc": 11.22
+ },
+ {
+  "nome": "Cereais, mingau, milho, infantil",
+  "categoria": "Cereais e derivados",
+  "kcal": 394.43,
+  "proteina_g": 6.43,
+  "carboidrato_g": 87.27,
+  "gordura_g": 1.09,
+  "umidade_perc": 4.7
+ },
+ {
+  "nome": "Cereais, mistura para vitamina, trigo, cevada e aveia",
+  "categoria": "Cereais e derivados",
+  "kcal": 381.13,
+  "proteina_g": 8.9,
+  "carboidrato_g": 81.62,
+  "gordura_g": 2.12,
+  "umidade_perc": 4.37
+ },
+ {
+  "nome": "Cereal matinal, milho",
+  "categoria": "Cereais e derivados",
+  "kcal": 365.35,
+  "proteina_g": 7.16,
+  "carboidrato_g": 83.82,
+  "gordura_g": 0.96,
+  "umidade_perc": 5.53
+ },
+ {
+  "nome": "Cereal matinal, milho, açúcar",
+  "categoria": "Cereais e derivados",
+  "kcal": 376.56,
+  "proteina_g": 4.74,
+  "carboidrato_g": 88.84,
+  "gordura_g": 0.67,
+  "umidade_perc": 4.27
+ },
+ {
+  "nome": "Creme de arroz, pó",
+  "categoria": "Cereais e derivados",
+  "kcal": 386.0,
+  "proteina_g": 7.03,
+  "carboidrato_g": 83.87,
+  "gordura_g": 1.23,
+  "umidade_perc": 7.33
+ },
+ {
+  "nome": "Creme de milho, pó",
+  "categoria": "Cereais e derivados",
+  "kcal": 333.03,
+  "proteina_g": 4.82,
+  "carboidrato_g": 86.15,
+  "gordura_g": 1.64,
+  "umidade_perc": 5.65
+ },
+ {
+  "nome": "Curau, milho verde",
+  "categoria": "Cereais e derivados",
+  "kcal": 78.43,
+  "proteina_g": 2.36,
+  "carboidrato_g": 13.94,
+  "gordura_g": 1.64,
+  "umidade_perc": 81.56
+ },
+ {
+  "nome": "Curau, milho verde, mistura para",
+  "categoria": "Cereais e derivados",
+  "kcal": 402.29,
+  "proteina_g": 2.22,
+  "carboidrato_g": 79.82,
+  "gordura_g": 13.37,
+  "umidade_perc": 3.92
+ },
+ {
+  "nome": "Farinha, de arroz, enriquecida",
+  "categoria": "Cereais e derivados",
+  "kcal": 363.06,
+  "proteina_g": 1.27,
+  "carboidrato_g": 85.5,
+  "gordura_g": 0.3,
+  "umidade_perc": 12.69
+ },
+ {
+  "nome": "Farinha, de centeio, integral",
+  "categoria": "Cereais e derivados",
+  "kcal": 335.78,
+  "proteina_g": 12.52,
+  "carboidrato_g": 73.3,
+  "gordura_g": 1.75,
+  "umidade_perc": 10.78
+ },
+ {
+  "nome": "Farinha, de milho, amarela",
+  "categoria": "Cereais e derivados",
+  "kcal": 350.59,
+  "proteina_g": 7.19,
+  "carboidrato_g": 79.08,
+  "gordura_g": 1.47,
+  "umidade_perc": 11.77
+ },
+ {
+  "nome": "Farinha, de rosca",
+  "categoria": "Cereais e derivados",
+  "kcal": 370.58,
+  "proteina_g": 11.38,
+  "carboidrato_g": 75.79,
+  "gordura_g": 1.46,
+  "umidade_perc": 9.81
+ },
+ {
+  "nome": "Farinha, de trigo",
+  "categoria": "Cereais e derivados",
+  "kcal": 360.47,
+  "proteina_g": 9.79,
+  "carboidrato_g": 75.09,
+  "gordura_g": 1.37,
+  "umidade_perc": 12.98
+ },
+ {
+  "nome": "Farinha, láctea, de cereais",
+  "categoria": "Cereais e derivados",
+  "kcal": 414.85,
+  "proteina_g": 11.88,
+  "carboidrato_g": 77.77,
+  "gordura_g": 5.79,
+  "umidade_perc": 2.7
+ },
+ {
+  "nome": "Lasanha, massa fresca, cozida",
+  "categoria": "Cereais e derivados",
+  "kcal": 163.76,
+  "proteina_g": 5.81,
+  "carboidrato_g": 32.52,
+  "gordura_g": 1.16,
+  "umidade_perc": 59.65
+ },
+ {
+  "nome": "Lasanha, massa fresca, crua",
+  "categoria": "Cereais e derivados",
+  "kcal": 220.31,
+  "proteina_g": 7.01,
+  "carboidrato_g": 45.06,
+  "gordura_g": 1.34,
+  "umidade_perc": 44.99
+ },
+ {
+  "nome": "Macarrão, instantâneo",
+  "categoria": "Cereais e derivados",
+  "kcal": 435.86,
+  "proteina_g": 8.79,
+  "carboidrato_g": 62.43,
+  "gordura_g": 17.24,
+  "umidade_perc": 5.97
+ },
+ {
+  "nome": "Macarrão, trigo, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 371.12,
+  "proteina_g": 10.0,
+  "carboidrato_g": 77.94,
+  "gordura_g": 1.3,
+  "umidade_perc": 10.24
+ },
+ {
+  "nome": "Macarrão, trigo, cru, com ovos",
+  "categoria": "Cereais e derivados",
+  "kcal": 370.57,
+  "proteina_g": 10.32,
+  "carboidrato_g": 76.62,
+  "gordura_g": 1.97,
+  "umidade_perc": 10.56
+ },
+ {
+  "nome": "Milho, amido, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 361.37,
+  "proteina_g": 0.6,
+  "carboidrato_g": 87.15,
+  "gordura_g": null,
+  "umidade_perc": 12.18
+ },
+ {
+  "nome": "Milho, fubá, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 353.48,
+  "proteina_g": 7.21,
+  "carboidrato_g": 78.87,
+  "gordura_g": 1.9,
+  "umidade_perc": 11.45
+ },
+ {
+  "nome": "Milho, verde, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 138.17,
+  "proteina_g": 6.59,
+  "carboidrato_g": 28.56,
+  "gordura_g": 0.61,
+  "umidade_perc": 63.54
+ },
+ {
+  "nome": "Milho, verde, enlatado, drenado",
+  "categoria": "Cereais e derivados",
+  "kcal": 97.56,
+  "proteina_g": 3.23,
+  "carboidrato_g": 17.14,
+  "gordura_g": 2.35,
+  "umidade_perc": 76.22
+ },
+ {
+  "nome": "Mingau tradicional, pó",
+  "categoria": "Cereais e derivados",
+  "kcal": 373.42,
+  "proteina_g": 0.58,
+  "carboidrato_g": 89.34,
+  "gordura_g": 0.37,
+  "umidade_perc": 8.14
+ },
+ {
+  "nome": "Pamonha, barra para cozimento, pré-cozida",
+  "categoria": "Cereais e derivados",
+  "kcal": 171.22,
+  "proteina_g": 2.55,
+  "carboidrato_g": 30.68,
+  "gordura_g": 4.85,
+  "umidade_perc": 61.31
+ },
+ {
+  "nome": "Pão, aveia, forma",
+  "categoria": "Cereais e derivados",
+  "kcal": 343.09,
+  "proteina_g": 12.35,
+  "carboidrato_g": 59.57,
+  "gordura_g": 5.69,
+  "umidade_perc": 19.92
+ },
+ {
+  "nome": "Pão, de soja",
+  "categoria": "Cereais e derivados",
+  "kcal": 308.73,
+  "proteina_g": 11.34,
+  "carboidrato_g": 56.51,
+  "gordura_g": 3.58,
+  "umidade_perc": 26.03
+ },
+ {
+  "nome": "Pão, glúten, forma",
+  "categoria": "Cereais e derivados",
+  "kcal": 252.99,
+  "proteina_g": 11.95,
+  "carboidrato_g": 44.12,
+  "gordura_g": 2.73,
+  "umidade_perc": 40.67
+ },
+ {
+  "nome": "Pão, milho, forma",
+  "categoria": "Cereais e derivados",
+  "kcal": 292.01,
+  "proteina_g": 8.3,
+  "carboidrato_g": 56.4,
+  "gordura_g": 3.11,
+  "umidade_perc": 30.42
+ },
+ {
+  "nome": "Pão, trigo, forma, integral",
+  "categoria": "Cereais e derivados",
+  "kcal": 253.19,
+  "proteina_g": 9.43,
+  "carboidrato_g": 49.94,
+  "gordura_g": 3.65,
+  "umidade_perc": 34.72
+ },
+ {
+  "nome": "Pão, trigo, francês",
+  "categoria": "Cereais e derivados",
+  "kcal": 299.81,
+  "proteina_g": 7.95,
+  "carboidrato_g": 58.65,
+  "gordura_g": 3.1,
+  "umidade_perc": 28.48
+ },
+ {
+  "nome": "Pão, trigo, sovado",
+  "categoria": "Cereais e derivados",
+  "kcal": 310.96,
+  "proteina_g": 8.4,
+  "carboidrato_g": 61.45,
+  "gordura_g": 2.84,
+  "umidade_perc": 25.76
+ },
+ {
+  "nome": "Pastel, de carne, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 288.7,
+  "proteina_g": 10.74,
+  "carboidrato_g": 42.02,
+  "gordura_g": 8.79,
+  "umidade_perc": 34.4
+ },
+ {
+  "nome": "Pastel, de carne, frito",
+  "categoria": "Cereais e derivados",
+  "kcal": 388.37,
+  "proteina_g": 10.1,
+  "carboidrato_g": 43.77,
+  "gordura_g": 20.14,
+  "umidade_perc": 22.92
+ },
+ {
+  "nome": "Pastel, de queijo, cru",
+  "categoria": "Cereais e derivados",
+  "kcal": 308.47,
+  "proteina_g": 9.85,
+  "carboidrato_g": 45.95,
+  "gordura_g": 9.63,
+  "umidade_perc": 31.28
+ },
+ {
+  "nome": "Pastel, de queijo, frito",
+  "categoria": "Cereais e derivados",
+  "kcal": 422.11,
+  "proteina_g": 8.71,
+  "carboidrato_g": 48.13,
+  "gordura_g": 22.67,
+  "umidade_perc": 17.54
+ },
+ {
+  "nome": "Pastel, massa, crua",
+  "categoria": "Cereais e derivados",
+  "kcal": 310.2,
+  "proteina_g": 6.9,
+  "carboidrato_g": 57.38,
+  "gordura_g": 5.48,
+  "umidade_perc": 27.07
+ },
+ {
+  "nome": "Pastel, massa, frita",
+  "categoria": "Cereais e derivados",
+  "kcal": 569.67,
+  "proteina_g": 6.02,
+  "carboidrato_g": 49.34,
+  "gordura_g": 40.86,
+  "umidade_perc": 0.97
+ },
+ {
+  "nome": "Pipoca, com óleo de soja, sem sal",
+  "categoria": "Cereais e derivados",
+  "kcal": 448.33,
+  "proteina_g": 9.93,
+  "carboidrato_g": 70.31,
+  "gordura_g": 15.94,
+  "umidade_perc": 2.82
+ },
+ {
+  "nome": "Polenta, pré-cozida",
+  "categoria": "Cereais e derivados",
+  "kcal": 102.74,
+  "proteina_g": 2.29,
+  "carboidrato_g": 23.31,
+  "gordura_g": 0.3,
+  "umidade_perc": 72.74
+ },
+ {
+  "nome": "Torrada, pão francês",
+  "categoria": "Cereais e derivados",
+  "kcal": 377.42,
+  "proteina_g": 10.52,
+  "carboidrato_g": 74.56,
+  "gordura_g": 3.3,
+  "umidade_perc": 9.05
+ },
+ {
+  "nome": "Abóbora, cabotian, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 48.04,
+  "proteina_g": 1.44,
+  "carboidrato_g": 10.76,
+  "gordura_g": 0.73,
+  "umidade_perc": 86.35
+ },
+ {
+  "nome": "Abóbora, cabotian, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 38.6,
+  "proteina_g": 1.75,
+  "carboidrato_g": 8.36,
+  "gordura_g": 0.54,
+  "umidade_perc": 88.52
+ },
+ {
+  "nome": "Abóbora, menina brasileira, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 13.61,
+  "proteina_g": 0.61,
+  "carboidrato_g": 3.3,
+  "gordura_g": null,
+  "umidade_perc": 95.69
+ },
+ {
+  "nome": "Abóbora, moranga, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 12.36,
+  "proteina_g": 0.96,
+  "carboidrato_g": 2.67,
+  "gordura_g": 0.06,
+  "umidade_perc": 95.87
+ },
+ {
+  "nome": "Abóbora, moranga, refogada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 29.0,
+  "proteina_g": 0.39,
+  "carboidrato_g": 5.98,
+  "gordura_g": 0.8,
+  "umidade_perc": 92.46
+ },
+ {
+  "nome": "Abóbora, pescoço, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 24.47,
+  "proteina_g": 0.67,
+  "carboidrato_g": 6.12,
+  "gordura_g": 0.12,
+  "umidade_perc": 92.49
+ },
+ {
+  "nome": "Abobrinha, italiana, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 15.04,
+  "proteina_g": 1.12,
+  "carboidrato_g": 2.98,
+  "gordura_g": 0.2,
+  "umidade_perc": 95.28
+ },
+ {
+  "nome": "Abobrinha, italiana, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 19.28,
+  "proteina_g": 1.14,
+  "carboidrato_g": 4.29,
+  "gordura_g": 0.14,
+  "umidade_perc": 93.86
+ },
+ {
+  "nome": "Abobrinha, italiana, refogada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 24.43,
+  "proteina_g": 1.07,
+  "carboidrato_g": 4.19,
+  "gordura_g": 0.82,
+  "umidade_perc": 93.49
+ },
+ {
+  "nome": "Abobrinha, paulista, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 30.81,
+  "proteina_g": 0.64,
+  "carboidrato_g": 7.87,
+  "gordura_g": 0.14,
+  "umidade_perc": 90.85
+ },
+ {
+  "nome": "Acelga, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 20.94,
+  "proteina_g": 1.44,
+  "carboidrato_g": 4.63,
+  "gordura_g": 0.11,
+  "umidade_perc": 93.19
+ },
+ {
+  "nome": "Agrião, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 16.58,
+  "proteina_g": 2.69,
+  "carboidrato_g": 2.25,
+  "gordura_g": 0.24,
+  "umidade_perc": 93.94
+ },
+ {
+  "nome": "Aipo, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 19.09,
+  "proteina_g": 0.76,
+  "carboidrato_g": 4.27,
+  "gordura_g": 0.07,
+  "umidade_perc": 93.83
+ },
+ {
+  "nome": "Alface, americana, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 8.79,
+  "proteina_g": 0.61,
+  "carboidrato_g": 1.75,
+  "gordura_g": 0.13,
+  "umidade_perc": 97.17
+ },
+ {
+  "nome": "Alface, crespa, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 10.68,
+  "proteina_g": 1.35,
+  "carboidrato_g": 1.7,
+  "gordura_g": 0.16,
+  "umidade_perc": 96.09
+ },
+ {
+  "nome": "Alface, lisa, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 13.82,
+  "proteina_g": 1.69,
+  "carboidrato_g": 2.43,
+  "gordura_g": 0.12,
+  "umidade_perc": 95.0
+ },
+ {
+  "nome": "Alface, roxa, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 12.72,
+  "proteina_g": 0.91,
+  "carboidrato_g": 2.49,
+  "gordura_g": 0.19,
+  "umidade_perc": 95.73
+ },
+ {
+  "nome": "Alfavaca, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 29.18,
+  "proteina_g": 2.66,
+  "carboidrato_g": 5.24,
+  "gordura_g": 0.48,
+  "umidade_perc": 90.21
+ },
+ {
+  "nome": "Alho, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 113.13,
+  "proteina_g": 7.01,
+  "carboidrato_g": 23.91,
+  "gordura_g": 0.22,
+  "umidade_perc": 67.55
+ },
+ {
+  "nome": "Alho-poró, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 31.51,
+  "proteina_g": 1.41,
+  "carboidrato_g": 6.88,
+  "gordura_g": 0.14,
+  "umidade_perc": 90.95
+ },
+ {
+  "nome": "Almeirão, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 18.03,
+  "proteina_g": 1.77,
+  "carboidrato_g": 3.34,
+  "gordura_g": 0.22,
+  "umidade_perc": 93.67
+ },
+ {
+  "nome": "Almeirão, refogado",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 65.08,
+  "proteina_g": 1.7,
+  "carboidrato_g": 5.7,
+  "gordura_g": 4.85,
+  "umidade_perc": 86.54
+ },
+ {
+  "nome": "Batata, baroa, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 80.12,
+  "proteina_g": 0.85,
+  "carboidrato_g": 18.95,
+  "gordura_g": 0.17,
+  "umidade_perc": 79.26
+ },
+ {
+  "nome": "Batata, baroa, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 100.98,
+  "proteina_g": 1.05,
+  "carboidrato_g": 23.98,
+  "gordura_g": 0.17,
+  "umidade_perc": 73.69
+ },
+ {
+  "nome": "Batata, doce, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 76.76,
+  "proteina_g": 0.64,
+  "carboidrato_g": 18.42,
+  "gordura_g": 0.09,
+  "umidade_perc": 80.42
+ },
+ {
+  "nome": "Batata, doce, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 118.24,
+  "proteina_g": 1.26,
+  "carboidrato_g": 28.2,
+  "gordura_g": 0.13,
+  "umidade_perc": 69.51
+ },
+ {
+  "nome": "Batata, frita, tipo chips, industrializada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 542.73,
+  "proteina_g": 5.58,
+  "carboidrato_g": 51.22,
+  "gordura_g": 36.62,
+  "umidade_perc": 2.7
+ },
+ {
+  "nome": "Batata, inglesa, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 51.59,
+  "proteina_g": 1.16,
+  "carboidrato_g": 11.94,
+  "gordura_g": null,
+  "umidade_perc": 86.36
+ },
+ {
+  "nome": "Batata, inglesa, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 64.37,
+  "proteina_g": 1.77,
+  "carboidrato_g": 14.69,
+  "gordura_g": null,
+  "umidade_perc": 82.87
+ },
+ {
+  "nome": "Batata, inglesa, frita",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 267.16,
+  "proteina_g": 4.97,
+  "carboidrato_g": 35.64,
+  "gordura_g": 13.11,
+  "umidade_perc": 44.12
+ },
+ {
+  "nome": "Batata, inglesa, sauté",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 67.89,
+  "proteina_g": 1.29,
+  "carboidrato_g": 14.09,
+  "gordura_g": 0.9,
+  "umidade_perc": 83.09
+ },
+ {
+  "nome": "Berinjela, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 18.85,
+  "proteina_g": 0.68,
+  "carboidrato_g": 4.47,
+  "gordura_g": 0.15,
+  "umidade_perc": 94.43
+ },
+ {
+  "nome": "Berinjela, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 19.63,
+  "proteina_g": 1.22,
+  "carboidrato_g": 4.43,
+  "gordura_g": 0.1,
+  "umidade_perc": 93.8
+ },
+ {
+  "nome": "Beterraba, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 32.15,
+  "proteina_g": 1.29,
+  "carboidrato_g": 7.23,
+  "gordura_g": 0.09,
+  "umidade_perc": 90.57
+ },
+ {
+  "nome": "Beterraba, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 48.83,
+  "proteina_g": 1.95,
+  "carboidrato_g": 11.11,
+  "gordura_g": 0.09,
+  "umidade_perc": 85.98
+ },
+ {
+  "nome": "Biscoito, polvilho doce",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 437.55,
+  "proteina_g": 1.29,
+  "carboidrato_g": 80.54,
+  "gordura_g": 12.25,
+  "umidade_perc": 5.44
+ },
+ {
+  "nome": "Brócolis, cozido",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 24.64,
+  "proteina_g": 2.13,
+  "carboidrato_g": 4.37,
+  "gordura_g": 0.46,
+  "umidade_perc": 92.62
+ },
+ {
+  "nome": "Brócolis, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 25.5,
+  "proteina_g": 3.64,
+  "carboidrato_g": 4.03,
+  "gordura_g": 0.27,
+  "umidade_perc": 91.22
+ },
+ {
+  "nome": "Cará, cozido",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 77.58,
+  "proteina_g": 1.53,
+  "carboidrato_g": 18.85,
+  "gordura_g": 0.11,
+  "umidade_perc": 78.88
+ },
+ {
+  "nome": "Cará, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 95.63,
+  "proteina_g": 2.28,
+  "carboidrato_g": 22.95,
+  "gordura_g": 0.14,
+  "umidade_perc": 73.69
+ },
+ {
+  "nome": "Caruru, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 34.03,
+  "proteina_g": 3.2,
+  "carboidrato_g": 5.97,
+  "gordura_g": 0.58,
+  "umidade_perc": 87.62
+ },
+ {
+  "nome": "Catalonha, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 23.89,
+  "proteina_g": 1.87,
+  "carboidrato_g": 4.75,
+  "gordura_g": 0.28,
+  "umidade_perc": 91.76
+ },
+ {
+  "nome": "Catalonha, refogada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 63.45,
+  "proteina_g": 1.95,
+  "carboidrato_g": 4.81,
+  "gordura_g": 4.81,
+  "umidade_perc": 87.43
+ },
+ {
+  "nome": "Cebola, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 39.42,
+  "proteina_g": 1.71,
+  "carboidrato_g": 8.85,
+  "gordura_g": 0.08,
+  "umidade_perc": 88.92
+ },
+ {
+  "nome": "Cebolinha, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 19.52,
+  "proteina_g": 1.87,
+  "carboidrato_g": 3.37,
+  "gordura_g": 0.35,
+  "umidade_perc": 93.88
+ },
+ {
+  "nome": "Cenoura, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 29.86,
+  "proteina_g": 0.85,
+  "carboidrato_g": 6.69,
+  "gordura_g": 0.22,
+  "umidade_perc": 91.66
+ },
+ {
+  "nome": "Cenoura, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 34.14,
+  "proteina_g": 1.32,
+  "carboidrato_g": 7.66,
+  "gordura_g": 0.17,
+  "umidade_perc": 90.08
+ },
+ {
+  "nome": "Chicória, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 13.84,
+  "proteina_g": 1.14,
+  "carboidrato_g": 2.85,
+  "gordura_g": 0.14,
+  "umidade_perc": 95.14
+ },
+ {
+  "nome": "Chuchu, cozido",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 18.54,
+  "proteina_g": 0.41,
+  "carboidrato_g": 4.79,
+  "gordura_g": null,
+  "umidade_perc": 94.56
+ },
+ {
+  "nome": "Chuchu, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 16.98,
+  "proteina_g": 0.7,
+  "carboidrato_g": 4.14,
+  "gordura_g": 0.06,
+  "umidade_perc": 94.84
+ },
+ {
+  "nome": "Coentro, folhas desidratadas",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 309.07,
+  "proteina_g": 20.88,
+  "carboidrato_g": 47.95,
+  "gordura_g": 10.39,
+  "umidade_perc": 10.63
+ },
+ {
+  "nome": "Couve, manteiga, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 27.06,
+  "proteina_g": 2.87,
+  "carboidrato_g": 4.33,
+  "gordura_g": 0.55,
+  "umidade_perc": 90.9
+ },
+ {
+  "nome": "Couve, manteiga, refogada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 90.34,
+  "proteina_g": 1.67,
+  "carboidrato_g": 8.71,
+  "gordura_g": 6.59,
+  "umidade_perc": 81.53
+ },
+ {
+  "nome": "Couve-flor, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 22.56,
+  "proteina_g": 1.91,
+  "carboidrato_g": 4.52,
+  "gordura_g": 0.21,
+  "umidade_perc": 92.77
+ },
+ {
+  "nome": "Couve-flor, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 19.11,
+  "proteina_g": 1.24,
+  "carboidrato_g": 3.88,
+  "gordura_g": 0.27,
+  "umidade_perc": 94.34
+ },
+ {
+  "nome": "Espinafre, Nova Zelândia, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 16.1,
+  "proteina_g": 2.0,
+  "carboidrato_g": 2.57,
+  "gordura_g": 0.24,
+  "umidade_perc": 94.03
+ },
+ {
+  "nome": "Espinafre, Nova Zelândia, refogado",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 67.25,
+  "proteina_g": 2.72,
+  "carboidrato_g": 4.24,
+  "gordura_g": 5.43,
+  "umidade_perc": 86.57
+ },
+ {
+  "nome": "Farinha, de mandioca, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 360.87,
+  "proteina_g": 1.55,
+  "carboidrato_g": 87.9,
+  "gordura_g": 0.28,
+  "umidade_perc": 9.39
+ },
+ {
+  "nome": "Farinha, de mandioca, torrada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 365.27,
+  "proteina_g": 1.23,
+  "carboidrato_g": 89.19,
+  "gordura_g": 0.29,
+  "umidade_perc": 8.34
+ },
+ {
+  "nome": "Farinha, de puba",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 360.18,
+  "proteina_g": 1.62,
+  "carboidrato_g": 87.29,
+  "gordura_g": 0.47,
+  "umidade_perc": 9.8
+ },
+ {
+  "nome": "Fécula, de mandioca",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 330.85,
+  "proteina_g": 0.52,
+  "carboidrato_g": 81.15,
+  "gordura_g": 0.28,
+  "umidade_perc": 17.77
+ },
+ {
+  "nome": "Feijão, broto, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 38.72,
+  "proteina_g": 4.17,
+  "carboidrato_g": 7.76,
+  "gordura_g": 0.1,
+  "umidade_perc": 87.48
+ },
+ {
+  "nome": "Inhame, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 96.7,
+  "proteina_g": 2.05,
+  "carboidrato_g": 23.23,
+  "gordura_g": 0.21,
+  "umidade_perc": 73.31
+ },
+ {
+  "nome": "Jiló, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 27.37,
+  "proteina_g": 1.4,
+  "carboidrato_g": 6.19,
+  "gordura_g": 0.22,
+  "umidade_perc": 91.63
+ },
+ {
+  "nome": "Jurubeba, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 125.81,
+  "proteina_g": 4.41,
+  "carboidrato_g": 23.06,
+  "gordura_g": 3.91,
+  "umidade_perc": 66.64
+ },
+ {
+  "nome": "Mandioca, cozida",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 125.36,
+  "proteina_g": 0.57,
+  "carboidrato_g": 30.09,
+  "gordura_g": 0.3,
+  "umidade_perc": 68.69
+ },
+ {
+  "nome": "Mandioca, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 151.42,
+  "proteina_g": 1.13,
+  "carboidrato_g": 36.17,
+  "gordura_g": 0.3,
+  "umidade_perc": 61.84
+ },
+ {
+  "nome": "Mandioca, farofa, temperada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 405.69,
+  "proteina_g": 2.06,
+  "carboidrato_g": 80.3,
+  "gordura_g": 9.12,
+  "umidade_perc": 6.42
+ },
+ {
+  "nome": "Mandioca, frita",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 300.06,
+  "proteina_g": 1.38,
+  "carboidrato_g": 50.25,
+  "gordura_g": 11.2,
+  "umidade_perc": 36.57
+ },
+ {
+  "nome": "Manjericão, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 21.15,
+  "proteina_g": 1.99,
+  "carboidrato_g": 3.64,
+  "gordura_g": 0.39,
+  "umidade_perc": 92.96
+ },
+ {
+  "nome": "Maxixe, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 13.75,
+  "proteina_g": 1.39,
+  "carboidrato_g": 2.73,
+  "gordura_g": 0.07,
+  "umidade_perc": 95.06
+ },
+ {
+  "nome": "Mostarda, folha, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 18.11,
+  "proteina_g": 2.11,
+  "carboidrato_g": 3.24,
+  "gordura_g": 0.17,
+  "umidade_perc": 93.43
+ },
+ {
+  "nome": "Nhoque, batata, cozido",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 180.78,
+  "proteina_g": 5.86,
+  "carboidrato_g": 36.78,
+  "gordura_g": 1.94,
+  "umidade_perc": 54.95
+ },
+ {
+  "nome": "Nabo, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 18.19,
+  "proteina_g": 1.2,
+  "carboidrato_g": 4.15,
+  "gordura_g": 0.05,
+  "umidade_perc": 93.84
+ },
+ {
+  "nome": "Palmito, Juçara, em conserva",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 23.2,
+  "proteina_g": 1.79,
+  "carboidrato_g": 4.33,
+  "gordura_g": 0.4,
+  "umidade_perc": 91.37
+ },
+ {
+  "nome": "Palmito, pupunha, em conserva",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 29.43,
+  "proteina_g": 2.46,
+  "carboidrato_g": 5.51,
+  "gordura_g": 0.45,
+  "umidade_perc": 89.44
+ },
+ {
+  "nome": "Pão, de queijo, assado",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 363.08,
+  "proteina_g": 5.12,
+  "carboidrato_g": 34.24,
+  "gordura_g": 24.57,
+  "umidade_perc": 33.74
+ },
+ {
+  "nome": "Pão, de queijo, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 294.54,
+  "proteina_g": 3.65,
+  "carboidrato_g": 38.51,
+  "gordura_g": 13.99,
+  "umidade_perc": 41.84
+ },
+ {
+  "nome": "Pepino, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 9.53,
+  "proteina_g": 0.87,
+  "carboidrato_g": 2.04,
+  "gordura_g": null,
+  "umidade_perc": 96.79
+ },
+ {
+  "nome": "Pimentão, amarelo, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 27.93,
+  "proteina_g": 1.22,
+  "carboidrato_g": 5.96,
+  "gordura_g": 0.44,
+  "umidade_perc": 91.88
+ },
+ {
+  "nome": "Pimentão, verde, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 21.29,
+  "proteina_g": 1.05,
+  "carboidrato_g": 4.89,
+  "gordura_g": 0.15,
+  "umidade_perc": 93.52
+ },
+ {
+  "nome": "Pimentão, vermelho, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 23.28,
+  "proteina_g": 1.04,
+  "carboidrato_g": 5.47,
+  "gordura_g": 0.15,
+  "umidade_perc": 92.9
+ },
+ {
+  "nome": "Polvilho, doce",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 351.23,
+  "proteina_g": 0.43,
+  "carboidrato_g": 86.77,
+  "gordura_g": null,
+  "umidade_perc": 12.58
+ },
+ {
+  "nome": "Quiabo, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 29.94,
+  "proteina_g": 1.92,
+  "carboidrato_g": 6.37,
+  "gordura_g": 0.3,
+  "umidade_perc": 90.58
+ },
+ {
+  "nome": "Rabanete, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 13.74,
+  "proteina_g": 1.39,
+  "carboidrato_g": 2.73,
+  "gordura_g": 0.07,
+  "umidade_perc": 95.06
+ },
+ {
+  "nome": "Repolho, branco, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 17.12,
+  "proteina_g": 0.88,
+  "carboidrato_g": 3.86,
+  "gordura_g": 0.14,
+  "umidade_perc": 94.72
+ },
+ {
+  "nome": "Repolho, roxo, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 30.91,
+  "proteina_g": 1.91,
+  "carboidrato_g": 7.2,
+  "gordura_g": 0.06,
+  "umidade_perc": 90.08
+ },
+ {
+  "nome": "Repolho, roxo, refogado",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 41.77,
+  "proteina_g": 1.8,
+  "carboidrato_g": 7.56,
+  "gordura_g": 1.24,
+  "umidade_perc": 88.7
+ },
+ {
+  "nome": "Rúcula, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 13.13,
+  "proteina_g": 1.77,
+  "carboidrato_g": 2.22,
+  "gordura_g": 0.11,
+  "umidade_perc": 94.82
+ },
+ {
+  "nome": "Salsa, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 33.42,
+  "proteina_g": 3.26,
+  "carboidrato_g": 5.71,
+  "gordura_g": 0.61,
+  "umidade_perc": 88.65
+ },
+ {
+  "nome": "Seleta de legumes, enlatada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 56.53,
+  "proteina_g": 3.42,
+  "carboidrato_g": 12.67,
+  "gordura_g": 0.35,
+  "umidade_perc": 82.15
+ },
+ {
+  "nome": "Serralha, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 30.4,
+  "proteina_g": 2.67,
+  "carboidrato_g": 4.95,
+  "gordura_g": 0.74,
+  "umidade_perc": 90.25
+ },
+ {
+  "nome": "Taioba, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 34.21,
+  "proteina_g": 2.9,
+  "carboidrato_g": 5.43,
+  "gordura_g": 0.93,
+  "umidade_perc": 89.24
+ },
+ {
+  "nome": "Tomate, com semente, cru",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 15.34,
+  "proteina_g": 1.1,
+  "carboidrato_g": 3.14,
+  "gordura_g": 0.17,
+  "umidade_perc": 95.13
+ },
+ {
+  "nome": "Tomate, extrato",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 60.93,
+  "proteina_g": 2.43,
+  "carboidrato_g": 14.96,
+  "gordura_g": 0.19,
+  "umidade_perc": 79.66
+ },
+ {
+  "nome": "Tomate, molho industrializado",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 38.45,
+  "proteina_g": 1.38,
+  "carboidrato_g": 7.71,
+  "gordura_g": 0.9,
+  "umidade_perc": 88.14
+ },
+ {
+  "nome": "Tomate, purê",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 27.94,
+  "proteina_g": 1.36,
+  "carboidrato_g": 6.89,
+  "gordura_g": null,
+  "umidade_perc": 90.79
+ },
+ {
+  "nome": "Tomate, salada",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 20.55,
+  "proteina_g": 0.81,
+  "carboidrato_g": 5.12,
+  "gordura_g": null,
+  "umidade_perc": 93.63
+ },
+ {
+  "nome": "Vagem, crua",
+  "categoria": "Verduras, hortaliças e derivados",
+  "kcal": 24.9,
+  "proteina_g": 1.79,
+  "carboidrato_g": 5.35,
+  "gordura_g": 0.17,
+  "umidade_perc": 92.17
+ },
+ {
+  "nome": "Abacate, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 96.15,
+  "proteina_g": 1.24,
+  "carboidrato_g": 6.03,
+  "gordura_g": 8.4,
+  "umidade_perc": 83.79
+ },
+ {
+  "nome": "Abacaxi, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 48.32,
+  "proteina_g": 0.86,
+  "carboidrato_g": 12.33,
+  "gordura_g": 0.12,
+  "umidade_perc": 86.32
+ },
+ {
+  "nome": "Abacaxi, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 30.59,
+  "proteina_g": 0.47,
+  "carboidrato_g": 7.8,
+  "gordura_g": 0.11,
+  "umidade_perc": 91.29
+ },
+ {
+  "nome": "Abiu, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 62.42,
+  "proteina_g": 0.83,
+  "carboidrato_g": 14.93,
+  "gordura_g": 0.7,
+  "umidade_perc": 83.14
+ },
+ {
+  "nome": "Açaí, polpa, com xarope de guaraná e glucose",
+  "categoria": "Frutas e derivados",
+  "kcal": 110.3,
+  "proteina_g": 0.72,
+  "carboidrato_g": 21.46,
+  "gordura_g": 3.66,
+  "umidade_perc": 73.88
+ },
+ {
+  "nome": "Açaí, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 58.05,
+  "proteina_g": 0.8,
+  "carboidrato_g": 6.21,
+  "gordura_g": 3.94,
+  "umidade_perc": 88.7
+ },
+ {
+  "nome": "Acerola, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 33.46,
+  "proteina_g": 0.91,
+  "carboidrato_g": 7.97,
+  "gordura_g": 0.21,
+  "umidade_perc": 90.53
+ },
+ {
+  "nome": "Acerola, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 21.94,
+  "proteina_g": 0.59,
+  "carboidrato_g": 5.54,
+  "gordura_g": null,
+  "umidade_perc": 93.61
+ },
+ {
+  "nome": "Ameixa, calda, enlatada",
+  "categoria": "Frutas e derivados",
+  "kcal": 182.85,
+  "proteina_g": 0.41,
+  "carboidrato_g": 46.89,
+  "gordura_g": null,
+  "umidade_perc": 52.17
+ },
+ {
+  "nome": "Ameixa, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 52.54,
+  "proteina_g": 0.77,
+  "carboidrato_g": 13.85,
+  "gordura_g": null,
+  "umidade_perc": 84.77
+ },
+ {
+  "nome": "Ameixa, em calda, enlatada, drenada",
+  "categoria": "Frutas e derivados",
+  "kcal": 177.36,
+  "proteina_g": 1.02,
+  "carboidrato_g": 47.66,
+  "gordura_g": 0.28,
+  "umidade_perc": 50.34
+ },
+ {
+  "nome": "Atemóia, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 96.97,
+  "proteina_g": 0.97,
+  "carboidrato_g": 25.33,
+  "gordura_g": 0.3,
+  "umidade_perc": 72.74
+ },
+ {
+  "nome": "Banana, da terra, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 128.02,
+  "proteina_g": 1.43,
+  "carboidrato_g": 33.67,
+  "gordura_g": 0.24,
+  "umidade_perc": 63.88
+ },
+ {
+  "nome": "Banana, doce em barra",
+  "categoria": "Frutas e derivados",
+  "kcal": 280.11,
+  "proteina_g": 2.17,
+  "carboidrato_g": 75.67,
+  "gordura_g": 0.05,
+  "umidade_perc": 21.13
+ },
+ {
+  "nome": "Banana, figo, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 105.08,
+  "proteina_g": 1.13,
+  "carboidrato_g": 27.8,
+  "gordura_g": 0.14,
+  "umidade_perc": 70.07
+ },
+ {
+  "nome": "Banana, maçã, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 86.81,
+  "proteina_g": 1.75,
+  "carboidrato_g": 22.34,
+  "gordura_g": 0.06,
+  "umidade_perc": 75.23
+ },
+ {
+  "nome": "Banana, nanica, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 91.53,
+  "proteina_g": 1.4,
+  "carboidrato_g": 23.85,
+  "gordura_g": 0.12,
+  "umidade_perc": 73.8
+ },
+ {
+  "nome": "Banana, ouro, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 112.37,
+  "proteina_g": 1.48,
+  "carboidrato_g": 29.34,
+  "gordura_g": 0.21,
+  "umidade_perc": 68.18
+ },
+ {
+  "nome": "Banana, pacova, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 77.91,
+  "proteina_g": 1.23,
+  "carboidrato_g": 20.31,
+  "gordura_g": 0.08,
+  "umidade_perc": 77.71
+ },
+ {
+  "nome": "Banana, prata, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 98.25,
+  "proteina_g": 1.27,
+  "carboidrato_g": 25.96,
+  "gordura_g": 0.07,
+  "umidade_perc": 71.86
+ },
+ {
+  "nome": "Cacau, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 74.29,
+  "proteina_g": 0.95,
+  "carboidrato_g": 19.41,
+  "gordura_g": 0.14,
+  "umidade_perc": 79.21
+ },
+ {
+  "nome": "Cajá-Manga, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 45.58,
+  "proteina_g": 1.28,
+  "carboidrato_g": 11.43,
+  "gordura_g": null,
+  "umidade_perc": 86.89
+ },
+ {
+  "nome": "Cajá, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 26.33,
+  "proteina_g": 0.59,
+  "carboidrato_g": 6.37,
+  "gordura_g": 0.17,
+  "umidade_perc": 92.44
+ },
+ {
+  "nome": "Caju, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 43.07,
+  "proteina_g": 0.97,
+  "carboidrato_g": 10.29,
+  "gordura_g": 0.33,
+  "umidade_perc": 88.11
+ },
+ {
+  "nome": "Caju, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.57,
+  "proteina_g": 0.48,
+  "carboidrato_g": 9.35,
+  "gordura_g": 0.15,
+  "umidade_perc": 89.82
+ },
+ {
+  "nome": "Caju, suco concentrado, envasado",
+  "categoria": "Frutas e derivados",
+  "kcal": 45.11,
+  "proteina_g": 0.4,
+  "carboidrato_g": 10.73,
+  "gordura_g": 0.2,
+  "umidade_perc": 88.37
+ },
+ {
+  "nome": "Caqui, chocolate, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 71.35,
+  "proteina_g": 0.36,
+  "carboidrato_g": 19.33,
+  "gordura_g": 0.07,
+  "umidade_perc": 79.72
+ },
+ {
+  "nome": "Carambola, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 45.74,
+  "proteina_g": 0.87,
+  "carboidrato_g": 11.48,
+  "gordura_g": 0.18,
+  "umidade_perc": 87.1
+ },
+ {
+  "nome": "Ciriguela, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 75.59,
+  "proteina_g": 1.4,
+  "carboidrato_g": 18.86,
+  "gordura_g": 0.36,
+  "umidade_perc": 78.69
+ },
+ {
+  "nome": "Cupuaçu, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 49.42,
+  "proteina_g": 1.16,
+  "carboidrato_g": 10.43,
+  "gordura_g": 0.95,
+  "umidade_perc": 86.23
+ },
+ {
+  "nome": "Cupuaçu, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 48.8,
+  "proteina_g": 0.84,
+  "carboidrato_g": 11.39,
+  "gordura_g": 0.59,
+  "umidade_perc": 86.55
+ },
+ {
+  "nome": "Figo, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 41.45,
+  "proteina_g": 0.97,
+  "carboidrato_g": 10.25,
+  "gordura_g": 0.16,
+  "umidade_perc": 88.19
+ },
+ {
+  "nome": "Figo, enlatado, em calda",
+  "categoria": "Frutas e derivados",
+  "kcal": 184.36,
+  "proteina_g": 0.56,
+  "carboidrato_g": 50.34,
+  "gordura_g": 0.15,
+  "umidade_perc": 48.77
+ },
+ {
+  "nome": "Fruta-pão, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 67.05,
+  "proteina_g": 1.08,
+  "carboidrato_g": 17.17,
+  "gordura_g": 0.19,
+  "umidade_perc": 80.87
+ },
+ {
+  "nome": "Goiaba, branca, com casca, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 51.74,
+  "proteina_g": 0.9,
+  "carboidrato_g": 12.4,
+  "gordura_g": 0.49,
+  "umidade_perc": 85.69
+ },
+ {
+  "nome": "Goiaba, doce em pasta",
+  "categoria": "Frutas e derivados",
+  "kcal": 268.96,
+  "proteina_g": 0.58,
+  "carboidrato_g": 74.12,
+  "gordura_g": 0.0,
+  "umidade_perc": 24.78
+ },
+ {
+  "nome": "Goiaba, doce, cascão",
+  "categoria": "Frutas e derivados",
+  "kcal": 285.59,
+  "proteina_g": 0.41,
+  "carboidrato_g": 78.7,
+  "gordura_g": 0.1,
+  "umidade_perc": 20.26
+ },
+ {
+  "nome": "Goiaba, vermelha, com casca, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 54.17,
+  "proteina_g": 1.09,
+  "carboidrato_g": 13.01,
+  "gordura_g": 0.44,
+  "umidade_perc": 84.98
+ },
+ {
+  "nome": "Graviola, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 61.62,
+  "proteina_g": 0.85,
+  "carboidrato_g": 15.84,
+  "gordura_g": 0.21,
+  "umidade_perc": 82.15
+ },
+ {
+  "nome": "Graviola, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 38.27,
+  "proteina_g": 0.57,
+  "carboidrato_g": 9.78,
+  "gordura_g": 0.14,
+  "umidade_perc": 89.16
+ },
+ {
+  "nome": "Jabuticaba, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 58.05,
+  "proteina_g": 0.61,
+  "carboidrato_g": 15.26,
+  "gordura_g": 0.13,
+  "umidade_perc": 83.65
+ },
+ {
+  "nome": "Jaca, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 87.92,
+  "proteina_g": 1.4,
+  "carboidrato_g": 22.5,
+  "gordura_g": 0.27,
+  "umidade_perc": 75.07
+ },
+ {
+  "nome": "Jambo, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 26.91,
+  "proteina_g": 0.89,
+  "carboidrato_g": 6.49,
+  "gordura_g": 0.07,
+  "umidade_perc": 92.1
+ },
+ {
+  "nome": "Jamelão, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 41.01,
+  "proteina_g": 0.55,
+  "carboidrato_g": 10.63,
+  "gordura_g": 0.11,
+  "umidade_perc": 87.67
+ },
+ {
+  "nome": "Kiwi, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 51.14,
+  "proteina_g": 1.34,
+  "carboidrato_g": 11.5,
+  "gordura_g": 0.63,
+  "umidade_perc": 85.88
+ },
+ {
+  "nome": "Laranja, baía, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 45.44,
+  "proteina_g": 0.98,
+  "carboidrato_g": 11.47,
+  "gordura_g": 0.1,
+  "umidade_perc": 87.08
+ },
+ {
+  "nome": "Laranja, baía, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.65,
+  "proteina_g": 0.65,
+  "carboidrato_g": 8.7,
+  "gordura_g": null,
+  "umidade_perc": 90.25
+ },
+ {
+  "nome": "Laranja, da terra, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 51.47,
+  "proteina_g": 1.08,
+  "carboidrato_g": 12.86,
+  "gordura_g": 0.19,
+  "umidade_perc": 85.38
+ },
+ {
+  "nome": "Laranja, da terra, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 40.96,
+  "proteina_g": 0.67,
+  "carboidrato_g": 9.57,
+  "gordura_g": 0.14,
+  "umidade_perc": 89.22
+ },
+ {
+  "nome": "Laranja, lima, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 45.7,
+  "proteina_g": 1.06,
+  "carboidrato_g": 11.53,
+  "gordura_g": 0.08,
+  "umidade_perc": 86.97
+ },
+ {
+  "nome": "Laranja, lima, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 39.34,
+  "proteina_g": 0.71,
+  "carboidrato_g": 9.17,
+  "gordura_g": 0.12,
+  "umidade_perc": 89.68
+ },
+ {
+  "nome": "Laranja, pêra, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.77,
+  "proteina_g": 1.04,
+  "carboidrato_g": 8.95,
+  "gordura_g": 0.13,
+  "umidade_perc": 89.55
+ },
+ {
+  "nome": "Laranja, pêra, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 32.71,
+  "proteina_g": 0.74,
+  "carboidrato_g": 7.55,
+  "gordura_g": 0.07,
+  "umidade_perc": 91.29
+ },
+ {
+  "nome": "Laranja, valência, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 46.11,
+  "proteina_g": 0.77,
+  "carboidrato_g": 11.72,
+  "gordura_g": 0.16,
+  "umidade_perc": 86.94
+ },
+ {
+  "nome": "Laranja, valência, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.2,
+  "proteina_g": 0.48,
+  "carboidrato_g": 8.55,
+  "gordura_g": 0.12,
+  "umidade_perc": 90.53
+ },
+ {
+  "nome": "Limão, cravo, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 14.1,
+  "proteina_g": 0.33,
+  "carboidrato_g": 5.25,
+  "gordura_g": null,
+  "umidade_perc": 94.19
+ },
+ {
+  "nome": "Limão, galego, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 22.23,
+  "proteina_g": 0.57,
+  "carboidrato_g": 7.32,
+  "gordura_g": 0.07,
+  "umidade_perc": 91.8
+ },
+ {
+  "nome": "Limão, tahiti, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 31.82,
+  "proteina_g": 0.94,
+  "carboidrato_g": 11.08,
+  "gordura_g": 0.14,
+  "umidade_perc": 87.43
+ },
+ {
+  "nome": "Maçã, Argentina, com casca, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 62.53,
+  "proteina_g": 0.23,
+  "carboidrato_g": 16.59,
+  "gordura_g": 0.25,
+  "umidade_perc": 82.65
+ },
+ {
+  "nome": "Maçã, Fuji, com casca, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 55.52,
+  "proteina_g": 0.29,
+  "carboidrato_g": 15.15,
+  "gordura_g": null,
+  "umidade_perc": 84.34
+ },
+ {
+  "nome": "Macaúba, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 404.28,
+  "proteina_g": 2.08,
+  "carboidrato_g": 13.95,
+  "gordura_g": 40.66,
+  "umidade_perc": 41.53
+ },
+ {
+  "nome": "Mamão, doce em calda, drenado",
+  "categoria": "Frutas e derivados",
+  "kcal": 195.63,
+  "proteina_g": 0.19,
+  "carboidrato_g": 54.0,
+  "gordura_g": 0.07,
+  "umidade_perc": 45.53
+ },
+ {
+  "nome": "Mamão, Formosa, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 45.34,
+  "proteina_g": 0.82,
+  "carboidrato_g": 11.55,
+  "gordura_g": 0.12,
+  "umidade_perc": 86.93
+ },
+ {
+  "nome": "Mamão, Papaia, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 40.16,
+  "proteina_g": 0.46,
+  "carboidrato_g": 10.44,
+  "gordura_g": 0.12,
+  "umidade_perc": 88.58
+ },
+ {
+  "nome": "Mamão verde, doce em calda, drenado",
+  "categoria": "Frutas e derivados",
+  "kcal": 209.38,
+  "proteina_g": 0.32,
+  "carboidrato_g": 57.64,
+  "gordura_g": 0.1,
+  "umidade_perc": 41.88
+ },
+ {
+  "nome": "Manga, Haden, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 63.5,
+  "proteina_g": 0.41,
+  "carboidrato_g": 16.66,
+  "gordura_g": 0.26,
+  "umidade_perc": 82.29
+ },
+ {
+  "nome": "Manga, Palmer, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 72.49,
+  "proteina_g": 0.41,
+  "carboidrato_g": 19.35,
+  "gordura_g": 0.17,
+  "umidade_perc": 79.74
+ },
+ {
+  "nome": "Manga, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 48.31,
+  "proteina_g": 0.38,
+  "carboidrato_g": 12.52,
+  "gordura_g": 0.23,
+  "umidade_perc": 86.5
+ },
+ {
+  "nome": "Manga, Tommy Atkins, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 50.69,
+  "proteina_g": 0.86,
+  "carboidrato_g": 12.77,
+  "gordura_g": 0.22,
+  "umidade_perc": 85.81
+ },
+ {
+  "nome": "Maracujá, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 68.44,
+  "proteina_g": 1.99,
+  "carboidrato_g": 12.26,
+  "gordura_g": 2.1,
+  "umidade_perc": 82.85
+ },
+ {
+  "nome": "Maracujá, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 38.76,
+  "proteina_g": 0.81,
+  "carboidrato_g": 9.6,
+  "gordura_g": 0.18,
+  "umidade_perc": 88.9
+ },
+ {
+  "nome": "Maracujá, suco concentrado, envasado",
+  "categoria": "Frutas e derivados",
+  "kcal": 41.97,
+  "proteina_g": 0.77,
+  "carboidrato_g": 9.64,
+  "gordura_g": 0.19,
+  "umidade_perc": 88.94
+ },
+ {
+  "nome": "Melancia, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 32.61,
+  "proteina_g": 0.88,
+  "carboidrato_g": 8.14,
+  "gordura_g": null,
+  "umidade_perc": 90.67
+ },
+ {
+  "nome": "Melão, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 29.37,
+  "proteina_g": 0.68,
+  "carboidrato_g": 7.53,
+  "gordura_g": null,
+  "umidade_perc": 91.28
+ },
+ {
+  "nome": "Mexerica, Murcote, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 57.59,
+  "proteina_g": 0.88,
+  "carboidrato_g": 14.86,
+  "gordura_g": 0.13,
+  "umidade_perc": 83.65
+ },
+ {
+  "nome": "Mexerica, Rio, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.87,
+  "proteina_g": 0.65,
+  "carboidrato_g": 9.34,
+  "gordura_g": 0.13,
+  "umidade_perc": 89.57
+ },
+ {
+  "nome": "Morango, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 30.15,
+  "proteina_g": 0.89,
+  "carboidrato_g": 6.82,
+  "gordura_g": 0.31,
+  "umidade_perc": 91.53
+ },
+ {
+  "nome": "Nêspera, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 42.54,
+  "proteina_g": 0.31,
+  "carboidrato_g": 11.53,
+  "gordura_g": null,
+  "umidade_perc": 87.76
+ },
+ {
+  "nome": "Pequi, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 204.97,
+  "proteina_g": 2.34,
+  "carboidrato_g": 12.97,
+  "gordura_g": 17.97,
+  "umidade_perc": 65.89
+ },
+ {
+  "nome": "Pêra, Park, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 60.59,
+  "proteina_g": 0.24,
+  "carboidrato_g": 16.07,
+  "gordura_g": 0.23,
+  "umidade_perc": 83.19
+ },
+ {
+  "nome": "Pêra, Williams, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 53.31,
+  "proteina_g": 0.57,
+  "carboidrato_g": 14.02,
+  "gordura_g": 0.11,
+  "umidade_perc": 85.03
+ },
+ {
+  "nome": "Pêssego, Aurora, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.33,
+  "proteina_g": 0.82,
+  "carboidrato_g": 9.32,
+  "gordura_g": null,
+  "umidade_perc": 89.32
+ },
+ {
+  "nome": "Pêssego, enlatado, em calda",
+  "categoria": "Frutas e derivados",
+  "kcal": 63.14,
+  "proteina_g": 0.71,
+  "carboidrato_g": 16.88,
+  "gordura_g": null,
+  "umidade_perc": 82.19
+ },
+ {
+  "nome": "Pinha, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 88.47,
+  "proteina_g": 1.49,
+  "carboidrato_g": 22.45,
+  "gordura_g": 0.32,
+  "umidade_perc": 75.05
+ },
+ {
+  "nome": "Pitanga, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 41.42,
+  "proteina_g": 0.93,
+  "carboidrato_g": 10.24,
+  "gordura_g": 0.17,
+  "umidade_perc": 88.29
+ },
+ {
+  "nome": "Pitanga, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 19.11,
+  "proteina_g": 0.29,
+  "carboidrato_g": 4.76,
+  "gordura_g": 0.12,
+  "umidade_perc": 94.57
+ },
+ {
+  "nome": "Romã, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 55.74,
+  "proteina_g": 0.4,
+  "carboidrato_g": 15.11,
+  "gordura_g": null,
+  "umidade_perc": 83.99
+ },
+ {
+  "nome": "Tamarindo, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 275.7,
+  "proteina_g": 3.21,
+  "carboidrato_g": 72.53,
+  "gordura_g": 0.46,
+  "umidade_perc": 21.95
+ },
+ {
+  "nome": "Tangerina, Poncã, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 37.83,
+  "proteina_g": 0.85,
+  "carboidrato_g": 9.61,
+  "gordura_g": 0.07,
+  "umidade_perc": 89.22
+ },
+ {
+  "nome": "Tangerina, Poncã, suco",
+  "categoria": "Frutas e derivados",
+  "kcal": 36.11,
+  "proteina_g": 0.52,
+  "carboidrato_g": 8.8,
+  "gordura_g": null,
+  "umidade_perc": 90.44
+ },
+ {
+  "nome": "Tucumã, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 262.02,
+  "proteina_g": 2.09,
+  "carboidrato_g": 26.47,
+  "gordura_g": 19.08,
+  "umidade_perc": 51.26
+ },
+ {
+  "nome": "Umbu, cru",
+  "categoria": "Frutas e derivados",
+  "kcal": 37.02,
+  "proteina_g": 0.84,
+  "carboidrato_g": 9.4,
+  "gordura_g": null,
+  "umidade_perc": 89.25
+ },
+ {
+  "nome": "Umbu, polpa, congelada",
+  "categoria": "Frutas e derivados",
+  "kcal": 33.94,
+  "proteina_g": 0.51,
+  "carboidrato_g": 8.79,
+  "gordura_g": 0.07,
+  "umidade_perc": 90.19
+ },
+ {
+  "nome": "Uva, Itália, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 52.87,
+  "proteina_g": 0.75,
+  "carboidrato_g": 13.57,
+  "gordura_g": 0.2,
+  "umidade_perc": 84.97
+ },
+ {
+  "nome": "Uva, Rubi, crua",
+  "categoria": "Frutas e derivados",
+  "kcal": 49.06,
+  "proteina_g": 0.61,
+  "carboidrato_g": 12.7,
+  "gordura_g": 0.16,
+  "umidade_perc": 86.08
+ },
+ {
+  "nome": "Uva, suco concentrado, envasado",
+  "categoria": "Frutas e derivados",
+  "kcal": 57.66,
+  "proteina_g": null,
+  "carboidrato_g": 14.71,
+  "gordura_g": null,
+  "umidade_perc": 85.13
+ },
+ {
+  "nome": "Azeite, de dendê",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Azeite, de oliva, extra virgem",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Manteiga, com sal",
+  "categoria": "Gorduras e óleos",
+  "kcal": 725.97,
+  "proteina_g": 0.41,
+  "carboidrato_g": 0.06,
+  "gordura_g": 82.36,
+  "umidade_perc": 15.79
+ },
+ {
+  "nome": "Manteiga, sem sal",
+  "categoria": "Gorduras e óleos",
+  "kcal": 757.54,
+  "proteina_g": 0.4,
+  "carboidrato_g": 0.0,
+  "gordura_g": 86.04,
+  "umidade_perc": 13.63
+ },
+ {
+  "nome": "Margarina, com óleo hidrogenado, com sal (65% de lipídeos)",
+  "categoria": "Gorduras e óleos",
+  "kcal": 596.12,
+  "proteina_g": null,
+  "carboidrato_g": 0.0,
+  "gordura_g": 67.43,
+  "umidade_perc": 32.23
+ },
+ {
+  "nome": "Margarina, com óleo hidrogenado, sem sal (80% de lipídeos)",
+  "categoria": "Gorduras e óleos",
+  "kcal": 722.53,
+  "proteina_g": null,
+  "carboidrato_g": 0.0,
+  "gordura_g": 81.73,
+  "umidade_perc": 19.59
+ },
+ {
+  "nome": "Margarina, com óleo interesterificado, com sal (65%de lipídeos)",
+  "categoria": "Gorduras e óleos",
+  "kcal": 594.45,
+  "proteina_g": null,
+  "carboidrato_g": 0.0,
+  "gordura_g": 67.25,
+  "umidade_perc": 31.97
+ },
+ {
+  "nome": "Margarina, com óleo interesterificado, sem sal (65% de lipídeos)",
+  "categoria": "Gorduras e óleos",
+  "kcal": 593.14,
+  "proteina_g": null,
+  "carboidrato_g": 0.0,
+  "gordura_g": 67.1,
+  "umidade_perc": 33.37
+ },
+ {
+  "nome": "Óleo, de babaçu",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Óleo, de canola",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Óleo, de girassol",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Óleo, de milho",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Óleo, de pequi",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Óleo, de soja",
+  "categoria": "Gorduras e óleos",
+  "kcal": 884.0,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": 100.0,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Abadejo, filé, congelado, assado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 111.62,
+  "proteina_g": 23.52,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.24,
+  "umidade_perc": 74.32
+ },
+ {
+  "nome": "Abadejo, filé, congelado,cozido",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 91.1,
+  "proteina_g": 19.35,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.94,
+  "umidade_perc": 79.73
+ },
+ {
+  "nome": "Abadejo, filé, congelado, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 59.11,
+  "proteina_g": 13.08,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.36,
+  "umidade_perc": 86.42
+ },
+ {
+  "nome": "Abadejo, filé, congelado, grelhado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 129.64,
+  "proteina_g": 27.61,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.3,
+  "umidade_perc": 70.96
+ },
+ {
+  "nome": "Atum, conserva em óleo",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 165.91,
+  "proteina_g": 26.19,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.0,
+  "umidade_perc": 64.5
+ },
+ {
+  "nome": "Atum, fresco, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 117.5,
+  "proteina_g": 25.68,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.87,
+  "umidade_perc": 73.05
+ },
+ {
+  "nome": "Bacalhau, salgado, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 135.89,
+  "proteina_g": 29.04,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.32,
+  "umidade_perc": 47.89
+ },
+ {
+  "nome": "Bacalhau, salgado, refogado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 139.66,
+  "proteina_g": 23.98,
+  "carboidrato_g": 1.22,
+  "gordura_g": 3.61,
+  "umidade_perc": 65.91
+ },
+ {
+  "nome": "Cação, posta, com farinha de trigo, frita",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 208.33,
+  "proteina_g": 24.95,
+  "carboidrato_g": 3.1,
+  "gordura_g": 9.95,
+  "umidade_perc": 60.62
+ },
+ {
+  "nome": "Cação, posta, cozida",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 116.01,
+  "proteina_g": 25.59,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.75,
+  "umidade_perc": 75.93
+ },
+ {
+  "nome": "Cação, posta, crua",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 83.33,
+  "proteina_g": 17.85,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.79,
+  "umidade_perc": 81.38
+ },
+ {
+  "nome": "Camarão, Rio Grande, grande, cozido",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 90.01,
+  "proteina_g": 18.97,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.0,
+  "umidade_perc": 78.71
+ },
+ {
+  "nome": "Camarão, Rio Grande, grande, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 47.18,
+  "proteina_g": 9.99,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.5,
+  "umidade_perc": 89.13
+ },
+ {
+  "nome": "Camarão, Sete Barbas, sem cabeça, com casca, frito",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 231.25,
+  "proteina_g": 18.39,
+  "carboidrato_g": 2.88,
+  "gordura_g": 15.62,
+  "umidade_perc": 61.04
+ },
+ {
+  "nome": "Caranguejo, cozido",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 82.72,
+  "proteina_g": 18.48,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.42,
+  "umidade_perc": 77.0
+ },
+ {
+  "nome": "Corimba, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 128.16,
+  "proteina_g": 17.37,
+  "carboidrato_g": -0.03,
+  "gordura_g": 5.99,
+  "umidade_perc": 75.64
+ },
+ {
+  "nome": "Corimbatá, assado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 261.45,
+  "proteina_g": 19.9,
+  "carboidrato_g": 0.0,
+  "gordura_g": 19.57,
+  "umidade_perc": 59.93
+ },
+ {
+  "nome": "Corimbatá, cozido",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 238.7,
+  "proteina_g": 20.13,
+  "carboidrato_g": 0.0,
+  "gordura_g": 16.93,
+  "umidade_perc": 64.56
+ },
+ {
+  "nome": "Corvina de água doce, crua",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 101.01,
+  "proteina_g": 18.92,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.24,
+  "umidade_perc": 79.25
+ },
+ {
+  "nome": "Corvina do mar, crua",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 94.0,
+  "proteina_g": 18.57,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.58,
+  "umidade_perc": 79.35
+ },
+ {
+  "nome": "Corvina grande, assada",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 146.53,
+  "proteina_g": 26.77,
+  "carboidrato_g": 0.0,
+  "gordura_g": 3.57,
+  "umidade_perc": 69.03
+ },
+ {
+  "nome": "Corvina grande, cozida",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 100.08,
+  "proteina_g": 23.44,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.56,
+  "umidade_perc": 73.61
+ },
+ {
+  "nome": "Dourada de água doce, fresca",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 131.21,
+  "proteina_g": 18.81,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.64,
+  "umidade_perc": 76.16
+ },
+ {
+  "nome": "Lambari, congelado, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 130.84,
+  "proteina_g": 16.81,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.55,
+  "umidade_perc": 71.89
+ },
+ {
+  "nome": "Lambari, congelado, frito",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 326.87,
+  "proteina_g": 28.43,
+  "carboidrato_g": 0.0,
+  "gordura_g": 22.78,
+  "umidade_perc": 40.14
+ },
+ {
+  "nome": "Lambari, fresco,cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 151.6,
+  "proteina_g": 15.65,
+  "carboidrato_g": 0.0,
+  "gordura_g": 9.4,
+  "umidade_perc": 72.17
+ },
+ {
+  "nome": "Manjuba, com farinha de trigo, frita",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 343.55,
+  "proteina_g": 23.45,
+  "carboidrato_g": 10.24,
+  "gordura_g": 22.59,
+  "umidade_perc": 41.3
+ },
+ {
+  "nome": "Manjuba, frita",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 349.33,
+  "proteina_g": 30.14,
+  "carboidrato_g": 0.0,
+  "gordura_g": 24.46,
+  "umidade_perc": 40.68
+ },
+ {
+  "nome": "Merluza, filé, assado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 121.91,
+  "proteina_g": 26.6,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.92,
+  "umidade_perc": 70.73
+ },
+ {
+  "nome": "Merluza, filé, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 89.13,
+  "proteina_g": 16.61,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.02,
+  "umidade_perc": 82.07
+ },
+ {
+  "nome": "Merluza, filé, frito",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 191.63,
+  "proteina_g": 26.93,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.5,
+  "umidade_perc": 63.46
+ },
+ {
+  "nome": "Pescada, branca, crua",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 110.88,
+  "proteina_g": 16.26,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.59,
+  "umidade_perc": 79.57
+ },
+ {
+  "nome": "Pescada, branca, frita",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 223.04,
+  "proteina_g": 27.36,
+  "carboidrato_g": 0.0,
+  "gordura_g": 11.78,
+  "umidade_perc": 57.0
+ },
+ {
+  "nome": "Pescada, filé, com farinha de trigo, frito",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 283.43,
+  "proteina_g": 21.44,
+  "carboidrato_g": 5.03,
+  "gordura_g": 19.11,
+  "umidade_perc": 53.2
+ },
+ {
+  "nome": "Pescada, filé, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 107.21,
+  "proteina_g": 16.65,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.0,
+  "umidade_perc": 79.52
+ },
+ {
+  "nome": "Pescada, filé, frito",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 154.27,
+  "proteina_g": 28.59,
+  "carboidrato_g": 0.0,
+  "gordura_g": 3.57,
+  "umidade_perc": 66.8
+ },
+ {
+  "nome": "Pescada, filé, molho escabeche",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 141.96,
+  "proteina_g": 11.75,
+  "carboidrato_g": 5.02,
+  "gordura_g": 8.02,
+  "umidade_perc": 74.53
+ },
+ {
+  "nome": "Pescadinha, crua",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 76.41,
+  "proteina_g": 15.48,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.14,
+  "umidade_perc": 80.62
+ },
+ {
+  "nome": "Pintado, assado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 191.56,
+  "proteina_g": 36.45,
+  "carboidrato_g": 0.0,
+  "gordura_g": 3.98,
+  "umidade_perc": 56.98
+ },
+ {
+  "nome": "Pintado, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 91.08,
+  "proteina_g": 18.56,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.31,
+  "umidade_perc": 80.27
+ },
+ {
+  "nome": "Pintado, grelhado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 152.19,
+  "proteina_g": 30.8,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.29,
+  "umidade_perc": 65.49
+ },
+ {
+  "nome": "Porquinho, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 93.02,
+  "proteina_g": 20.49,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.61,
+  "umidade_perc": 79.17
+ },
+ {
+  "nome": "Salmão, filé, com pele, fresco,  grelhado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 228.73,
+  "proteina_g": 23.92,
+  "carboidrato_g": 0.0,
+  "gordura_g": 14.04,
+  "umidade_perc": 60.93
+ },
+ {
+  "nome": "Salmão, sem pele, fresco, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 169.78,
+  "proteina_g": 19.25,
+  "carboidrato_g": 0.0,
+  "gordura_g": 9.71,
+  "umidade_perc": 68.98
+ },
+ {
+  "nome": "Salmão, sem pele, fresco, grelhado",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 242.71,
+  "proteina_g": 26.14,
+  "carboidrato_g": 0.0,
+  "gordura_g": 14.53,
+  "umidade_perc": 58.13
+ },
+ {
+  "nome": "Sardinha, assada",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 164.35,
+  "proteina_g": 32.18,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.99,
+  "umidade_perc": 60.08
+ },
+ {
+  "nome": "Sardinha, conserva em óleo",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 284.98,
+  "proteina_g": 15.94,
+  "carboidrato_g": 0.0,
+  "gordura_g": 24.05,
+  "umidade_perc": 55.14
+ },
+ {
+  "nome": "Sardinha, frita",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 257.04,
+  "proteina_g": 33.38,
+  "carboidrato_g": 0.0,
+  "gordura_g": 12.69,
+  "umidade_perc": 48.49
+ },
+ {
+  "nome": "Sardinha, inteira, crua",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 113.9,
+  "proteina_g": 21.08,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.65,
+  "umidade_perc": 76.64
+ },
+ {
+  "nome": "Tucunaré, filé, congelado, cru",
+  "categoria": "Pescados e frutos do mar",
+  "kcal": 87.69,
+  "proteina_g": 17.96,
+  "carboidrato_g": -0.05,
+  "gordura_g": 1.22,
+  "umidade_perc": 79.88
+ },
+ {
+  "nome": "Apresuntado",
+  "categoria": "Carnes e derivados",
+  "kcal": 128.86,
+  "proteina_g": 13.45,
+  "carboidrato_g": 2.86,
+  "gordura_g": 6.69,
+  "umidade_perc": 73.72
+ },
+ {
+  "nome": "Caldo de carne, tablete",
+  "categoria": "Carnes e derivados",
+  "kcal": 240.62,
+  "proteina_g": 7.82,
+  "carboidrato_g": 15.05,
+  "gordura_g": 16.57,
+  "umidade_perc": 2.93
+ },
+ {
+  "nome": "Caldo de galinha, tablete",
+  "categoria": "Carnes e derivados",
+  "kcal": 251.45,
+  "proteina_g": 6.28,
+  "carboidrato_g": 10.65,
+  "gordura_g": 20.42,
+  "umidade_perc": 3.38
+ },
+ {
+  "nome": "Carne, bovina, acém, moído, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 212.42,
+  "proteina_g": 26.69,
+  "carboidrato_g": 0.0,
+  "gordura_g": 10.92,
+  "umidade_perc": 61.62
+ },
+ {
+  "nome": "Carne, bovina, acém, moído, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 136.56,
+  "proteina_g": 19.42,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.95,
+  "umidade_perc": 72.7
+ },
+ {
+  "nome": "Carne, bovina, acém, sem gordura, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 214.61,
+  "proteina_g": 27.27,
+  "carboidrato_g": 0.0,
+  "gordura_g": 10.88,
+  "umidade_perc": 60.38
+ },
+ {
+  "nome": "Carne, bovina, acém, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 144.03,
+  "proteina_g": 20.82,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.11,
+  "umidade_perc": 71.52
+ },
+ {
+  "nome": "Carne, bovina, almôndegas, cruas",
+  "categoria": "Carnes e derivados",
+  "kcal": 189.26,
+  "proteina_g": 12.31,
+  "carboidrato_g": 9.79,
+  "gordura_g": 11.2,
+  "umidade_perc": 64.28
+ },
+ {
+  "nome": "Carne, bovina, almôndegas, fritas",
+  "categoria": "Carnes e derivados",
+  "kcal": 271.81,
+  "proteina_g": 18.16,
+  "carboidrato_g": 14.29,
+  "gordura_g": 15.78,
+  "umidade_perc": 48.09
+ },
+ {
+  "nome": "Carne, bovina, bucho, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 133.02,
+  "proteina_g": 21.64,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.5,
+  "umidade_perc": 74.12
+ },
+ {
+  "nome": "Carne, bovina, bucho, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 137.3,
+  "proteina_g": 20.53,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.5,
+  "umidade_perc": 74.97
+ },
+ {
+  "nome": "Carne, bovina, capa de contra-filé, com gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 216.91,
+  "proteina_g": 19.2,
+  "carboidrato_g": 0.0,
+  "gordura_g": 14.96,
+  "umidade_perc": 64.77
+ },
+ {
+  "nome": "Carne, bovina, capa de contra-filé, com gordura, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 311.7,
+  "proteina_g": 30.69,
+  "carboidrato_g": 0.0,
+  "gordura_g": 20.03,
+  "umidade_perc": 47.88
+ },
+ {
+  "nome": "Carne, bovina, capa de contra-filé, sem gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 131.06,
+  "proteina_g": 21.54,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.33,
+  "umidade_perc": 72.99
+ },
+ {
+  "nome": "Carne, bovina, capa de contra-filé, sem gordura, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 239.44,
+  "proteina_g": 35.06,
+  "carboidrato_g": -0.01,
+  "gordura_g": 9.95,
+  "umidade_perc": 53.74
+ },
+ {
+  "nome": "Carne, bovina, charque, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 262.78,
+  "proteina_g": 36.36,
+  "carboidrato_g": 0.0,
+  "gordura_g": 11.92,
+  "umidade_perc": 45.79
+ },
+ {
+  "nome": "Carne, bovina, charque, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 248.86,
+  "proteina_g": 22.71,
+  "carboidrato_g": 0.0,
+  "gordura_g": 16.84,
+  "umidade_perc": 44.47
+ },
+ {
+  "nome": "Carne, bovina, contra-filé, à milanesa",
+  "categoria": "Carnes e derivados",
+  "kcal": 351.59,
+  "proteina_g": 20.61,
+  "carboidrato_g": 12.17,
+  "gordura_g": 24.0,
+  "umidade_perc": 42.16
+ },
+ {
+  "nome": "Carne, bovina, contra-filé de costela, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 202.44,
+  "proteina_g": 19.8,
+  "carboidrato_g": 0.0,
+  "gordura_g": 13.07,
+  "umidade_perc": 66.38
+ },
+ {
+  "nome": "Carne, bovina, contra-filé de costela, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 274.91,
+  "proteina_g": 29.88,
+  "carboidrato_g": 0.0,
+  "gordura_g": 16.33,
+  "umidade_perc": 52.19
+ },
+ {
+  "nome": "Carne, bovina, contra-filé, com gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 205.86,
+  "proteina_g": 21.15,
+  "carboidrato_g": 0.0,
+  "gordura_g": 12.81,
+  "umidade_perc": 65.75
+ },
+ {
+  "nome": "Carne, bovina, contra-filé, com gordura, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 278.05,
+  "proteina_g": 32.4,
+  "carboidrato_g": 0.0,
+  "gordura_g": 15.49,
+  "umidade_perc": 51.71
+ },
+ {
+  "nome": "Carne, bovina, contra-filé, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 156.62,
+  "proteina_g": 24.0,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.0,
+  "umidade_perc": 69.14
+ },
+ {
+  "nome": "Carne, bovina, contra-filé, sem gordura, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 193.69,
+  "proteina_g": 35.88,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.49,
+  "umidade_perc": 57.53
+ },
+ {
+  "nome": "Carne, bovina, costela, assada",
+  "categoria": "Carnes e derivados",
+  "kcal": 373.04,
+  "proteina_g": 28.81,
+  "carboidrato_g": 0.0,
+  "gordura_g": 27.72,
+  "umidade_perc": 43.19
+ },
+ {
+  "nome": "Carne, bovina, costela, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 357.72,
+  "proteina_g": 16.71,
+  "carboidrato_g": 0.0,
+  "gordura_g": 31.75,
+  "umidade_perc": 52.73
+ },
+ {
+  "nome": "Carne, bovina, coxão duro, sem gordura, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 216.62,
+  "proteina_g": 31.88,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.92,
+  "umidade_perc": 58.53
+ },
+ {
+  "nome": "Carne, bovina, coxão duro, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 147.97,
+  "proteina_g": 21.51,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.22,
+  "umidade_perc": 69.8
+ },
+ {
+  "nome": "Carne, bovina, coxão mole, sem gordura, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 218.68,
+  "proteina_g": 32.38,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.91,
+  "umidade_perc": 58.04
+ },
+ {
+  "nome": "Carne, bovina, coxão mole, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 169.07,
+  "proteina_g": 21.23,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.69,
+  "umidade_perc": 68.6
+ },
+ {
+  "nome": "Carne, bovina, cupim, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 330.1,
+  "proteina_g": 28.63,
+  "carboidrato_g": 0.0,
+  "gordura_g": 23.04,
+  "umidade_perc": 48.42
+ },
+ {
+  "nome": "Carne, bovina, cupim, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 221.4,
+  "proteina_g": 19.54,
+  "carboidrato_g": 0.0,
+  "gordura_g": 15.3,
+  "umidade_perc": 64.83
+ },
+ {
+  "nome": "Carne, bovina, fígado, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 141.05,
+  "proteina_g": 20.71,
+  "carboidrato_g": 1.11,
+  "gordura_g": 5.36,
+  "umidade_perc": 71.33
+ },
+ {
+  "nome": "Carne, bovina, fígado, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 225.03,
+  "proteina_g": 29.86,
+  "carboidrato_g": 4.2,
+  "gordura_g": 9.01,
+  "umidade_perc": 54.97
+ },
+ {
+  "nome": "Carne, bovina, filé mingnon, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 142.86,
+  "proteina_g": 21.6,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.61,
+  "umidade_perc": 71.89
+ },
+ {
+  "nome": "Carne, bovina, filé mingnon, sem gordura, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 219.7,
+  "proteina_g": 32.8,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.83,
+  "umidade_perc": 57.0
+ },
+ {
+  "nome": "Carne, bovina, flanco, sem gordura, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 195.58,
+  "proteina_g": 29.38,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.77,
+  "umidade_perc": 61.98
+ },
+ {
+  "nome": "Carne, bovina, flanco, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 141.46,
+  "proteina_g": 20.0,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.22,
+  "umidade_perc": 72.07
+ },
+ {
+  "nome": "Carne, bovina, fraldinha, com gordura, cozida",
+  "categoria": "Carnes e derivados",
+  "kcal": 338.45,
+  "proteina_g": 24.24,
+  "carboidrato_g": 0.0,
+  "gordura_g": 26.05,
+  "umidade_perc": 49.72
+ },
+ {
+  "nome": "Carne, bovina, fraldinha, com gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 220.72,
+  "proteina_g": 17.58,
+  "carboidrato_g": 0.0,
+  "gordura_g": 16.15,
+  "umidade_perc": 65.44
+ },
+ {
+  "nome": "Carne, bovina, lagarto, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 222.47,
+  "proteina_g": 32.86,
+  "carboidrato_g": 0.0,
+  "gordura_g": 9.11,
+  "umidade_perc": 57.63
+ },
+ {
+  "nome": "Carne, bovina, lagarto, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 134.86,
+  "proteina_g": 20.54,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.23,
+  "umidade_perc": 70.97
+ },
+ {
+  "nome": "Carne, bovina, língua, cozida",
+  "categoria": "Carnes e derivados",
+  "kcal": 314.9,
+  "proteina_g": 21.37,
+  "carboidrato_g": 0.0,
+  "gordura_g": 24.8,
+  "umidade_perc": 53.41
+ },
+ {
+  "nome": "Carne, bovina, língua, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 215.25,
+  "proteina_g": 17.09,
+  "carboidrato_g": 0.0,
+  "gordura_g": 15.77,
+  "umidade_perc": 65.02
+ },
+ {
+  "nome": "Carne, bovina, maminha, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 152.77,
+  "proteina_g": 20.93,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.03,
+  "umidade_perc": 69.99
+ },
+ {
+  "nome": "Carne, bovina, maminha, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 153.09,
+  "proteina_g": 30.74,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.42,
+  "umidade_perc": 65.28
+ },
+ {
+  "nome": "Carne, bovina, miolo de alcatra, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 162.87,
+  "proteina_g": 21.61,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.83,
+  "umidade_perc": 69.49
+ },
+ {
+  "nome": "Carne, bovina, miolo de alcatra, sem gordura, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 241.36,
+  "proteina_g": 31.93,
+  "carboidrato_g": 0.0,
+  "gordura_g": 11.64,
+  "umidade_perc": 52.43
+ },
+ {
+  "nome": "Carne, bovina, músculo, sem gordura, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 193.8,
+  "proteina_g": 31.23,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.7,
+  "umidade_perc": 62.82
+ },
+ {
+  "nome": "Carne, bovina, músculo, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 141.58,
+  "proteina_g": 21.56,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.49,
+  "umidade_perc": 72.35
+ },
+ {
+  "nome": "Carne, bovina, paleta, com gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 158.71,
+  "proteina_g": 21.41,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.46,
+  "umidade_perc": 70.62
+ },
+ {
+  "nome": "Carne, bovina, paleta, sem gordura, cozida",
+  "categoria": "Carnes e derivados",
+  "kcal": 193.65,
+  "proteina_g": 29.72,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.4,
+  "umidade_perc": 62.94
+ },
+ {
+  "nome": "Carne, bovina, paleta, sem gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 140.94,
+  "proteina_g": 21.03,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.67,
+  "umidade_perc": 72.08
+ },
+ {
+  "nome": "Carne, bovina, patinho, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 133.47,
+  "proteina_g": 21.72,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.51,
+  "umidade_perc": 72.91
+ },
+ {
+  "nome": "Carne, bovina, patinho, sem gordura, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 219.26,
+  "proteina_g": 35.9,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.31,
+  "umidade_perc": 55.15
+ },
+ {
+  "nome": "Carne, bovina, peito, sem gordura, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 338.47,
+  "proteina_g": 22.25,
+  "carboidrato_g": 0.0,
+  "gordura_g": 26.99,
+  "umidade_perc": 51.18
+ },
+ {
+  "nome": "Carne, bovina, peito, sem gordura, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 259.28,
+  "proteina_g": 17.56,
+  "carboidrato_g": 0.0,
+  "gordura_g": 20.43,
+  "umidade_perc": 61.49
+ },
+ {
+  "nome": "Carne, bovina, picanha, com gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 212.88,
+  "proteina_g": 18.82,
+  "carboidrato_g": 0.0,
+  "gordura_g": 14.69,
+  "umidade_perc": 65.64
+ },
+ {
+  "nome": "Carne, bovina, picanha, com gordura, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 288.77,
+  "proteina_g": 26.42,
+  "carboidrato_g": 0.0,
+  "gordura_g": 19.51,
+  "umidade_perc": 53.39
+ },
+ {
+  "nome": "Carne, bovina, picanha, sem gordura, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 133.52,
+  "proteina_g": 21.25,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.74,
+  "umidade_perc": 72.42
+ },
+ {
+  "nome": "Carne, bovina, picanha, sem gordura, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 238.47,
+  "proteina_g": 31.91,
+  "carboidrato_g": 0.0,
+  "gordura_g": 11.33,
+  "umidade_perc": 54.63
+ },
+ {
+  "nome": "Carne, bovina, seca, cozida",
+  "categoria": "Carnes e derivados",
+  "kcal": 312.8,
+  "proteina_g": 26.93,
+  "carboidrato_g": 0.0,
+  "gordura_g": 21.93,
+  "umidade_perc": 47.19
+ },
+ {
+  "nome": "Carne, bovina, seca, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 312.75,
+  "proteina_g": 19.66,
+  "carboidrato_g": 0.0,
+  "gordura_g": 25.37,
+  "umidade_perc": 39.24
+ },
+ {
+  "nome": "Coxinha de frango, frita",
+  "categoria": "Carnes e derivados",
+  "kcal": 283.05,
+  "proteina_g": 9.61,
+  "carboidrato_g": 34.52,
+  "gordura_g": 11.84,
+  "umidade_perc": 42.21
+ },
+ {
+  "nome": "Croquete, de carne, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 245.77,
+  "proteina_g": 12.04,
+  "carboidrato_g": 13.95,
+  "gordura_g": 15.56,
+  "umidade_perc": 55.96
+ },
+ {
+  "nome": "Croquete, de carne, frito",
+  "categoria": "Carnes e derivados",
+  "kcal": 346.74,
+  "proteina_g": 16.86,
+  "carboidrato_g": 18.15,
+  "gordura_g": 22.67,
+  "umidade_perc": 39.23
+ },
+ {
+  "nome": "Empada de frango, pré-cozida, assada",
+  "categoria": "Carnes e derivados",
+  "kcal": 358.19,
+  "proteina_g": 6.94,
+  "carboidrato_g": 47.49,
+  "gordura_g": 15.61,
+  "umidade_perc": 28.19
+ },
+ {
+  "nome": "Empada, de frango, pré-cozida",
+  "categoria": "Carnes e derivados",
+  "kcal": 377.48,
+  "proteina_g": 7.34,
+  "carboidrato_g": 35.53,
+  "gordura_g": 22.89,
+  "umidade_perc": 32.03
+ },
+ {
+  "nome": "Frango, asa, com pele, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 213.19,
+  "proteina_g": 18.1,
+  "carboidrato_g": 0.0,
+  "gordura_g": 15.07,
+  "umidade_perc": 67.47
+ },
+ {
+  "nome": "Frango, caipira, inteiro, com pele, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 242.89,
+  "proteina_g": 23.88,
+  "carboidrato_g": 0.0,
+  "gordura_g": 15.62,
+  "umidade_perc": 59.69
+ },
+ {
+  "nome": "Frango, caipira, inteiro, sem pele, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 195.76,
+  "proteina_g": 29.57,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.7,
+  "umidade_perc": 61.42
+ },
+ {
+  "nome": "Frango, coração, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 221.5,
+  "proteina_g": 12.58,
+  "carboidrato_g": 0.0,
+  "gordura_g": 18.6,
+  "umidade_perc": 69.05
+ },
+ {
+  "nome": "Frango, coração, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 207.27,
+  "proteina_g": 22.44,
+  "carboidrato_g": 0.61,
+  "gordura_g": 12.1,
+  "umidade_perc": 63.51
+ },
+ {
+  "nome": "Frango, coxa, com pele, assada",
+  "categoria": "Carnes e derivados",
+  "kcal": 215.12,
+  "proteina_g": 28.49,
+  "carboidrato_g": 0.06,
+  "gordura_g": 10.36,
+  "umidade_perc": 59.79
+ },
+ {
+  "nome": "Frango, coxa, com pele, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 161.47,
+  "proteina_g": 17.09,
+  "carboidrato_g": 0.0,
+  "gordura_g": 9.81,
+  "umidade_perc": 72.85
+ },
+ {
+  "nome": "Frango, coxa, sem pele, cozida",
+  "categoria": "Carnes e derivados",
+  "kcal": 167.43,
+  "proteina_g": 26.86,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.85,
+  "umidade_perc": 66.66
+ },
+ {
+  "nome": "Frango, coxa, sem pele, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 119.95,
+  "proteina_g": 17.81,
+  "carboidrato_g": 0.02,
+  "gordura_g": 4.86,
+  "umidade_perc": 76.42
+ },
+ {
+  "nome": "Frango, fígado, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 106.48,
+  "proteina_g": 17.59,
+  "carboidrato_g": -0.02,
+  "gordura_g": 3.49,
+  "umidade_perc": 77.75
+ },
+ {
+  "nome": "Frango, filé, à milanesa",
+  "categoria": "Carnes e derivados",
+  "kcal": 220.87,
+  "proteina_g": 28.46,
+  "carboidrato_g": 7.51,
+  "gordura_g": 7.79,
+  "umidade_perc": 54.89
+ },
+ {
+  "nome": "Frango, inteiro, com pele, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 226.32,
+  "proteina_g": 16.44,
+  "carboidrato_g": 0.0,
+  "gordura_g": 17.31,
+  "umidade_perc": 66.54
+ },
+ {
+  "nome": "Frango, inteiro, sem pele, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 187.34,
+  "proteina_g": 28.02,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.5,
+  "umidade_perc": 63.2
+ },
+ {
+  "nome": "Frango, inteiro, sem pele, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 170.39,
+  "proteina_g": 24.99,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.06,
+  "umidade_perc": 67.45
+ },
+ {
+  "nome": "Frango, inteiro, sem pele, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 129.1,
+  "proteina_g": 20.59,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.57,
+  "umidade_perc": 74.86
+ },
+ {
+  "nome": "Frango, peito, com pele, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 211.68,
+  "proteina_g": 33.42,
+  "carboidrato_g": 0.0,
+  "gordura_g": 7.65,
+  "umidade_perc": 58.54
+ },
+ {
+  "nome": "Frango, peito, com pele, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 149.47,
+  "proteina_g": 20.78,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.73,
+  "umidade_perc": 71.94
+ },
+ {
+  "nome": "Frango, peito, sem pele, cozido",
+  "categoria": "Carnes e derivados",
+  "kcal": 162.87,
+  "proteina_g": 31.47,
+  "carboidrato_g": 0.0,
+  "gordura_g": 3.16,
+  "umidade_perc": 65.57
+ },
+ {
+  "nome": "Frango, peito, sem pele, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 119.16,
+  "proteina_g": 21.53,
+  "carboidrato_g": 0.0,
+  "gordura_g": 3.02,
+  "umidade_perc": 74.79
+ },
+ {
+  "nome": "Frango, peito, sem pele, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 159.19,
+  "proteina_g": 32.03,
+  "carboidrato_g": 0.0,
+  "gordura_g": 2.48,
+  "umidade_perc": 63.81
+ },
+ {
+  "nome": "Frango, sobrecoxa, com pele, assada",
+  "categoria": "Carnes e derivados",
+  "kcal": 259.6,
+  "proteina_g": 28.7,
+  "carboidrato_g": 0.0,
+  "gordura_g": 15.19,
+  "umidade_perc": 55.0
+ },
+ {
+  "nome": "Frango, sobrecoxa, com pele, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 254.53,
+  "proteina_g": 15.46,
+  "carboidrato_g": 0.0,
+  "gordura_g": 20.9,
+  "umidade_perc": 63.58
+ },
+ {
+  "nome": "Frango, sobrecoxa, sem pele, assada",
+  "categoria": "Carnes e derivados",
+  "kcal": 232.88,
+  "proteina_g": 29.18,
+  "carboidrato_g": 0.0,
+  "gordura_g": 12.01,
+  "umidade_perc": 55.63
+ },
+ {
+  "nome": "Frango, sobrecoxa, sem pele, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 161.8,
+  "proteina_g": 17.57,
+  "carboidrato_g": 0.0,
+  "gordura_g": 9.62,
+  "umidade_perc": 72.71
+ },
+ {
+  "nome": "Hambúrguer, bovino, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 214.84,
+  "proteina_g": 13.16,
+  "carboidrato_g": 4.15,
+  "gordura_g": 16.18,
+  "umidade_perc": 63.6
+ },
+ {
+  "nome": "Hambúrguer, bovino, frito",
+  "categoria": "Carnes e derivados",
+  "kcal": 258.28,
+  "proteina_g": 19.97,
+  "carboidrato_g": 6.32,
+  "gordura_g": 17.01,
+  "umidade_perc": 52.46
+ },
+ {
+  "nome": "Hambúrguer, bovino, grelhado",
+  "categoria": "Carnes e derivados",
+  "kcal": 209.83,
+  "proteina_g": 13.16,
+  "carboidrato_g": 11.33,
+  "gordura_g": 12.43,
+  "umidade_perc": 59.23
+ },
+ {
+  "nome": "Lingüiça, frango, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 218.11,
+  "proteina_g": 14.24,
+  "carboidrato_g": 0.0,
+  "gordura_g": 17.44,
+  "umidade_perc": 64.76
+ },
+ {
+  "nome": "Lingüiça, frango, frita",
+  "categoria": "Carnes e derivados",
+  "kcal": 245.46,
+  "proteina_g": 18.32,
+  "carboidrato_g": 0.0,
+  "gordura_g": 18.54,
+  "umidade_perc": 59.57
+ },
+ {
+  "nome": "Lingüiça, frango, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 243.66,
+  "proteina_g": 18.19,
+  "carboidrato_g": 0.0,
+  "gordura_g": 18.4,
+  "umidade_perc": 58.58
+ },
+ {
+  "nome": "Lingüiça, porco, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 227.2,
+  "proteina_g": 16.06,
+  "carboidrato_g": 0.0,
+  "gordura_g": 17.58,
+  "umidade_perc": 62.48
+ },
+ {
+  "nome": "Lingüiça, porco, frita",
+  "categoria": "Carnes e derivados",
+  "kcal": 279.54,
+  "proteina_g": 20.45,
+  "carboidrato_g": 0.0,
+  "gordura_g": 21.31,
+  "umidade_perc": 54.61
+ },
+ {
+  "nome": "Lingüiça, porco, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 296.49,
+  "proteina_g": 23.17,
+  "carboidrato_g": 0.0,
+  "gordura_g": 21.9,
+  "umidade_perc": 50.48
+ },
+ {
+  "nome": "Mortadela",
+  "categoria": "Carnes e derivados",
+  "kcal": 268.82,
+  "proteina_g": 11.95,
+  "carboidrato_g": 5.82,
+  "gordura_g": 21.65,
+  "umidade_perc": 56.44
+ },
+ {
+  "nome": "Peru, congelado, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 163.07,
+  "proteina_g": 26.2,
+  "carboidrato_g": 0.0,
+  "gordura_g": 5.67,
+  "umidade_perc": 65.32
+ },
+ {
+  "nome": "Peru, congelado, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 93.72,
+  "proteina_g": 18.08,
+  "carboidrato_g": 0.0,
+  "gordura_g": 1.83,
+  "umidade_perc": 78.18
+ },
+ {
+  "nome": "Porco, bisteca, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 164.12,
+  "proteina_g": 21.5,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.02,
+  "umidade_perc": 67.7
+ },
+ {
+  "nome": "Porco, bisteca, frita",
+  "categoria": "Carnes e derivados",
+  "kcal": 311.17,
+  "proteina_g": 33.75,
+  "carboidrato_g": 0.0,
+  "gordura_g": 18.52,
+  "umidade_perc": 47.33
+ },
+ {
+  "nome": "Porco, bisteca, grelhada",
+  "categoria": "Carnes e derivados",
+  "kcal": 280.08,
+  "proteina_g": 28.89,
+  "carboidrato_g": 0.0,
+  "gordura_g": 17.38,
+  "umidade_perc": 51.84
+ },
+ {
+  "nome": "Porco, costela, assada",
+  "categoria": "Carnes e derivados",
+  "kcal": 402.17,
+  "proteina_g": 30.22,
+  "carboidrato_g": 0.0,
+  "gordura_g": 30.28,
+  "umidade_perc": 36.92
+ },
+ {
+  "nome": "Porco, costela, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 255.61,
+  "proteina_g": 18.0,
+  "carboidrato_g": 0.0,
+  "gordura_g": 19.82,
+  "umidade_perc": 61.21
+ },
+ {
+  "nome": "Porco, lombo, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 210.23,
+  "proteina_g": 35.73,
+  "carboidrato_g": 0.0,
+  "gordura_g": 6.4,
+  "umidade_perc": 56.56
+ },
+ {
+  "nome": "Porco, lombo, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 175.63,
+  "proteina_g": 22.6,
+  "carboidrato_g": 0.0,
+  "gordura_g": 8.77,
+  "umidade_perc": 67.73
+ },
+ {
+  "nome": "Porco, orelha, salgada, crua",
+  "categoria": "Carnes e derivados",
+  "kcal": 258.49,
+  "proteina_g": 18.52,
+  "carboidrato_g": 0.0,
+  "gordura_g": 19.89,
+  "umidade_perc": 59.67
+ },
+ {
+  "nome": "Porco, pernil, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 262.26,
+  "proteina_g": 32.13,
+  "carboidrato_g": 0.0,
+  "gordura_g": 13.86,
+  "umidade_perc": 49.26
+ },
+ {
+  "nome": "Porco, pernil, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 186.06,
+  "proteina_g": 20.12,
+  "carboidrato_g": 0.0,
+  "gordura_g": 11.1,
+  "umidade_perc": 67.08
+ },
+ {
+  "nome": "Porco, rabo, salgado, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 377.42,
+  "proteina_g": 15.58,
+  "carboidrato_g": 0.0,
+  "gordura_g": 34.47,
+  "umidade_perc": 43.79
+ },
+ {
+  "nome": "Presunto, com capa de gordura",
+  "categoria": "Carnes e derivados",
+  "kcal": 127.85,
+  "proteina_g": 14.37,
+  "carboidrato_g": 1.4,
+  "gordura_g": 6.77,
+  "umidade_perc": 73.95
+ },
+ {
+  "nome": "Presunto, sem capa de gordura",
+  "categoria": "Carnes e derivados",
+  "kcal": 93.74,
+  "proteina_g": 14.29,
+  "carboidrato_g": 2.15,
+  "gordura_g": 2.71,
+  "umidade_perc": 77.18
+ },
+ {
+  "nome": "Quibe, assado",
+  "categoria": "Carnes e derivados",
+  "kcal": 136.23,
+  "proteina_g": 14.59,
+  "carboidrato_g": 12.86,
+  "gordura_g": 2.68,
+  "umidade_perc": 69.02
+ },
+ {
+  "nome": "Quibe, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 109.49,
+  "proteina_g": 12.35,
+  "carboidrato_g": 10.77,
+  "gordura_g": 1.67,
+  "umidade_perc": 74.51
+ },
+ {
+  "nome": "Quibe, frito",
+  "categoria": "Carnes e derivados",
+  "kcal": 253.83,
+  "proteina_g": 14.89,
+  "carboidrato_g": 12.34,
+  "gordura_g": 15.8,
+  "umidade_perc": 53.96
+ },
+ {
+  "nome": "Salame",
+  "categoria": "Carnes e derivados",
+  "kcal": 397.84,
+  "proteina_g": 25.81,
+  "carboidrato_g": 2.91,
+  "gordura_g": 30.64,
+  "umidade_perc": 34.7
+ },
+ {
+  "nome": "Toucinho, cru",
+  "categoria": "Carnes e derivados",
+  "kcal": 592.53,
+  "proteina_g": 11.48,
+  "carboidrato_g": 0.0,
+  "gordura_g": 60.26,
+  "umidade_perc": 27.61
+ },
+ {
+  "nome": "Toucinho, frito",
+  "categoria": "Carnes e derivados",
+  "kcal": 696.56,
+  "proteina_g": 27.28,
+  "carboidrato_g": 0.0,
+  "gordura_g": 64.31,
+  "umidade_perc": 6.33
+ },
+ {
+  "nome": "Bebida láctea, pêssego",
+  "categoria": "Leite e derivados",
+  "kcal": 55.16,
+  "proteina_g": 2.13,
+  "carboidrato_g": 7.57,
+  "gordura_g": 1.91,
+  "umidade_perc": 87.69
+ },
+ {
+  "nome": "Creme de Leite",
+  "categoria": "Leite e derivados",
+  "kcal": 221.48,
+  "proteina_g": 1.51,
+  "carboidrato_g": 4.51,
+  "gordura_g": 22.48,
+  "umidade_perc": 70.89
+ },
+ {
+  "nome": "Iogurte, natural",
+  "categoria": "Leite e derivados",
+  "kcal": 51.49,
+  "proteina_g": 4.06,
+  "carboidrato_g": 1.92,
+  "gordura_g": 3.04,
+  "umidade_perc": 90.04
+ },
+ {
+  "nome": "Iogurte, natural, desnatado",
+  "categoria": "Leite e derivados",
+  "kcal": 41.49,
+  "proteina_g": 3.83,
+  "carboidrato_g": 5.77,
+  "gordura_g": 0.32,
+  "umidade_perc": 89.22
+ },
+ {
+  "nome": "Iogurte, sabor morango",
+  "categoria": "Leite e derivados",
+  "kcal": 69.57,
+  "proteina_g": 2.71,
+  "carboidrato_g": 9.69,
+  "gordura_g": 2.33,
+  "umidade_perc": 84.63
+ },
+ {
+  "nome": "Iogurte, sabor pêssego",
+  "categoria": "Leite e derivados",
+  "kcal": 67.85,
+  "proteina_g": 2.53,
+  "carboidrato_g": 9.43,
+  "gordura_g": 2.34,
+  "umidade_perc": 85.06
+ },
+ {
+  "nome": "Leite, condensado",
+  "categoria": "Leite e derivados",
+  "kcal": 312.57,
+  "proteina_g": 7.67,
+  "carboidrato_g": 57.0,
+  "gordura_g": 6.74,
+  "umidade_perc": 26.96
+ },
+ {
+  "nome": "Leite, de cabra",
+  "categoria": "Leite e derivados",
+  "kcal": 66.42,
+  "proteina_g": 3.07,
+  "carboidrato_g": 5.25,
+  "gordura_g": 3.75,
+  "umidade_perc": 87.07
+ },
+ {
+  "nome": "Leite, de vaca, achocolatado",
+  "categoria": "Leite e derivados",
+  "kcal": 82.82,
+  "proteina_g": 2.1,
+  "carboidrato_g": 14.16,
+  "gordura_g": 2.17,
+  "umidade_perc": 80.89
+ },
+ {
+  "nome": "Leite, de vaca, desnatado, pó",
+  "categoria": "Leite e derivados",
+  "kcal": 361.61,
+  "proteina_g": 34.69,
+  "carboidrato_g": 53.04,
+  "gordura_g": 0.93,
+  "umidade_perc": 3.1
+ },
+ {
+  "nome": "Leite, de vaca, integral, pó",
+  "categoria": "Leite e derivados",
+  "kcal": 496.65,
+  "proteina_g": 25.42,
+  "carboidrato_g": 39.18,
+  "gordura_g": 26.9,
+  "umidade_perc": 2.7
+ },
+ {
+  "nome": "Leite, fermentado",
+  "categoria": "Leite e derivados",
+  "kcal": 69.62,
+  "proteina_g": 1.89,
+  "carboidrato_g": 15.67,
+  "gordura_g": 0.1,
+  "umidade_perc": 81.88
+ },
+ {
+  "nome": "Queijo, minas, frescal",
+  "categoria": "Leite e derivados",
+  "kcal": 264.27,
+  "proteina_g": 17.41,
+  "carboidrato_g": 3.24,
+  "gordura_g": 20.18,
+  "umidade_perc": 56.12
+ },
+ {
+  "nome": "Queijo, minas, meia cura",
+  "categoria": "Leite e derivados",
+  "kcal": 320.72,
+  "proteina_g": 21.21,
+  "carboidrato_g": 3.57,
+  "gordura_g": 24.61,
+  "umidade_perc": 47.12
+ },
+ {
+  "nome": "Queijo, mozarela",
+  "categoria": "Leite e derivados",
+  "kcal": 329.87,
+  "proteina_g": 22.65,
+  "carboidrato_g": 3.05,
+  "gordura_g": 25.18,
+  "umidade_perc": 45.34
+ },
+ {
+  "nome": "Queijo, parmesão",
+  "categoria": "Leite e derivados",
+  "kcal": 452.96,
+  "proteina_g": 35.55,
+  "carboidrato_g": 1.66,
+  "gordura_g": 33.53,
+  "umidade_perc": 21.25
+ },
+ {
+  "nome": "Queijo, pasteurizado",
+  "categoria": "Leite e derivados",
+  "kcal": 303.08,
+  "proteina_g": 9.36,
+  "carboidrato_g": 5.68,
+  "gordura_g": 27.44,
+  "umidade_perc": 54.42
+ },
+ {
+  "nome": "Queijo, petit suisse, morango",
+  "categoria": "Leite e derivados",
+  "kcal": 121.11,
+  "proteina_g": 5.79,
+  "carboidrato_g": 18.46,
+  "gordura_g": 2.84,
+  "umidade_perc": 72.22
+ },
+ {
+  "nome": "Queijo, prato",
+  "categoria": "Leite e derivados",
+  "kcal": 359.88,
+  "proteina_g": 22.66,
+  "carboidrato_g": 1.88,
+  "gordura_g": 29.11,
+  "umidade_perc": 42.44
+ },
+ {
+  "nome": "Maria mole",
+  "categoria": "Leite e derivados",
+  "kcal": 256.58,
+  "proteina_g": 9.63,
+  "carboidrato_g": 2.43,
+  "gordura_g": 23.44,
+  "umidade_perc": 62.47
+ },
+ {
+  "nome": "Queijo, ricota",
+  "categoria": "Leite e derivados",
+  "kcal": 139.73,
+  "proteina_g": 12.6,
+  "carboidrato_g": 3.79,
+  "gordura_g": 8.11,
+  "umidade_perc": 73.57
+ },
+ {
+  "nome": "Bebida isotônica, sabores variados",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 25.61,
+  "proteina_g": 0.0,
+  "carboidrato_g": 6.4,
+  "gordura_g": 0.0,
+  "umidade_perc": 93.51
+ },
+ {
+  "nome": "Café, infusão 10%",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 9.07,
+  "proteina_g": 0.71,
+  "carboidrato_g": 1.48,
+  "gordura_g": 0.07,
+  "umidade_perc": 97.37
+ },
+ {
+  "nome": "Cana, aguardente 1",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 215.66,
+  "proteina_g": null,
+  "carboidrato_g": null,
+  "gordura_g": null,
+  "umidade_perc": null
+ },
+ {
+  "nome": "Cana, caldo de",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 65.34,
+  "proteina_g": null,
+  "carboidrato_g": 18.15,
+  "gordura_g": null,
+  "umidade_perc": 81.73
+ },
+ {
+  "nome": "Cerveja, pilsen 2",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 40.72,
+  "proteina_g": 0.56,
+  "carboidrato_g": 3.32,
+  "gordura_g": null,
+  "umidade_perc": 92.38
+ },
+ {
+  "nome": "Chá, erva-doce, infusão 5%",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 1.4,
+  "proteina_g": 0.0,
+  "carboidrato_g": 0.39,
+  "gordura_g": 0.0,
+  "umidade_perc": 99.61
+ },
+ {
+  "nome": "Chá, mate, infusão 5%",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 2.73,
+  "proteina_g": 0.0,
+  "carboidrato_g": 0.64,
+  "gordura_g": 0.05,
+  "umidade_perc": 99.31
+ },
+ {
+  "nome": "Chá, preto, infusão 5%",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 2.25,
+  "proteina_g": 0.0,
+  "carboidrato_g": 0.63,
+  "gordura_g": 0.0,
+  "umidade_perc": 99.37
+ },
+ {
+  "nome": "Coco, água de",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 21.51,
+  "proteina_g": 0.0,
+  "carboidrato_g": 5.28,
+  "gordura_g": 0.0,
+  "umidade_perc": 94.25
+ },
+ {
+  "nome": "Refrigerante, tipo água tônica",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 30.78,
+  "proteina_g": 0.0,
+  "carboidrato_g": 7.95,
+  "gordura_g": 0.0,
+  "umidade_perc": 92.01
+ },
+ {
+  "nome": "Refrigerante, tipo cola",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 33.51,
+  "proteina_g": 0.0,
+  "carboidrato_g": 8.66,
+  "gordura_g": 0.0,
+  "umidade_perc": 91.28
+ },
+ {
+  "nome": "Refrigerante, tipo guaraná",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 38.7,
+  "proteina_g": 0.0,
+  "carboidrato_g": 10.0,
+  "gordura_g": 0.0,
+  "umidade_perc": 89.96
+ },
+ {
+  "nome": "Refrigerante, tipo laranja",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 45.63,
+  "proteina_g": 0.0,
+  "carboidrato_g": 11.79,
+  "gordura_g": 0.0,
+  "umidade_perc": 88.17
+ },
+ {
+  "nome": "Refrigerante, tipo limão",
+  "categoria": "Bebidas (alcoólicas e não alcoólicas)",
+  "kcal": 39.72,
+  "proteina_g": 0.0,
+  "carboidrato_g": 10.26,
+  "gordura_g": 0.0,
+  "umidade_perc": 89.69
+ },
+ {
+  "nome": "Omelete, de queijo",
+  "categoria": "Ovos e derivados",
+  "kcal": 268.01,
+  "proteina_g": 15.57,
+  "carboidrato_g": 0.44,
+  "gordura_g": 22.01,
+  "umidade_perc": 60.49
+ },
+ {
+  "nome": "Ovo, de codorna, inteiro, cru",
+  "categoria": "Ovos e derivados",
+  "kcal": 176.89,
+  "proteina_g": 13.69,
+  "carboidrato_g": 0.77,
+  "gordura_g": 12.68,
+  "umidade_perc": 71.67
+ },
+ {
+  "nome": "Ovo, de galinha, clara, cozida/10minutos",
+  "categoria": "Ovos e derivados",
+  "kcal": 59.44,
+  "proteina_g": 13.45,
+  "carboidrato_g": 0.0,
+  "gordura_g": 0.09,
+  "umidade_perc": 85.23
+ },
+ {
+  "nome": "Ovo, de galinha, gema, cozida/10minutos",
+  "categoria": "Ovos e derivados",
+  "kcal": 352.67,
+  "proteina_g": 15.9,
+  "carboidrato_g": 1.56,
+  "gordura_g": 30.78,
+  "umidade_perc": 50.02
+ },
+ {
+  "nome": "Ovo, de galinha, inteiro, cozido/10minutos",
+  "categoria": "Ovos e derivados",
+  "kcal": 145.7,
+  "proteina_g": 13.29,
+  "carboidrato_g": 0.61,
+  "gordura_g": 9.48,
+  "umidade_perc": 75.77
+ },
+ {
+  "nome": "Ovo, de galinha, inteiro, cru",
+  "categoria": "Ovos e derivados",
+  "kcal": 143.11,
+  "proteina_g": 13.03,
+  "carboidrato_g": 1.64,
+  "gordura_g": 8.9,
+  "umidade_perc": 75.6
+ },
+ {
+  "nome": "Ovo, de galinha, inteiro, frito",
+  "categoria": "Ovos e derivados",
+  "kcal": 240.19,
+  "proteina_g": 15.62,
+  "carboidrato_g": 1.19,
+  "gordura_g": 18.59,
+  "umidade_perc": 63.5
+ },
+ {
+  "nome": "Achocolatado, pó",
+  "categoria": "Produtos açucarados",
+  "kcal": 401.02,
+  "proteina_g": 4.2,
+  "carboidrato_g": 91.18,
+  "gordura_g": 2.17,
+  "umidade_perc": 1.1
+ },
+ {
+  "nome": "Açúcar, cristal",
+  "categoria": "Produtos açucarados",
+  "kcal": 386.85,
+  "proteina_g": 0.32,
+  "carboidrato_g": 99.61,
+  "gordura_g": null,
+  "umidade_perc": 0.05
+ },
+ {
+  "nome": "Açúcar, mascavo",
+  "categoria": "Produtos açucarados",
+  "kcal": 368.55,
+  "proteina_g": 0.76,
+  "carboidrato_g": 94.45,
+  "gordura_g": 0.09,
+  "umidade_perc": 3.32
+ },
+ {
+  "nome": "Açúcar, refinado",
+  "categoria": "Produtos açucarados",
+  "kcal": 386.57,
+  "proteina_g": 0.32,
+  "carboidrato_g": 99.54,
+  "gordura_g": null,
+  "umidade_perc": 0.12
+ },
+ {
+  "nome": "Chocolate, ao leite",
+  "categoria": "Produtos açucarados",
+  "kcal": 539.59,
+  "proteina_g": 7.22,
+  "carboidrato_g": 59.58,
+  "gordura_g": 30.27,
+  "umidade_perc": 1.26
+ },
+ {
+  "nome": "Chocolate, ao leite, com castanha do Pará",
+  "categoria": "Produtos açucarados",
+  "kcal": 558.88,
+  "proteina_g": 7.41,
+  "carboidrato_g": 55.38,
+  "gordura_g": 34.19,
+  "umidade_perc": 1.21
+ },
+ {
+  "nome": "Chocolate, ao leite, dietético",
+  "categoria": "Produtos açucarados",
+  "kcal": 556.82,
+  "proteina_g": 6.9,
+  "carboidrato_g": 56.32,
+  "gordura_g": 33.77,
+  "umidade_perc": 1.73
+ },
+ {
+  "nome": "Chocolate, meio amargo",
+  "categoria": "Produtos açucarados",
+  "kcal": 474.92,
+  "proteina_g": 4.86,
+  "carboidrato_g": 62.42,
+  "gordura_g": 29.86,
+  "umidade_perc": 1.02
+ },
+ {
+  "nome": "Cocada branca",
+  "categoria": "Produtos açucarados",
+  "kcal": 448.85,
+  "proteina_g": 1.12,
+  "carboidrato_g": 81.38,
+  "gordura_g": 13.59,
+  "umidade_perc": 3.42
+ },
+ {
+  "nome": "Doce, de abóbora, cremoso",
+  "categoria": "Produtos açucarados",
+  "kcal": 198.94,
+  "proteina_g": 0.92,
+  "carboidrato_g": 54.61,
+  "gordura_g": 0.21,
+  "umidade_perc": 43.88
+ },
+ {
+  "nome": "Doce, de leite, cremoso",
+  "categoria": "Produtos açucarados",
+  "kcal": 306.31,
+  "proteina_g": 5.48,
+  "carboidrato_g": 59.49,
+  "gordura_g": 5.99,
+  "umidade_perc": 27.5
+ },
+ {
+  "nome": "Geléia, mocotó, natural",
+  "categoria": "Produtos açucarados",
+  "kcal": 106.09,
+  "proteina_g": 2.12,
+  "carboidrato_g": 24.23,
+  "gordura_g": 0.07,
+  "umidade_perc": 73.48
+ },
+ {
+  "nome": "Glicose de milho",
+  "categoria": "Produtos açucarados",
+  "kcal": 292.12,
+  "proteina_g": 0.0,
+  "carboidrato_g": 79.38,
+  "gordura_g": 0.0,
+  "umidade_perc": 20.41
+ },
+ {
+  "nome": "Maria mole",
+  "categoria": "Produtos açucarados",
+  "kcal": 301.24,
+  "proteina_g": 3.81,
+  "carboidrato_g": 73.55,
+  "gordura_g": 0.19,
+  "umidade_perc": 21.57
+ },
+ {
+  "nome": "Maria mole, coco queimado",
+  "categoria": "Produtos açucarados",
+  "kcal": 306.63,
+  "proteina_g": 3.93,
+  "carboidrato_g": 75.06,
+  "gordura_g": 0.09,
+  "umidade_perc": 20.73
+ },
+ {
+  "nome": "Marmelada",
+  "categoria": "Produtos açucarados",
+  "kcal": 257.24,
+  "proteina_g": 0.4,
+  "carboidrato_g": 70.76,
+  "gordura_g": 0.14,
+  "umidade_perc": 28.5
+ },
+ {
+  "nome": "Mel, de abelha",
+  "categoria": "Produtos açucarados",
+  "kcal": 309.24,
+  "proteina_g": 0.0,
+  "carboidrato_g": 84.03,
+  "gordura_g": 0.0,
+  "umidade_perc": 15.82
+ },
+ {
+  "nome": "Melado",
+  "categoria": "Produtos açucarados",
+  "kcal": 296.51,
+  "proteina_g": 0.0,
+  "carboidrato_g": 76.62,
+  "gordura_g": 0.0,
+  "umidade_perc": 22.09
+ },
+ {
+  "nome": "Quindim",
+  "categoria": "Produtos açucarados",
+  "kcal": 411.35,
+  "proteina_g": 4.74,
+  "carboidrato_g": 46.3,
+  "gordura_g": 24.43,
+  "umidade_perc": 23.93
+ },
+ {
+  "nome": "Rapadura",
+  "categoria": "Produtos açucarados",
+  "kcal": 351.96,
+  "proteina_g": 0.99,
+  "carboidrato_g": 90.79,
+  "gordura_g": 0.07,
+  "umidade_perc": 7.1
+ },
+ {
+  "nome": "Café, pó, torrado",
+  "categoria": "Miscelâneas",
+  "kcal": 418.62,
+  "proteina_g": 14.7,
+  "carboidrato_g": 65.75,
+  "gordura_g": 11.95,
+  "umidade_perc": 2.93
+ },
+ {
+  "nome": "Capuccino, pó",
+  "categoria": "Miscelâneas",
+  "kcal": 417.41,
+  "proteina_g": 11.31,
+  "carboidrato_g": 73.61,
+  "gordura_g": 8.63,
+  "umidade_perc": 2.6
+ },
+ {
+  "nome": "Fermento em pó, químico",
+  "categoria": "Miscelâneas",
+  "kcal": 89.72,
+  "proteina_g": 0.48,
+  "carboidrato_g": 43.91,
+  "gordura_g": 0.07,
+  "umidade_perc": 7.08
+ },
+ {
+  "nome": "Fermento, biológico, levedura, tablete",
+  "categoria": "Miscelâneas",
+  "kcal": 89.79,
+  "proteina_g": 16.96,
+  "carboidrato_g": 7.7,
+  "gordura_g": 1.52,
+  "umidade_perc": 71.9
+ },
+ {
+  "nome": "Gelatina, sabores variados, pó",
+  "categoria": "Miscelâneas",
+  "kcal": 380.22,
+  "proteina_g": 8.89,
+  "carboidrato_g": 89.22,
+  "gordura_g": null,
+  "umidade_perc": 1.24
+ },
+ {
+  "nome": "Shoyu",
+  "categoria": "Miscelâneas",
+  "kcal": 60.93,
+  "proteina_g": 3.31,
+  "carboidrato_g": 11.65,
+  "gordura_g": 0.33,
+  "umidade_perc": 70.63
+ },
+ {
+  "nome": "Tempero a base de sal",
+  "categoria": "Miscelâneas",
+  "kcal": 21.33,
+  "proteina_g": 2.67,
+  "carboidrato_g": 2.07,
+  "gordura_g": 0.26,
+  "umidade_perc": 7.65
+ },
+ {
+  "nome": "Azeitona, preta, conserva",
+  "categoria": "Outros alimentos industrializados",
+  "kcal": 194.15,
+  "proteina_g": 1.16,
+  "carboidrato_g": 5.54,
+  "gordura_g": 20.34,
+  "umidade_perc": 68.46
+ },
+ {
+  "nome": "Azeitona, verde, conserva",
+  "categoria": "Outros alimentos industrializados",
+  "kcal": 136.94,
+  "proteina_g": 0.95,
+  "carboidrato_g": 4.1,
+  "gordura_g": 14.22,
+  "umidade_perc": 76.26
+ },
+ {
+  "nome": "Chantilly, spray, com gordura vegetal",
+  "categoria": "Outros alimentos industrializados",
+  "kcal": 314.96,
+  "proteina_g": 0.53,
+  "carboidrato_g": 16.86,
+  "gordura_g": 27.27,
+  "umidade_perc": 55.14
+ },
+ {
+  "nome": "Leite, de coco",
+  "categoria": "Outros alimentos industrializados",
+  "kcal": 166.16,
+  "proteina_g": 1.01,
+  "carboidrato_g": 2.19,
+  "gordura_g": 18.36,
+  "umidade_perc": 77.98
+ },
+ {
+  "nome": "Maionese, tradicional com ovos",
+  "categoria": "Outros alimentos industrializados",
+  "kcal": 302.15,
+  "proteina_g": 0.58,
+  "carboidrato_g": 7.9,
+  "gordura_g": 30.5,
+  "umidade_perc": 58.42
+ },
+ {
+  "nome": "Acarajé",
+  "categoria": "Alimentos preparados",
+  "kcal": 289.21,
+  "proteina_g": 8.35,
+  "carboidrato_g": 19.11,
+  "gordura_g": 19.93,
+  "umidade_perc": 50.46
+ },
+ {
+  "nome": "Arroz carreteiro",
+  "categoria": "Alimentos preparados",
+  "kcal": 153.77,
+  "proteina_g": 10.83,
+  "carboidrato_g": 11.58,
+  "gordura_g": 7.12,
+  "umidade_perc": 68.04
+ },
+ {
+  "nome": "Baião de dois, arroz e feijão-de-corda",
+  "categoria": "Alimentos preparados",
+  "kcal": 135.68,
+  "proteina_g": 6.24,
+  "carboidrato_g": 20.42,
+  "gordura_g": 3.23,
+  "umidade_perc": 69.05
+ },
+ {
+  "nome": "Barreado",
+  "categoria": "Alimentos preparados",
+  "kcal": 164.98,
+  "proteina_g": 18.27,
+  "carboidrato_g": 0.24,
+  "gordura_g": 9.53,
+  "umidade_perc": 71.17
+ },
+ {
+  "nome": "Bife à cavalo, com contra filé",
+  "categoria": "Alimentos preparados",
+  "kcal": 291.23,
+  "proteina_g": 23.66,
+  "carboidrato_g": 0.0,
+  "gordura_g": 21.15,
+  "umidade_perc": 54.21
+ },
+ {
+  "nome": "Bolinho de arroz",
+  "categoria": "Alimentos preparados",
+  "kcal": 273.51,
+  "proteina_g": 8.04,
+  "carboidrato_g": 41.68,
+  "gordura_g": 8.29,
+  "umidade_perc": 41.5
+ },
+ {
+  "nome": "Camarão à baiana",
+  "categoria": "Alimentos preparados",
+  "kcal": 100.78,
+  "proteina_g": 7.94,
+  "carboidrato_g": 3.17,
+  "gordura_g": 5.97,
+  "umidade_perc": 81.99
+ },
+ {
+  "nome": "Charuto, de repolho",
+  "categoria": "Alimentos preparados",
+  "kcal": 78.23,
+  "proteina_g": 6.78,
+  "carboidrato_g": 10.13,
+  "gordura_g": 1.12,
+  "umidade_perc": 81.55
+ },
+ {
+  "nome": "Cuscuz, de milho, cozido com sal",
+  "categoria": "Alimentos preparados",
+  "kcal": 113.46,
+  "proteina_g": 2.16,
+  "carboidrato_g": 25.28,
+  "gordura_g": 0.68,
+  "umidade_perc": 71.14
+ },
+ {
+  "nome": "Cuscuz, paulista",
+  "categoria": "Alimentos preparados",
+  "kcal": 142.12,
+  "proteina_g": 2.56,
+  "carboidrato_g": 22.51,
+  "gordura_g": 4.65,
+  "umidade_perc": 68.94
+ },
+ {
+  "nome": "Cuxá, molho",
+  "categoria": "Alimentos preparados",
+  "kcal": 80.09,
+  "proteina_g": 5.64,
+  "carboidrato_g": 5.74,
+  "gordura_g": 3.59,
+  "umidade_perc": 80.99
+ },
+ {
+  "nome": "Dobradinha",
+  "categoria": "Alimentos preparados",
+  "kcal": 124.5,
+  "proteina_g": 19.77,
+  "carboidrato_g": 0.0,
+  "gordura_g": 4.44,
+  "umidade_perc": 75.27
+ },
+ {
+  "nome": "Estrogonofe de carne",
+  "categoria": "Alimentos preparados",
+  "kcal": 173.14,
+  "proteina_g": 15.03,
+  "carboidrato_g": 2.98,
+  "gordura_g": 10.8,
+  "umidade_perc": 70.13
+ },
+ {
+  "nome": "Estrogonofe de frango",
+  "categoria": "Alimentos preparados",
+  "kcal": 156.81,
+  "proteina_g": 17.55,
+  "carboidrato_g": 2.59,
+  "gordura_g": 7.96,
+  "umidade_perc": 70.89
+ },
+ {
+  "nome": "Feijão tropeiro mineiro",
+  "categoria": "Alimentos preparados",
+  "kcal": 151.56,
+  "proteina_g": 10.17,
+  "carboidrato_g": 19.58,
+  "gordura_g": 6.79,
+  "umidade_perc": 61.67
+ },
+ {
+  "nome": "Feijoada",
+  "categoria": "Alimentos preparados",
+  "kcal": 116.93,
+  "proteina_g": 8.67,
+  "carboidrato_g": 11.64,
+  "gordura_g": 6.48,
+  "umidade_perc": 71.8
+ },
+ {
+  "nome": "Frango, com açafrão",
+  "categoria": "Alimentos preparados",
+  "kcal": 112.78,
+  "proteina_g": 9.7,
+  "carboidrato_g": 4.06,
+  "gordura_g": 6.17,
+  "umidade_perc": 79.52
+ },
+ {
+  "nome": "Macarrão, molho bolognesa",
+  "categoria": "Alimentos preparados",
+  "kcal": 119.53,
+  "proteina_g": 4.93,
+  "carboidrato_g": 22.52,
+  "gordura_g": 0.89,
+  "umidade_perc": 71.41
+ },
+ {
+  "nome": "Maniçoba",
+  "categoria": "Alimentos preparados",
+  "kcal": 134.22,
+  "proteina_g": 9.96,
+  "carboidrato_g": 3.42,
+  "gordura_g": 8.7,
+  "umidade_perc": 76.4
+ },
+ {
+  "nome": "Quibebe",
+  "categoria": "Alimentos preparados",
+  "kcal": 86.35,
+  "proteina_g": 8.56,
+  "carboidrato_g": 6.64,
+  "gordura_g": 2.67,
+  "umidade_perc": 81.11
+ },
+ {
+  "nome": "Salada, de legumes, com maionese",
+  "categoria": "Alimentos preparados",
+  "kcal": 96.1,
+  "proteina_g": 1.05,
+  "carboidrato_g": 8.92,
+  "gordura_g": 7.04,
+  "umidade_perc": 82.04
+ },
+ {
+  "nome": "Salada, de legumes, cozida no vapor",
+  "categoria": "Alimentos preparados",
+  "kcal": 35.41,
+  "proteina_g": 2.01,
+  "carboidrato_g": 7.09,
+  "gordura_g": 0.31,
+  "umidade_perc": 89.98
+ },
+ {
+  "nome": "Salpicão, de frango",
+  "categoria": "Alimentos preparados",
+  "kcal": 147.86,
+  "proteina_g": 13.93,
+  "carboidrato_g": 4.57,
+  "gordura_g": 7.84,
+  "umidade_perc": 72.53
+ },
+ {
+  "nome": "Sarapatel",
+  "categoria": "Alimentos preparados",
+  "kcal": 122.98,
+  "proteina_g": 18.47,
+  "carboidrato_g": 1.09,
+  "gordura_g": 4.42,
+  "umidade_perc": 74.95
+ },
+ {
+  "nome": "Tabule",
+  "categoria": "Alimentos preparados",
+  "kcal": 57.45,
+  "proteina_g": 2.05,
+  "carboidrato_g": 10.58,
+  "gordura_g": 1.21,
+  "umidade_perc": 85.77
+ },
+ {
+  "nome": "Tacacá",
+  "categoria": "Alimentos preparados",
+  "kcal": 46.89,
+  "proteina_g": 6.96,
+  "carboidrato_g": 3.39,
+  "gordura_g": 0.36,
+  "umidade_perc": 85.19
+ },
+ {
+  "nome": "Tapioca, com manteiga",
+  "categoria": "Alimentos preparados",
+  "kcal": 347.83,
+  "proteina_g": 0.09,
+  "carboidrato_g": 63.59,
+  "gordura_g": 10.91,
+  "umidade_perc": 24.9
+ },
+ {
+  "nome": "Tucupi, com pimenta-de-cheiro",
+  "categoria": "Alimentos preparados",
+  "kcal": 27.18,
+  "proteina_g": 2.06,
+  "carboidrato_g": 4.74,
+  "gordura_g": 0.28,
+  "umidade_perc": 91.88
+ },
+ {
+  "nome": "Vaca atolada",
+  "categoria": "Alimentos preparados",
+  "kcal": 144.9,
+  "proteina_g": 5.12,
+  "carboidrato_g": 10.06,
+  "gordura_g": 9.32,
+  "umidade_perc": 74.95
+ },
+ {
+  "nome": "Vatapá",
+  "categoria": "Alimentos preparados",
+  "kcal": 254.89,
+  "proteina_g": 6.0,
+  "carboidrato_g": 9.75,
+  "gordura_g": 23.23,
+  "umidade_perc": 58.36
+ },
+ {
+  "nome": "Virado à paulista",
+  "categoria": "Alimentos preparados",
+  "kcal": 306.95,
+  "proteina_g": 10.18,
+  "carboidrato_g": 14.11,
+  "gordura_g": 25.59,
+  "umidade_perc": 48.59
+ },
+ {
+  "nome": "Yakisoba",
+  "categoria": "Alimentos preparados",
+  "kcal": 112.8,
+  "proteina_g": 7.52,
+  "carboidrato_g": 18.25,
+  "gordura_g": 2.61,
+  "umidade_perc": 69.38
+ },
+ {
+  "nome": "Amendoim, grão, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 544.05,
+  "proteina_g": 27.19,
+  "carboidrato_g": 20.31,
+  "gordura_g": 43.85,
+  "umidade_perc": 6.43
+ },
+ {
+  "nome": "Amendoim, torrado, salgado",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 605.78,
+  "proteina_g": 22.48,
+  "carboidrato_g": 18.7,
+  "gordura_g": 53.96,
+  "umidade_perc": 1.69
+ },
+ {
+  "nome": "Ervilha, em vagem",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 88.09,
+  "proteina_g": 7.45,
+  "carboidrato_g": 14.23,
+  "gordura_g": 0.47,
+  "umidade_perc": 76.84
+ },
+ {
+  "nome": "Ervilha, enlatada, drenada",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 73.84,
+  "proteina_g": 4.6,
+  "carboidrato_g": 13.44,
+  "gordura_g": 0.38,
+  "umidade_perc": 80.14
+ },
+ {
+  "nome": "Feijão, carioca, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 76.42,
+  "proteina_g": 4.78,
+  "carboidrato_g": 13.59,
+  "gordura_g": 0.54,
+  "umidade_perc": 80.35
+ },
+ {
+  "nome": "Feijão, carioca, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 329.03,
+  "proteina_g": 19.98,
+  "carboidrato_g": 61.22,
+  "gordura_g": 1.26,
+  "umidade_perc": 14.0
+ },
+ {
+  "nome": "Feijão, fradinho, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 78.01,
+  "proteina_g": 5.09,
+  "carboidrato_g": 13.5,
+  "gordura_g": 0.64,
+  "umidade_perc": 80.01
+ },
+ {
+  "nome": "Feijão, fradinho, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 339.16,
+  "proteina_g": 20.21,
+  "carboidrato_g": 61.24,
+  "gordura_g": 2.37,
+  "umidade_perc": 12.7
+ },
+ {
+  "nome": "Feijão, jalo, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 92.74,
+  "proteina_g": 6.14,
+  "carboidrato_g": 16.5,
+  "gordura_g": 0.51,
+  "umidade_perc": 75.84
+ },
+ {
+  "nome": "Feijão, jalo, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 327.91,
+  "proteina_g": 20.1,
+  "carboidrato_g": 61.48,
+  "gordura_g": 0.95,
+  "umidade_perc": 13.53
+ },
+ {
+  "nome": "Feijão, preto, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 77.03,
+  "proteina_g": 4.48,
+  "carboidrato_g": 14.01,
+  "gordura_g": 0.54,
+  "umidade_perc": 80.22
+ },
+ {
+  "nome": "Feijão, preto, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 323.57,
+  "proteina_g": 21.34,
+  "carboidrato_g": 58.75,
+  "gordura_g": 1.24,
+  "umidade_perc": 14.88
+ },
+ {
+  "nome": "Feijão, rajado, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 84.7,
+  "proteina_g": 5.54,
+  "carboidrato_g": 15.27,
+  "gordura_g": 0.4,
+  "umidade_perc": 77.86
+ },
+ {
+  "nome": "Feijão, rajado, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 325.84,
+  "proteina_g": 17.27,
+  "carboidrato_g": 62.93,
+  "gordura_g": 1.17,
+  "umidade_perc": 14.96
+ },
+ {
+  "nome": "Feijão, rosinha, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 67.87,
+  "proteina_g": 4.54,
+  "carboidrato_g": 11.82,
+  "gordura_g": 0.48,
+  "umidade_perc": 82.58
+ },
+ {
+  "nome": "Feijão, rosinha, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 336.96,
+  "proteina_g": 20.92,
+  "carboidrato_g": 62.22,
+  "gordura_g": 1.33,
+  "umidade_perc": 11.95
+ },
+ {
+  "nome": "Feijão, roxo, cozido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 76.89,
+  "proteina_g": 5.72,
+  "carboidrato_g": 12.91,
+  "gordura_g": 0.54,
+  "umidade_perc": 79.99
+ },
+ {
+  "nome": "Feijão, roxo, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 331.41,
+  "proteina_g": 22.17,
+  "carboidrato_g": 59.99,
+  "gordura_g": 1.24,
+  "umidade_perc": 12.64
+ },
+ {
+  "nome": "Grão-de-bico, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 354.7,
+  "proteina_g": 21.23,
+  "carboidrato_g": 57.88,
+  "gordura_g": 5.43,
+  "umidade_perc": 12.29
+ },
+ {
+  "nome": "Guandu, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 344.13,
+  "proteina_g": 18.96,
+  "carboidrato_g": 64.0,
+  "gordura_g": 2.13,
+  "umidade_perc": 11.45
+ },
+ {
+  "nome": "Lentilha, cozida",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 92.64,
+  "proteina_g": 6.31,
+  "carboidrato_g": 16.3,
+  "gordura_g": 0.52,
+  "umidade_perc": 76.25
+ },
+ {
+  "nome": "Lentilha, crua",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 339.14,
+  "proteina_g": 23.15,
+  "carboidrato_g": 62.0,
+  "gordura_g": 0.77,
+  "umidade_perc": 11.47
+ },
+ {
+  "nome": "Paçoca, amendoim",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 486.93,
+  "proteina_g": 16.0,
+  "carboidrato_g": 52.38,
+  "gordura_g": 26.08,
+  "umidade_perc": 1.8
+ },
+ {
+  "nome": "Pé-de-moleque, amendoim",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 503.19,
+  "proteina_g": 13.16,
+  "carboidrato_g": 54.73,
+  "gordura_g": 28.05,
+  "umidade_perc": 2.91
+ },
+ {
+  "nome": "Soja, farinha",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 403.96,
+  "proteina_g": 36.03,
+  "carboidrato_g": 38.44,
+  "gordura_g": 14.63,
+  "umidade_perc": 5.75
+ },
+ {
+  "nome": "Soja, extrato solúvel, natural, fluido",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 39.1,
+  "proteina_g": 2.38,
+  "carboidrato_g": 4.28,
+  "gordura_g": 1.61,
+  "umidade_perc": 91.28
+ },
+ {
+  "nome": "Soja, extrato solúvel, pó",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 458.9,
+  "proteina_g": 35.69,
+  "carboidrato_g": 28.48,
+  "gordura_g": 26.18,
+  "umidade_perc": 4.47
+ },
+ {
+  "nome": "Soja, queijo (tofu)",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 64.49,
+  "proteina_g": 6.55,
+  "carboidrato_g": 2.13,
+  "gordura_g": 3.95,
+  "umidade_perc": 86.65
+ },
+ {
+  "nome": "Tremoço, cru",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 381.28,
+  "proteina_g": 33.58,
+  "carboidrato_g": 43.79,
+  "gordura_g": 10.34,
+  "umidade_perc": 9.69
+ },
+ {
+  "nome": "Tremoço, em conserva",
+  "categoria": "Leguminosas e derivados",
+  "kcal": 120.64,
+  "proteina_g": 11.11,
+  "carboidrato_g": 12.39,
+  "gordura_g": 3.78,
+  "umidade_perc": 67.68
+ },
+ {
+  "nome": "Amêndoa, torrada, salgada",
+  "categoria": "Nozes e sementes",
+  "kcal": 580.75,
+  "proteina_g": 18.55,
+  "carboidrato_g": 29.55,
+  "gordura_g": 47.32,
+  "umidade_perc": 3.11
+ },
+ {
+  "nome": "Castanha-de-caju, torrada, salgada",
+  "categoria": "Nozes e sementes",
+  "kcal": 570.17,
+  "proteina_g": 18.51,
+  "carboidrato_g": 29.13,
+  "gordura_g": 46.28,
+  "umidade_perc": 3.46
+ },
+ {
+  "nome": "Castanha-do-Brasil, crua",
+  "categoria": "Nozes e sementes",
+  "kcal": 642.96,
+  "proteina_g": 14.54,
+  "carboidrato_g": 15.08,
+  "gordura_g": 63.46,
+  "umidade_perc": 3.52
+ },
+ {
+  "nome": "Coco, cru",
+  "categoria": "Nozes e sementes",
+  "kcal": 406.49,
+  "proteina_g": 3.69,
+  "carboidrato_g": 10.4,
+  "gordura_g": 41.98,
+  "umidade_perc": 42.96
+ },
+ {
+  "nome": "Farinha, de mesocarpo de babaçu, crua",
+  "categoria": "Nozes e sementes",
+  "kcal": 328.77,
+  "proteina_g": 1.41,
+  "carboidrato_g": 79.17,
+  "gordura_g": 0.2,
+  "umidade_perc": 15.82
+ },
+ {
+  "nome": "Gergelim, semente",
+  "categoria": "Nozes e sementes",
+  "kcal": 583.55,
+  "proteina_g": 21.16,
+  "carboidrato_g": 21.62,
+  "gordura_g": 50.43,
+  "umidade_perc": 3.86
+ },
+ {
+  "nome": "Linhaça, semente",
+  "categoria": "Nozes e sementes",
+  "kcal": 495.1,
+  "proteina_g": 14.08,
+  "carboidrato_g": 43.31,
+  "gordura_g": 32.25,
+  "umidade_perc": 6.68
+ },
+ {
+  "nome": "Pinhão, cozido",
+  "categoria": "Nozes e sementes",
+  "kcal": 174.37,
+  "proteina_g": 2.98,
+  "carboidrato_g": 43.92,
+  "gordura_g": 0.75,
+  "umidade_perc": 50.51
+ },
+ {
+  "nome": "Pupunha, cozida",
+  "categoria": "Nozes e sementes",
+  "kcal": 218.53,
+  "proteina_g": 2.52,
+  "carboidrato_g": 29.57,
+  "gordura_g": 12.76,
+  "umidade_perc": 54.46
+ },
+ {
+  "nome": "Noz, crua",
+  "categoria": "Nozes e sementes",
+  "kcal": 620.06,
+  "proteina_g": 13.97,
+  "carboidrato_g": 18.36,
+  "gordura_g": 59.36,
+  "umidade_perc": 6.24
+ }
+]

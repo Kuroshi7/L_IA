@@ -153,38 +153,48 @@
 - **Fix:** mover a nota para o system message do turno; `recursion_limit` explícito (~8). **Benefício:** autoridade de prompt correta e teto de custo por turno.
 
 ### IA-09 · Dado nutricional errado apresentado com confiança alta — 🔴 Crítico · G
-- **Status:** 🔴 Aberto. Medido em 2026-08-23 contra a stack real.
-- **Achado:** `POST /internal/consumo/calcular` para "2 conchas de arroz integral" devolve **601 kcal, 107 g de carboidrato e 13,9 g de gordura**, com `confianca: "alta"`. A base tem `Arroz Integral Cozido` a 257 kcal/100 g e 5,96 g de gordura; arroz integral cozido real fica em ~124 kcal/100 g e ~1 g de gordura — cerca de 2× as calorias e 6× a gordura. A `fonte` do registro é `*` (extração por visão de LLM sobre o PDF escaneado, não verificada), não `IBGE`. Entre os resultados de "arroz", 3 de 4 têm `fonte: *`.
-- **Problema:** atinge a tese central do produto. A promessa é "não gero número, resolvo contra a base" — mas `confianca` mede a certeza do CASAMENTO de string, não a CORREÇÃO do dado. O sistema fica confiantemente errado, que é o comportamento de LLM genérico que o produto existe para evitar. Toda a rede construída protege contra *não reconhecer*; nenhuma protege contra *reconhecer e o número estar errado*.
-- **Fix:** auditar `nutri_porcoes` com `fonte = '*'` contra TACO/IBGE; marcar divergentes e rebaixar a confiança do item quando a fonte não for verificada. **Benefício:** sem isto, o diferencial do produto não existe.
+- **Status:** 🔶 Parcial em `feat/motor-agente-onyx`. O sistema parou de afirmar o número errado; a base ainda não foi corrigida.
+- **Achado:** `POST /internal/consumo/calcular` para "2 conchas de arroz integral" devolvia **601 kcal, 107 g de carboidrato e 13,9 g de gordura**, com `confianca: "alta"`.
+- **Causa (apurada, não suposta):** a extração está **correta**. A página 7 do PDF-fonte (*Tabela para Avaliação de Consumo Alimentar em Medidas Caseiras*, Atheneu) diz literalmente `ARROZ INTEGRAL COZIDO | 100,0 | 257,00 | 4,86 | 45,96 | 5,96 | fonte *`, e a base bate dígito a dígito. O cruzamento de Atwater confirma consistência interna (0 de 346 porções desviam >15%). **O valor da fonte primária é que não sobrevive à conferência**: a TACO (NEPA/UNICAMP) traz 123,5 kcal e 25,8 g de carboidrato para o mesmo alimento, e o próprio livro dá 164 kcal ao arroz *branco* cozido — integral não tem 42% mais carboidrato que branco.
+- **Escala:** a auditoria cruzada com a TACO casou 37 dos 142 alimentos (26% — a TACO não cataloga preparação brasileira como estrogonofe ou farofa) e achou **17 divergências acima de 40%**. Todas na mesma direção: a base é 1,41× a 4,22× a TACO, nunca menor. É viés sistemático de método (o livro parece registrar o alimento antes da hidratação do cozimento), não dígito trocado — e atinge linhas `IBGE` e `GF` também, não só as `*`.
+- **Problema:** `confianca` media a certeza do CASAMENTO do nome, nunca a plausibilidade do DADO. O sistema ficava confiantemente errado — o comportamento de LLM genérico que o produto existe para evitar.
+- **Feito:** `apps/ai/app/nutrition/taco.py` (referência TACO versionada, casamento por token com barreira de preparo) + `app/nutrition/auditoria.py` (`--aplicar`) marcam `nutri_porcoes.suspeito`; a migração `0007` adiciona a coluna e uma checagem de plausibilidade independente; `CalcularConsumo` rebaixa a confiança para `media` com `obs` explicando, e a Lia passa a declarar a aproximação. **51 de 346 porções marcadas.**
+- **Falta:** revisão da nutricionista sobre as 17 divergências e sobre os 105 alimentos sem par na TACO. Corrigir valor sem medição primária seria trocar um palpite por outro — por isso rebaixamos a confiança em vez de reescrever o número.
 
 ### IA-10 · `registrar_consumo` bloqueada pelo cardápio — 🔴 Crítico · P
-- **Status:** 🔴 Aberto. Confirmado nos logs do worker (nenhum `TOOL START | name=registrar_consumo` em toda a conversa).
+- **Status:** ✅ Corrigido em `feat/motor-agente-onyx`. Regra 1b no `SYSTEM_AGENT` separa RECOMENDAR (só do cardápio) de REGISTRAR (qualquer alimento), reforçada na seção QUAL TOOL USAR. Depois da correção, os dois casos de consumo do eval passaram a chamar a tool.
 - **Achado:** ao registrar "comi 2 conchas de arroz e um escondidinho da vovó", a Lia responde *"olhei o cardápio de hoje e não encontrei 'escondidinho da vovó' na lista"* e **nunca chama a tool**. Ela usa o cardápio (4 pratos da unidade) como porteiro do registro de consumo, que deveria aceitar qualquer alimento da base (144 alimentos, independentes do cardápio).
 - **Problema:** a regra "nunca invente pratos" vaza do domínio de recomendação para o de registro. Consequência: a maquinaria de incerteza (nota no resultado da tool, portão de gravação, campo `confianca` no chat) está correta em teste unitário e **nunca dispara em produção**.
 - **Fix:** separar no `SYSTEM_AGENT` "recomendar SÓ do cardápio" de "registrar o que a pessoa diz que comeu, venha de onde vier". **Benefício:** uma linha de prompt destrava uma feature inteira já construída.
 
 ### IA-11 · Regras R2/R3 com falso positivo alto — 🟠 Alto · M
-- **Status:** 🟠 Aberto. Log-only, então não afeta o usuário — mas inviabiliza promover as regras e polui o eval.
+- **Status:** 🔶 Parcial em `feat/motor-agente-onyx`. R2 passou a exigir que o negrito PAREÇA nome (sem dígito, sem pontuação de frase, sem `:` à direita, ≤5 palavras) — os 11 falso-positivos medidos viraram teste de regressão. R3 aceita somas e diferenças dos valores expostos (combinações de 2 e 3), o que cobre o prato montado. **Ainda log-only**: a R3 seguiu acusando em uma das rodadas (`[150, 30, 350]`), então falta medir por mais tempo antes de promover.
 - **Achado:** medido em turnos reais. R2 assume que todo `**negrito**` é nome de prato e acusa `['recomendacao para voce', 'nutricao da combinacao', '235 kcal', 'segunda-feira (17/08)']`; o modelo usa negrito para rótulos e prosa. R3 acusou `235`, que é `110+95+30` — a soma legítima dos três pratos recomendados.
 - **Problema:** taxa alta demais para promoção via `VALIDACAO_BLOQUEANTE`, e as duas contaminam o resultado do eval (IA-05).
 - **Fix:** R2 só considera negrito curto, sem dígitos e sem pontuação de frase; R3 tolera somas e diferenças dos valores expostos.
 
 ### IA-12 · `cardapio_da_semana` não responde "amanhã" no fim de semana — 🟡 Médio · P
-- **Status:** 🟡 Aberto.
+- **Status:** ✅ Corrigido em `feat/motor-agente-onyx`. A tool aceita `data_alvo` ("hoje", "amanha" ou ISO) e escolhe a semana que CONTÉM o dia, no fuso do refeitório; o prompt manda usá-la em vez de deduzir a semana.
 - **Achado:** num domingo, "e amanhã, o que vai ter?" fez a tool retornar a semana 17–23/08 ("semana atual"); amanhã era 24/08, da semana seguinte. A Lia apresentou **segunda-feira 17/08, já passada**, como sendo amanhã.
 - **Fix:** a tool aceita uma data-alvo e escolhe a semana que a contém, em vez de assumir a semana corrente.
 
 ### IA-13 · Confiança "média" não vira sinal para o usuário — 🟡 Médio · P
-- **Status:** 🟡 Aberto.
+- **Status:** ✅ Corrigido em `feat/motor-agente-onyx`. `confianca` ganhou `aproximados` e o nível `aproximada` (entrou na conta, número não garantido) ao lado de `parcial` (ficou de fora). O front mostra as duas linhas.
 - **Achado:** o campo `confianca` da resposta do chat só reporta itens **não reconhecidos**. Item resolvido com `confianca: "media"` (casamento incerto, número provavelmente errado) não gera nota no front nem ressalva na fala.
 - **Fix:** propagar o nível de confiança agregado do turno, não só a lista de não reconhecidos.
 
 ### IA-14 · Asserções do eval conflitam com a regra contratual — 🟡 Médio · P
-- **Status:** 🟡 Aberto.
+- **Status:** ✅ Corrigido em `feat/motor-agente-onyx`. `nao_deve_recomendar` olha só a seção de recomendação; o eval passou a suportar conversas de vários `turnos` (o prompt manda perguntar sobre sobras antes de registrar, então exigir a tool no 1º turno reprovava o comportamento certo); e a checagem do fluxo de duas etapas virou ESTRUTURAL, sobre o argumento `confirmado` da tool, em vez de procurar a palavra "confirma" no texto.
 - **Achado:** a asserção `nao_deve_recomendar` procura o nome do prato proibido em TODA a resposta — mas a regra contratual (§3.1) **obriga** listar o cardápio completo, que inclui o prato proibido. Os casos de restrição e alergia reprovam por construção.
 - **Problema:** dois dos dez casos do eval são falso negativo garantido, e são justamente os de segurança alimentar — os que mais precisam de sinal confiável.
 - **Fix:** restringir a checagem à seção de recomendação da resposta.
+
+### IA-15 · O eval de 10 casos varia demais para ser gate — 🟠 Alto · M
+- **Status:** 🟠 Aberto. Medido em 4 rodadas com Haiku.
+- **Achado:** depois das correções de IA-10/11/14, as rodadas deram **20% → 60% → 80% → 80% → 60%**. O piso subiu muito, mas a variância entre execuções é de ~20 pontos, e os casos que falham mudam a cada rodada.
+- **Problema:** com 10 casos, cada um vale 10 pontos — uma única resposta instável move o resultado mais que uma regressão real de prompt. Um gate assim fica vermelho por ruído e é ignorado em duas semanas, que é justamente o que o limiar de 90% queria evitar.
+- **Causa:** duas somadas. (a) amostra pequena; (b) as asserções restantes que dependem de REDAÇÃO ("a resposta contém 'não reconheci'") reprovam paráfrases corretas — o mesmo defeito do IA-14, que já foi resolvido nos casos onde dava para checar estrutura.
+- **Fix:** subir para 30–50 casos (reduz a variância por caso) e trocar o que sobrou de checagem textual por checagem estrutural (tools chamadas, argumentos, itens citados) ou por um juiz LLM com rubrica. **Benefício:** só então o número vira gate confiável e o limiar de 90% faz sentido.
 
 ---
 

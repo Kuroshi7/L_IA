@@ -48,11 +48,15 @@ type Output struct {
 // ele os resolve contra a base — e quando a resolução falha, quem conversa
 // precisa saber disso em vez de receber um total com cara de exato.
 type Confianca struct {
-	Nivel string `json:"nivel"` // alta | parcial
+	Nivel string `json:"nivel"` // alta | aproximada | parcial
 
 	// Termos que o usuário escreveu e a base não reconheceu. São acionáveis:
 	// a pessoa pode descrever o alimento de outro jeito.
 	NaoReconhecidos []string `json:"nao_reconhecidos,omitempty"`
+
+	// Termos que entraram na conta, mas com número aproximado — casamento
+	// incerto ou porção marcada para revisão nutricional.
+	Aproximados []string `json:"aproximados,omitempty"`
 }
 
 // mensagem trafegada via RabbitMQ entre Go e o worker Python.

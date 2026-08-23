@@ -12,7 +12,7 @@ from app.agent.motor.turn import ResultadoDeTurno
 from tests.eval import fakes
 from tests.eval.test_eval_llm import _conferir
 
-CAMPOS_OBRIGATORIOS = ("nome", "porque", "dados", "mensagem", "esperado")
+CAMPOS_OBRIGATORIOS = ("nome", "porque", "dados", "esperado")
 
 
 # --- integridade dos casos ----------------------------------------------------
@@ -23,6 +23,8 @@ def test_todos_os_casos_estao_completos():
     for caso in casos:
         faltando = [c for c in CAMPOS_OBRIGATORIOS if not caso.get(c)]
         assert not faltando, f"{caso.get('nome', '?')}: campos faltando {faltando}"
+        # Um caso é uma mensagem única ou uma conversa (`turnos`).
+        assert caso.get("mensagem") or caso.get("turnos"), f"{caso['nome']}: sem mensagem nem turnos"
 
 
 def test_todo_caso_aponta_para_um_dataset_existente():
@@ -115,3 +117,56 @@ def test_guardrail_e_conferido_nos_dois_sentidos(esperado_fora, resultado_nulo, 
     caso = {"nome": "x", "porque": "x", "esperado": {"deve_ser_fora_de_escopo": esperado_fora}}
     r = None if resultado_nulo else _resultado("resposta qualquer")
     assert bool(_conferir(caso, r, DADOS)) is deve_falhar
+
+
+# --- IA-14: a asserção de segurança alimentar não pode brigar com a §3.1 -----
+
+CARDAPIO_COMPLETO = (
+    "🍽️ Cardápio de hoje:\n"
+    "- **Frango grelhado com ervas** (proteina)\n"
+    "- **Estrogonofe de carne** (proteina)\n"
+    "- **Arroz integral** (acompanhamento)\n"
+)
+
+
+def test_listar_o_prato_proibido_no_cardapio_nao_e_recomendar():
+    # A regra contratual OBRIGA mostrar o cardápio completo, inclusive o prato
+    # que o perfil proíbe. Reprovar por isso reprovava o comportamento correto.
+    caso = {"nome": "x", "porque": "x", "esperado": {"nao_deve_recomendar": ["Estrogonofe de carne"]}}
+    resposta = CARDAPIO_COMPLETO + "\nBaseado nas suas restrições, recomendo o **Arroz integral**."
+    assert _conferir(caso, _resultado(resposta, tools=["filtrar_pratos"]), DADOS) == []
+
+
+def test_recomendar_o_prato_proibido_continua_reprovando():
+    caso = {"nome": "x", "porque": "x", "esperado": {"nao_deve_recomendar": ["Estrogonofe de carne"]}}
+    resposta = CARDAPIO_COMPLETO + "\nRecomendo o **Estrogonofe de carne**, é o mais proteico."
+    falhas = _conferir(caso, _resultado(resposta, tools=["filtrar_pratos"]), DADOS)
+    assert falhas and "proíbe" in falhas[0]
+
+
+def test_sem_marca_de_recomendacao_nao_ha_o_que_checar():
+    caso = {"nome": "x", "porque": "x", "esperado": {"nao_deve_recomendar": ["Estrogonofe de carne"]}}
+    assert _conferir(caso, _resultado(CARDAPIO_COMPLETO, tools=["filtrar_pratos"]), DADOS) == []
+
+
+def test_previa_antes_de_gravar_checa_argumento_e_nao_redacao():
+    from app.agent.motor.observacao import ObservacoesDoTurno
+
+    caso = {"nome": "x", "porque": "x", "esperado": {"previa_antes_de_gravar": True}}
+
+    def com_chamadas(*pares):
+        obs = ObservacoesDoTurno()
+        obs.chamadas.extend(pares)
+        return ResultadoDeTurno(resposta="Anotado!", tools_chamadas=[p[0] for p in pares], observacoes=obs)
+
+    # Prévia primeiro, gravação depois: correto, independente da redação.
+    ok = com_chamadas(("registrar_consumo", '{"k": {"confirmado": false}}'),
+                      ("registrar_consumo", '{"k": {"confirmado": true}}'))
+    assert _conferir(caso, ok, DADOS) == []
+
+    # Gravou de cara, sem prévia.
+    ruim = com_chamadas(("registrar_consumo", '{"k": {"confirmado": true}}'))
+    assert _conferir(caso, ruim, DADOS)
+
+    # Nem chamou.
+    assert _conferir(caso, com_chamadas(("meu_perfil", "{}")), DADOS)

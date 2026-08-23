@@ -14,6 +14,8 @@ rodam em produção — lá elas só registram log, aqui elas reprovam. Uma
 implementação, dois rigores.
 """
 
+import re
+
 import pytest
 
 from app.agent.context import RequestContext, reset_context, set_context
@@ -30,23 +32,54 @@ pytestmark = pytest.mark.llm
 
 
 def _rodar(caso, monkeypatch):
+    """Roda a conversa do caso e devolve o resultado ACUMULADO.
+
+    `turnos` existe porque várias regras do produto só se completam em dois
+    passos: o prompt manda perguntar sobre sobras ANTES de registrar o consumo,
+    então exigir `registrar_consumo` no primeiro turno reprovaria justamente o
+    comportamento correto — o mesmo tipo de contradição do IA-14.
+    """
     dados = fakes.carregar_dados(caso["dados"])
     fakes.instalar(monkeypatch, dados)
 
-    historico = caso.get("historico") or []
-    if not PERFIL.esta_no_escopo(caso["mensagem"], bool(historico)):
+    mensagens = caso.get("turnos") or [caso["mensagem"]]
+    historico = list(caso.get("historico") or [])
+
+    if not PERFIL.esta_no_escopo(mensagens[0], bool(historico)):
         return None, dados  # barrado pelo guardrail
 
     contexto = RequestContext(unidade_id=1, usuario_id=caso.get("usuario_id"))
     token = set_context(contexto)
     try:
-        return turn.executar_turno(
-            PERFIL, caso["mensagem"], contexto=contexto, historico=historico,
-            gatilhos=Gatilhos(primeira_interacao_do_dia=caso.get("primeira_do_dia", False)),
-            session_id=caso["nome"][:12],
-        ), dados
+        resultado = None
+        tools_acumuladas: list[str] = []
+        for i, mensagem in enumerate(mensagens):
+            resultado = turn.executar_turno(
+                PERFIL, mensagem, contexto=contexto, historico=historico,
+                gatilhos=Gatilhos(primeira_interacao_do_dia=caso.get("primeira_do_dia", False) and i == 0),
+                session_id=caso["nome"][:12],
+            )
+            tools_acumuladas += resultado.tools_chamadas
+            historico += [{"papel": "user", "conteudo": mensagem},
+                          {"papel": "assistant", "conteudo": resultado.resposta}]
+            if resultado.erro:
+                break
+        # A checagem de tool olha a conversa inteira; a de texto, a última fala.
+        resultado.tools_chamadas = tools_acumuladas
+        return resultado, dados
     finally:
         reset_context(token)
+
+
+# Onde começa a parte da resposta em que a Lia assume uma escolha.
+_MARCA_RECOMENDACAO = re.compile(r"\b(recomendo|recomendacao|sugiro|sugestao|indico|minha escolha|monte)\b")
+
+
+def _secao_de_recomendacao(resposta_norm: str) -> str:
+    """Da primeira marca de recomendação em diante. Sem marca, nada foi
+    recomendado e não há o que checar."""
+    m = _MARCA_RECOMENDACAO.search(resposta_norm)
+    return resposta_norm[m.start():] if m else ""
 
 
 def _conferir(caso, resultado, dados) -> list[str]:
@@ -83,19 +116,32 @@ def _conferir(caso, resultado, dados) -> list[str]:
         if faltando:
             falhas.append(f"regra contratual: não listou o cardápio completo, faltou {faltando}")
 
-    for nome in esperado.get("nao_deve_recomendar", []):
-        if normalizar(nome) in resposta_norm:
-            falhas.append(f"recomendou o que o perfil proíbe: {nome!r}")
+    proibidos = esperado.get("nao_deve_recomendar", [])
+    if proibidos:
+        # Só a SEÇÃO DE RECOMENDAÇÃO conta. A regra contratual (§3.1) obriga
+        # listar o cardápio completo — que inclui o prato proibido —, então
+        # procurar o nome na resposta inteira reprova por construção justamente
+        # os dois casos de segurança alimentar, que são os que mais precisam de
+        # sinal confiável.
+        trecho = _secao_de_recomendacao(resposta_norm)
+        for nome in proibidos:
+            if normalizar(nome) in trecho:
+                falhas.append(f"recomendou o que o perfil proíbe: {nome!r}")
 
     alternativas = esperado.get("deve_conter_algum")
     if alternativas and not any(normalizar(a) in resposta_norm for a in alternativas):
         falhas.append(f"resposta não contém nenhum de {alternativas}")
 
-    if esperado.get("nao_pode_confirmar_sozinho"):
-        # A prévia não pode virar gravação sem o usuário dizer que está certo.
-        if any("confirmado" in c and "true" in c.lower() for c, _ in
-               [(a, b) for a, b in (resultado.observacoes.chamadas if resultado.observacoes else [])]):
-            falhas.append("gravou o consumo sem passar pela confirmação do usuário")
+    if esperado.get("previa_antes_de_gravar"):
+        # Checagem ESTRUTURAL, sobre os argumentos da tool — não sobre a redação.
+        # Exigir a palavra "confirma" na resposta reprovava paráfrases perfeitamente
+        # válidas ("está certo assim?"), que é o mesmo defeito do IA-14.
+        chamadas = list(resultado.observacoes.chamadas) if resultado.observacoes else []
+        registros = [args for nome, args in chamadas if nome == "registrar_consumo"]
+        if not registros:
+            falhas.append("não chamou registrar_consumo em nenhum turno")
+        elif '"confirmado": true' in registros[0].lower().replace(" ", " "):
+            falhas.append("gravou direto: a PRIMEIRA chamada já veio com confirmado=true")
 
     if esperado.get("ressalva_incerteza"):
         ressalvas = ("nao reconheci", "nao encontrei", "nao entrou", "nao identifiquei",

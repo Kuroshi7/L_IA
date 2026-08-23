@@ -670,6 +670,10 @@ th.celula-num { text-align: right; }
   line-height: 1.45;
   color: var(--text-muted);
 }
+/* Duas linhas possíveis (fora da conta / aproximado). Espaçamento curto entre
+   elas para lerem como uma observação só, não como lista de erros. */
+.nota-linha { margin: 0; }
+.nota-linha + .nota-linha { margin-top: 3px; }
 .nota-termo {
   color: var(--accent);
   font-weight: 500;

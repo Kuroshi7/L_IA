@@ -516,3 +516,69 @@ func TestIntegracaoAgregadoIgnoraConsumoIncompleto(t *testing.T) {
 		t.Errorf("evento sem o campo `completo` deveria contar; linhas = %d", n)
 	}
 }
+
+// TestIntegracaoPorcaoSuspeitaRebaixaConfianca cobre o buraco mais grave achado
+// na validação: o casamento do nome podia ser perfeito e o NÚMERO estar errado,
+// e mesmo assim o cálculo saía com `confianca: "alta"`. A confiança media a
+// certeza da RESOLUÇÃO, nunca a plausibilidade do DADO.
+func TestIntegracaoPorcaoSuspeitaRebaixaConfianca(t *testing.T) {
+	limpar(t)
+	seedBase(t)
+	ctx := context.Background()
+
+	// "Feijão cozido" com 60 g de macros por 100 g: preparação hidratada deveria
+	// ser majoritariamente água. É a regra A da migração 0007.
+	var id int64
+	if err := pool.QueryRow(ctx,
+		`INSERT INTO nutri_alimentos (nome, nome_norm, categoria, fonte, aliases)
+		 VALUES ('Feijao cozido','feijao cozido','Leguminosas','*','{feijao}') RETURNING id`,
+	).Scan(&id); err != nil {
+		t.Fatalf("seed alimento suspeito: %v", err)
+	}
+	if _, err := pool.Exec(ctx,
+		`INSERT INTO nutri_porcoes (alimento_id, medida_label, medida_cod, quantidade_g,
+		                            kcal, proteina_g, carboidrato_g, gordura_g, suspeito)
+		 VALUES ($1,'CO CH','CO',100,300,10,45,5,true)`, id,
+	); err != nil {
+		t.Fatalf("seed porcao suspeita: %v", err)
+	}
+
+	tot, err := st.CalcularConsumo(ctx, []domain.ConsumoItemEntrada{
+		{Alimento: "feijao", Medida: "concha", Quantidade: 1},
+	})
+	if err != nil {
+		t.Fatalf("calcular: %v", err)
+	}
+	if len(tot.Itens) != 1 {
+		t.Fatalf("esperava 1 item, veio %d", len(tot.Itens))
+	}
+
+	item := tot.Itens[0]
+	if item.Confianca == "alta" {
+		t.Errorf("porção marcada como suspeita não pode sair com confiança alta: %+v", item)
+	}
+	if item.Obs == "" {
+		t.Error("faltou explicar ao usuário por que o número é aproximado")
+	}
+	// O cálculo continua valendo — rebaixar a confiança não é recusar a resposta.
+	if tot.Kcal != 300 || !tot.Completo {
+		t.Errorf("o total deveria seguir completo e somado: kcal=%v completo=%v", tot.Kcal, tot.Completo)
+	}
+}
+
+// TestIntegracaoMigracaoMarcaPorcoesImplausiveis prova que a regra determinística
+// da migração 0007 marca o que deve e não sai marcando o resto.
+func TestIntegracaoMigracaoMarcaPorcoesImplausiveis(t *testing.T) {
+	limpar(t)
+	seedBase(t)
+	ctx := context.Background()
+
+	// As porções do seed (arroz cozido, ~25 g de macros/100 g) são plausíveis.
+	var suspeitas int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM nutri_porcoes WHERE suspeito`).Scan(&suspeitas); err != nil {
+		t.Fatalf("contar: %v", err)
+	}
+	if suspeitas != 0 {
+		t.Errorf("a regra marcou %d porções plausíveis — precisão baixa demais para revisão humana", suspeitas)
+	}
+}

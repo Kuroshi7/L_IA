@@ -29,6 +29,11 @@ type NutriPorcao struct {
 	ProteinaG    float64 `json:"proteina_g"`
 	CarboidratoG float64 `json:"carboidrato_g"`
 	GorduraG     float64 `json:"gordura_g"`
+
+	// Valor implausível pela checagem determinística da migração 0007. Não
+	// invalida o cálculo — rebaixa a confiança, para a resposta sair como
+	// aproximação em vez de número exato.
+	Suspeito bool `json:"suspeito,omitempty"`
 }
 
 // ConsumoItemEntrada é um item informado pelo usuário (já estruturado pela LLM).

@@ -1,6 +1,6 @@
 {
   "nome": "cardapio vazio — admite em vez de inventar",
-  "porque": "regra inviolavel 4: lista vazia vira 'nao encontrei', nunca um prato plausivel",
+  "porque": "regra inviolavel 4: lista vazia vira 'nao encontrei', nunca um prato plausivel (a redação varia; o que importa é admitir a ausência sem citar prato)",
   "dados": "vazio",
   "usuario_id": 7,
   "primeira_do_dia": true,
@@ -13,7 +13,15 @@
       "nao temos",
       "sem pratos",
       "nao consta",
-      "nenhum prato"
+      "nenhum prato",
+      "nao foi carregado",
+      "nao esta disponivel",
+      "ainda nao",
+      "sem cardapio",
+      "nao localizei",
+      "indisponivel",
+      "nao tem cardapio",
+      "nao aparece"
     ]
   }
 }

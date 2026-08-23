@@ -126,3 +126,54 @@ def test_system_prompt_tem_a_regra_de_confianca():
     # esta regra. Se a regra sumir do prompt, a nota vira instrução órfã.
     assert "confianca" in SYSTEM_AGENT
     assert "itens_ignorados" in SYSTEM_AGENT
+
+
+# --- IA-13: confiança "média" também precisa virar sinal ---------------------
+
+def test_qualidade_registra_aproximados_no_cache_do_turno(monkeypatch):
+    from app.agent.motor.observacao import cache_do_turno, encerrar_turno, iniciar_turno
+    from app.agent.dominio.refeitorio.tools import CACHE_APROXIMADOS, CACHE_NAO_RECONHECIDOS
+
+    monkeypatch.setattr(
+        t.go_api, "calcular_consumo",
+        lambda itens: _totais([
+            _item("arroz", "Arroz Integral Cozido", confianca="media",
+                  obs="valor da tabela marcado para revisão nutricional"),
+            _item("xyzabc"),
+        ], ignorados=["xyzabc"], completo=False),
+    )
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+
+    token = iniciar_turno()
+    try:
+        registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
+        cache = cache_do_turno()
+    finally:
+        encerrar_turno(token)
+
+    # Os dois eixos são distintos: um saiu da conta, o outro entrou impreciso.
+    assert cache[CACHE_NAO_RECONHECIDOS] == ["xyzabc"]
+    assert cache[CACHE_APROXIMADOS] == ["arroz"]
+
+
+def test_aproximado_sozinho_ja_gera_sinal(monkeypatch):
+    # Antes do IA-13 este caso não gerava nota nenhuma: tudo entrou na conta,
+    # então a resposta saía com cara de exata mesmo com casamento incerto.
+    from app.agent.motor.observacao import cache_do_turno, encerrar_turno, iniciar_turno
+    from app.agent.dominio.refeitorio.tools import CACHE_APROXIMADOS
+
+    monkeypatch.setattr(
+        t.go_api, "calcular_consumo",
+        lambda itens: _totais([_item("arroz", "Arroz Integral Cozido", confianca="media")]),
+    )
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+
+    token = iniciar_turno()
+    try:
+        out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
+        cache = cache_do_turno()
+    finally:
+        encerrar_turno(token)
+
+    assert cache[CACHE_APROXIMADOS] == ["arroz"]
+    assert "nota_do_sistema" in out and "aproxima" in out["nota_do_sistema"].lower()

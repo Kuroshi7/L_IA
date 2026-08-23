@@ -7,9 +7,12 @@ export interface Unidade {
 
 /** Sinal de incerteza do turno. Ausente quando a Lia reconheceu tudo. */
 export interface Confianca {
-  nivel: "alta" | "parcial";
+  /** `parcial` = ficou algo fora do total; `aproximada` = entrou tudo, com número não garantido. */
+  nivel: "alta" | "aproximada" | "parcial";
   /** Termos que a pessoa escreveu e a base nutricional não reconheceu. */
   nao_reconhecidos?: string[];
+  /** Termos que entraram na conta, mas com número aproximado. */
+  aproximados?: string[];
 }
 
 export interface ChatResponse {

@@ -32,6 +32,31 @@ _ROTULOS = {
     "cardapio", "hoje", "dica", "atencao", "observacao", "total",
 }
 
+# O modelo usa negrito para MUITO mais que nome de prato: títulos de seção,
+# rótulos, datas e frases inteiras. Medido em turnos reais, tratar todo negrito
+# como nome de prato acusava coisas como "recomendação para você", "235 kcal" e
+# "segunda-feira (17/08)". Estes filtros existem para a regra ter precisão
+# suficiente para alguém olhar o log; sem eles ela vira ruído ignorado.
+_MAX_PALAVRAS_NOME = 5
+_PONTUACAO_DE_FRASE = ("?", "!", ";", ":")
+
+
+def _parece_nome_de_item(bruto: str, seguinte: str) -> bool:
+    nome = bruto.strip()
+    if not nome:
+        return False
+    # Negrito seguido de ":" é título de seção ("**Recomendação para você:**").
+    if nome.endswith(":") or seguinte.startswith(":"):
+        return False
+    if any(c in nome for c in _PONTUACAO_DE_FRASE):
+        return False
+    # Número no meio é rótulo ou data, não nome ("235 kcal", "segunda-feira (17/08)").
+    if any(c.isdigit() for c in nome):
+        return False
+    if len(nome.split()) > _MAX_PALAVRAS_NOME:
+        return False
+    return True
+
 _NUMERO_COM_UNIDADE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kcal|g\b)", re.IGNORECASE)
 
 # Palavras com que a resposta reconhece que não sabe. Se nenhuma aparecer quando
@@ -47,7 +72,11 @@ def resposta_recomenda(resposta: str) -> bool:
 
 def _itens_citados(resposta: str) -> list[str]:
     citados = []
-    for bruto in _NEGRITO.findall(resposta):
+    for m in _NEGRITO.finditer(resposta):
+        bruto = m.group(1)
+        seguinte = resposta[m.end():m.end() + 2]
+        if not _parece_nome_de_item(bruto, seguinte):
+            continue
         nome = normalizar(bruto).strip(" :*-")
         if not nome or nome in _ROTULOS:
             continue
@@ -98,6 +127,28 @@ def _prato_fora_do_cardapio(a: Achado) -> str | None:
 
 # --- R3 ----------------------------------------------------------------------
 
+# Somar as kcal dos pratos recomendados é aritmética LEGÍTIMA e esperada
+# ("110 + 95 + 30 = 235 kcal no total"). Sem isto a regra acusava o total de
+# toda recomendação combinada. Combinações de 2 e 3 cobrem o prato montado sem
+# explodir: o teto evita custo quadrático quando o turno expôs muitos valores.
+_MAX_VALORES_PARA_SOMA = 16
+
+
+def _valores_aceitaveis(expostos) -> set[float]:
+    valores = {v for v in expostos if v}
+    if len(valores) > _MAX_VALORES_PARA_SOMA:
+        return valores
+    lista = sorted(valores)
+    aceitos = set(valores)
+    for i, a in enumerate(lista):
+        for j, b in enumerate(lista[i + 1:], start=i + 1):
+            aceitos.add(a + b)
+            for c in lista[j + 1:]:
+                aceitos.add(a + b + c)
+    return aceitos
+
+
+
 def _numero_nao_exposto(a: Achado) -> str | None:
     obs = a.observacoes
     if obs is None:
@@ -110,11 +161,13 @@ def _numero_nao_exposto(a: Achado) -> str | None:
     # colhidos separadamente.
     if not obs.itens_conhecidos and not obs.valores_expostos:
         return None
+    aceitos = _valores_aceitaveis(obs.valores_expostos)
+
     fora = []
     for bruto, _unidade in _NUMERO_COM_UNIDADE.findall(a.resposta):
         valor = float(bruto.replace(",", "."))
         # Tolerância de arredondamento: 182.4 vira "182 kcal" legitimamente.
-        if any(abs(valor - v) <= max(1.0, abs(v) * 0.02) for v in obs.valores_expostos):
+        if any(abs(valor - v) <= max(1.0, abs(v) * 0.02) for v in aceitos):
             continue
         fora.append(valor)
     if not fora:

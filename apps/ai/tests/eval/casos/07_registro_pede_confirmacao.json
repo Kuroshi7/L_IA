@@ -1,6 +1,6 @@
 {
   "nome": "registro em duas etapas",
-  "porque": "IA-07: a primeira chamada e previa; gravar sem confirmacao vira pontuacao errada sem desfazer",
+  "porque": "IA-07: a primeira chamada e previa; gravar sem confirmacao vira pontuacao errada sem desfazer (o prompt manda perguntar sobre sobras antes de chamar a tool, logo é conversa de 2 turnos)",
   "dados": "padrao",
   "usuario_id": 7,
   "primeira_do_dia": false,
@@ -14,18 +14,14 @@
       "conteudo": "Ola!"
     }
   ],
-  "mensagem": "comi 2 conchas de arroz integral",
   "esperado": {
     "tools_obrigatorias": [
       "registrar_consumo"
     ],
-    "nao_pode_confirmar_sozinho": true,
-    "deve_conter_algum": [
-      "confirma",
-      "esta certo",
-      "correto",
-      "confere",
-      "sobrou"
-    ]
-  }
+    "previa_antes_de_gravar": true
+  },
+  "turnos": [
+    "comi 2 conchas de arroz integral",
+    "não sobrou nada"
+  ]
 }

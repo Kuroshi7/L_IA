@@ -16,7 +16,7 @@ import time
 from app.agent.context import RequestContext, reset_context, set_context
 from app.agent.dominio.refeitorio.perfil import PERFIL
 from app.agent.dominio.refeitorio.perfil import prewarm  # noqa: F401 — reexport p/ o worker
-from app.agent.dominio.refeitorio.tools import CACHE_NAO_RECONHECIDOS
+from app.agent.dominio.refeitorio.tools import CACHE_APROXIMADOS, CACHE_NAO_RECONHECIDOS
 from app.agent.dominio.refeitorio.validators import verificar_resposta
 from app.agent.motor import turn
 from app.agent.motor.reminders import Gatilhos
@@ -95,7 +95,16 @@ def _confianca(resultado) -> dict | None:
     consumidores que ainda não o conhecem seguem funcionando. Só reportamos o
     que é acionável pelo usuário: os termos que ele escreveu e a base não
     reconheceu, porque a ação é reescrever o alimento de outro jeito."""
-    nao_reconhecidos = (resultado.cache or {}).get(CACHE_NAO_RECONHECIDOS) or []
-    if not nao_reconhecidos:
+    cache = resultado.cache or {}
+    nao_reconhecidos = list(cache.get(CACHE_NAO_RECONHECIDOS) or [])
+    aproximados = list(cache.get(CACHE_APROXIMADOS) or [])
+    if not nao_reconhecidos and not aproximados:
         return None
-    return {"nivel": "parcial", "nao_reconhecidos": list(nao_reconhecidos)}
+    return {
+        # "parcial" = algo ficou de fora da conta; "aproximada" = tudo entrou,
+        # mas com número que a base não garante. São coisas diferentes para
+        # quem lê, e a segunda era invisível até aqui.
+        "nivel": "parcial" if nao_reconhecidos else "aproximada",
+        "nao_reconhecidos": nao_reconhecidos,
+        "aproximados": aproximados,
+    }

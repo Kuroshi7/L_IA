@@ -1,5 +1,7 @@
 """Regras R2/R3/R4 e compressão de repetição."""
 
+
+import pytest
 import app.agent.dominio.refeitorio.tools as t
 from app.agent.dominio.refeitorio.perfil import PERFIL
 from app.agent.dominio.refeitorio.validators import verificar_resposta
@@ -164,3 +166,54 @@ def test_r3_nao_acusa_quando_o_turno_so_trouxe_prosa():
     # regra viraria ruído que ninguém lê.
     obs = _obs("Uma concha média de arroz tem cerca de 110 kcal segundo o guia.")
     assert "R3-numero-nao-exposto" not in _ids("O guia diz 110 kcal por concha.", obs, tools=["buscar_informacao"])
+
+
+# --- IA-11: falso positivos MEDIDOS em turnos reais viram regressão ----------
+# Cada string abaixo saiu de um log `VALIDACAO | regra=...` de uma conversa real
+# com Haiku. São todos negritos que o modelo usa para título, rótulo, data ou
+# frase — nenhum é nome de prato.
+
+FALSO_POSITIVOS_R2 = [
+    "**Recomendação para você:** o frango está ótimo hoje.",
+    "**Nutrição da combinação:** 235 kcal no total.",
+    "Você comeu **235 kcal** no almoço.",
+    "**Segunda-feira (17/08)** tem frango.",
+    "**Terça a domingo:** o cardápio ainda não foi divulgado.",
+    "**Você quer que eu recomende como montar o prato de amanhã?**",
+    "**Minha sugestão:** monte com arroz.",
+    "**Resultado:** o frango lidera em proteína.",
+    "**Porção sugerida:** 2 conchas.",
+    "**Segunda opção:** arroz com salada.",
+    "O frango tem **31g de proteína**.",
+]
+
+
+@pytest.mark.parametrize("resposta", FALSO_POSITIVOS_R2)
+def test_r2_nao_acusa_negrito_que_nao_e_nome_de_prato(resposta):
+    # Antes do conserto, todos estes disparavam R2 e afogavam o sinal real.
+    assert "R2-prato-fora-do-cardapio" not in _ids(resposta, _obs(CARDAPIO))
+
+
+def test_r2_continua_pegando_prato_inventado_de_verdade():
+    # A precisão não pode ter custado a detecção — este é o caso que importa.
+    assert "R2-prato-fora-do-cardapio" in _ids("Recomendo a **Feijoada Completa**.", _obs(CARDAPIO))
+    assert "R2-prato-fora-do-cardapio" in _ids("Sugiro **Lasanha de Berinjela** hoje.", _obs(CARDAPIO))
+
+
+def test_r3_aceita_soma_dos_pratos_recomendados():
+    # 110 + 95 + 30 = 235: aritmética legítima do prato montado, não invenção.
+    obs = _obs([
+        {"id": 1, "nome": "Arroz Integral", "calorias": 110},
+        {"id": 2, "nome": "Feijão Carioca", "calorias": 95},
+        {"id": 3, "nome": "Salada Verde", "calorias": 30},
+    ])
+    assert "R3-numero-nao-exposto" not in _ids("No total dá 235 kcal.", obs)
+    assert "R3-numero-nao-exposto" not in _ids("Arroz e feijão somam 205 kcal.", obs)
+
+
+def test_r3_continua_pegando_numero_inventado():
+    obs = _obs([
+        {"id": 1, "nome": "Arroz Integral", "calorias": 110},
+        {"id": 2, "nome": "Feijão Carioca", "calorias": 95},
+    ])
+    assert "R3-numero-nao-exposto" in _ids("Esse prato tem 780 kcal.", obs)

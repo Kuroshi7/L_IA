@@ -19,6 +19,7 @@ class Confianca(BaseModel):
 
     nivel: str
     nao_reconhecidos: list[str] = Field(default_factory=list)
+    aproximados: list[str] = Field(default_factory=list)
 
 
 class InferResponse(BaseModel):

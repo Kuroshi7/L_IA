@@ -60,14 +60,14 @@ func (s *Store) ResolverPorcao(ctx context.Context, alimentoID int64, medida str
 		err := s.pool.QueryRow(ctx,
 			`SELECT id, alimento_id, medida_label, COALESCE(medida_cod,''),
 			        quantidade_g, COALESCE(kcal,0), COALESCE(proteina_g,0),
-			        COALESCE(carboidrato_g,0), COALESCE(gordura_g,0)
+			        COALESCE(carboidrato_g,0), COALESCE(gordura_g,0), suspeito
 			   FROM nutri_porcoes
 			  WHERE alimento_id = $1 AND medida_cod = $2
 			  ORDER BY quantidade_g
 			  LIMIT 1`,
 			alimentoID, cod,
 		).Scan(&p.ID, &p.AlimentoID, &p.MedidaLabel, &p.MedidaCod,
-			&p.QuantidadeG, &p.Kcal, &p.ProteinaG, &p.CarboidratoG, &p.GorduraG)
+			&p.QuantidadeG, &p.Kcal, &p.ProteinaG, &p.CarboidratoG, &p.GorduraG, &p.Suspeito)
 		if err == nil {
 			return p, "alta", ""
 		}
@@ -77,13 +77,13 @@ func (s *Store) ResolverPorcao(ctx context.Context, alimentoID int64, medida str
 	err := s.pool.QueryRow(ctx,
 		`SELECT id, alimento_id, medida_label, COALESCE(medida_cod,''),
 		        quantidade_g, COALESCE(kcal,0), COALESCE(proteina_g,0),
-		        COALESCE(carboidrato_g,0), COALESCE(gordura_g,0)
+		        COALESCE(carboidrato_g,0), COALESCE(gordura_g,0), suspeito
 		   FROM nutri_porcoes
 		  WHERE alimento_id = $1 AND medida_label = '100g'
 		  LIMIT 1`,
 		alimentoID,
 	).Scan(&p.ID, &p.AlimentoID, &p.MedidaLabel, &p.MedidaCod,
-		&p.QuantidadeG, &p.Kcal, &p.ProteinaG, &p.CarboidratoG, &p.GorduraG)
+		&p.QuantidadeG, &p.Kcal, &p.ProteinaG, &p.CarboidratoG, &p.GorduraG, &p.Suspeito)
 	if err != nil {
 		return domain.NutriPorcao{}, "baixa", "porção não encontrada"
 	}
@@ -148,6 +148,16 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 		res.GorduraG = porcao.GorduraG * qtd
 		res.Confianca = menorConfianca(confAlimento, confPorcao)
 		res.Obs = obs
+		if porcao.Suspeito {
+			// O casamento do nome pode ter sido perfeito e o NÚMERO ainda estar
+			// errado. Sem isto, a resposta sai com a mesma cara de certeza de um
+			// valor verificado — que é exatamente o comportamento que o produto
+			// existe para não ter.
+			res.Confianca = menorConfianca(res.Confianca, "media")
+			if res.Obs == "" {
+				res.Obs = "valor da tabela marcado para revisão nutricional; trate como aproximação"
+			}
+		}
 
 		tot.Kcal += res.Kcal
 		tot.ProteinaG += res.ProteinaG

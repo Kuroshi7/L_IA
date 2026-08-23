@@ -1,6 +1,6 @@
 {
   "nome": "alimento fora da base — declara a incerteza",
-  "porque": "o diferencial do produto: item nao reconhecido fica fora do total e isso PRECISA ser dito",
+  "porque": "o diferencial do produto: item nao reconhecido fica fora do total e isso PRECISA ser dito (o prompt manda perguntar sobre sobras antes de chamar a tool, logo é conversa de 2 turnos)",
   "dados": "consumo_fora_da_base",
   "usuario_id": 7,
   "primeira_do_dia": false,
@@ -14,7 +14,6 @@
       "conteudo": "Ola!"
     }
   ],
-  "mensagem": "comi 2 conchas de arroz e um escondidinho da vovo",
   "esperado": {
     "tools_obrigatorias": [
       "registrar_consumo"
@@ -28,5 +27,9 @@
       "fora da conta",
       "nao achei"
     ]
-  }
+  },
+  "turnos": [
+    "comi 2 conchas de arroz e um escondidinho da vovo",
+    "não sobrou nada, pode registrar"
+  ]
 }

@@ -42,17 +42,31 @@ e versionamento em [SemVer](https://semver.org/lang/pt-BR/).
 - Na IA: a Lia declara o que não entrou na conta, e `registrar_consumo` se recusa a gravar
   quando NENHUM item foi reconhecido (seria um registro de 0 kcal, indesfazível).
 
-### Known Issues — medidos na validação end-to-end (2026-08-23)
-Stack real + Anthropic/Haiku + navegador. O que a validação mostrou, além do que passou:
-- **IA-09 (crítico):** número nutricional errado com `confianca: "alta"` — 2 conchas de arroz
-  integral saem como 601 kcal. A confiança mede a certeza do CASAMENTO, não a correção do
-  DADO; parte da base tem `fonte: '*'` (extração por LLM sobre PDF, não verificada).
-- **IA-10 (crítico):** a Lia usa o cardápio como porteiro do registro de consumo e nunca
-  chama `registrar_consumo` para alimento fora dele. Na prática a camada de incerteza
-  entregue aqui **não dispara em produção** até isso ser corrigido no prompt.
-- **IA-11:** R2/R3 com falso positivo alto (negrito de rótulo tratado como nome de prato;
-  soma legítima tratada como número inventado). Por isso seguem log-only.
-- **IA-05:** primeira medição do eval: 2/10. Parte das falhas é do próprio harness (IA-14).
+### Fixed — o que a validação end-to-end apontou (2026-08-23)
+- **Auditoria da base contra a TACO** (`app/nutrition/taco.py` + `auditoria.py`). A base
+  entregava "2 conchas de arroz integral = 601 kcal" com `confianca: "alta"`. A extração
+  estava correta: a página 7 do PDF-fonte diz 257 kcal/100 g mesmo (fonte `*`, cálculo dos
+  autores). É a fonte primária que não sobrevive à conferência — a TACO traz 123,5 kcal, e
+  o próprio livro dá 164 kcal ao arroz branco. O cruzamento achou **17 divergências acima
+  de 40% em 37 alimentos casados, todas com a base ACIMA da TACO (1,41× a 4,22×)**: viés
+  sistemático de método, não dígito trocado. Não corrigimos o número (seria trocar um
+  palpite por outro): marcamos `nutri_porcoes.suspeito`, a confiança cai para `media` e a
+  Lia declara a aproximação. 51 de 346 porções marcadas.
+- **Registro de consumo destravado.** A Lia usava o cardápio como porteiro e nunca chamava
+  `registrar_consumo` para alimento fora dele — o que deixava toda a camada de incerteza
+  sem efeito prático. Regra 1b separa RECOMENDAR de REGISTRAR.
+- **R2/R3 com precisão utilizável.** R2 exige que o negrito pareça nome (os 11
+  falso-positivos medidos viraram teste); R3 aceita somas dos valores expostos.
+- **`cardapio_da_semana` responde "amanhã" no domingo** (aceita `data_alvo`).
+- **Confiança "média" virou sinal**: `aproximados` no contrato e segunda linha na nota.
+
+### Known Issues
+- **IA-09:** as 17 divergências e os 105 alimentos sem par na TACO aguardam revisão da
+  nutricionista. O sistema é honesto sobre a incerteza; a base ainda não está certa.
+- **IA-15:** o eval de 10 casos varia 20 pontos entre rodadas (60–80% após as correções,
+  contra 20% antes). Amostra pequena demais para virar gate; precisa de 30–50 casos e de
+  trocar as asserções textuais restantes por estruturais.
+- **IA-11:** R2/R3 seguem log-only até a taxa de falso positivo ser medida por mais tempo.
 
 ### Added — CI e eval
 - `.github/workflows/ci.yml`: pytest (`apps/ai`), `go vet`/`go test` (`apps/api`),

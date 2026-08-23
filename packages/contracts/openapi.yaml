@@ -348,10 +348,19 @@ components:
       properties:
         nivel:
           type: string
-          enum: [alta, parcial]
+          description: >
+            `parcial` = algum item ficou FORA do total; `aproximada` = tudo entrou,
+            mas com número que a base não garante.
+          enum: [alta, aproximada, parcial]
         nao_reconhecidos:
           type: array
           description: Termos escritos pelo usuário que a base não reconheceu.
+          items: { type: string }
+        aproximados:
+          type: array
+          description: >
+            Termos que entraram na conta com número aproximado — casamento incerto
+            ou porção marcada para revisão nutricional.
           items: { type: string }
     UsuarioInput:
       type: object
