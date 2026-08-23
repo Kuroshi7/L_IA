@@ -10,6 +10,58 @@ e versionamento em [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased] — produto-v2 (fundação)
 
+### Added — Motor de agente reaproveitável (conceitos do Onyx)
+- **Fronteira motor/domínio** em `apps/ai/app/agent/`: `motor/` (registry, turn controller,
+  reminders, observação, validação, LLM) não conhece vocabulário de refeitório; o produto
+  atual vive em `dominio/refeitorio/` e é declarado por um `PerfilDeDominio`. Trocar de
+  produto = escrever outro perfil. `tests/test_fronteira_motor.py` defende a separação a
+  cada commit (varredura de vocabulário + proibição de import).
+- **Tool registry por requisição**: sem usuário identificado, as tools de identidade ficam
+  fora do schema em vez de custarem um turno de LLM para o modelo descobrir que não pode
+  usá-las. Executor cacheado por assinatura do conjunto de tools; LLM construído sob demanda.
+- **Reminders no fim do contexto**: a regra contratual (cardápio completo antes da
+  recomendação) deixou de ser bloco de system e passou a ser a última coisa antes da
+  geração — posição com aderência muito maior. Invariante testada: um reminder só repete
+  regra que já existe no system prompt, então entregá-lo pelo canal do usuário não concede
+  nada novo. `executor_primeira_do_dia` deixou de existir.
+- **Deadline propagado**: o worker calcula o prazo a partir do `timestamp` da mensagem AMQP
+  e o turno aborta antes de cada tool quando o tempo de quem esperava acabou — em vez de
+  queimar tokens de uma resposta que ninguém lê e segurar a fila.
+- **Cache e compressão do turno**: as 4 tools de cardápio passaram a fazer 1 leitura da API
+  em vez de 4; repetição exata de tool devolve marcador em vez do corpo.
+- **Confiança visível**: `confianca.nao_reconhecidos` no contrato de chat (opcional,
+  retrocompatível) e nota discreta abaixo da bolha no front. O assistente não gera número
+  nutricional — resolve contra a base; quando falha, diz.
+
+### Fixed — Total de consumo subestimado em silêncio
+- Item que não resolvia contra a base entrava zerado e **não somava** aos totais
+  (`store/nutri.go`), mas a pontuação de gamificação e o índice de resto do dashboard eram
+  calculados sobre esse total menor. Agora `ConsumoTotais` expõe `itens_ignorados`/`completo`,
+  o registro incompleto **não pontua** (devolve `pontuacao_pendente` com o motivo), a linha é
+  marcada em `consumos.completo` (migração `0006`) e o agregado de desperdício a ignora.
+- Na IA: a Lia declara o que não entrou na conta, e `registrar_consumo` se recusa a gravar
+  quando NENHUM item foi reconhecido (seria um registro de 0 kcal, indesfazível).
+
+### Known Issues — medidos na validação end-to-end (2026-08-23)
+Stack real + Anthropic/Haiku + navegador. O que a validação mostrou, além do que passou:
+- **IA-09 (crítico):** número nutricional errado com `confianca: "alta"` — 2 conchas de arroz
+  integral saem como 601 kcal. A confiança mede a certeza do CASAMENTO, não a correção do
+  DADO; parte da base tem `fonte: '*'` (extração por LLM sobre PDF, não verificada).
+- **IA-10 (crítico):** a Lia usa o cardápio como porteiro do registro de consumo e nunca
+  chama `registrar_consumo` para alimento fora dele. Na prática a camada de incerteza
+  entregue aqui **não dispara em produção** até isso ser corrigido no prompt.
+- **IA-11:** R2/R3 com falso positivo alto (negrito de rótulo tratado como nome de prato;
+  soma legítima tratada como número inventado). Por isso seguem log-only.
+- **IA-05:** primeira medição do eval: 2/10. Parte das falhas é do próprio harness (IA-14).
+
+### Added — CI e eval
+- `.github/workflows/ci.yml`: pytest (`apps/ai`), `go vet`/`go test` (`apps/api`),
+  typecheck/build (`apps/web`), em paralelo.
+- `.github/workflows/eval-llm.yml`: eval de 10 casos com LLM real, noturno em dia útil e
+  sob demanda via label `eval`; limiar de 90% em vez de all-or-nothing (modelo é
+  estocástico; gate binário vira ruído ignorado). PR de fork pula o job em vez de falhar.
+
+
 Reestruturação do MVP para produto: monorepo de 3 serviços (Go + Python + Vite),
 base sólida com persistência, filas, RAG e isolamento por unidade.
 

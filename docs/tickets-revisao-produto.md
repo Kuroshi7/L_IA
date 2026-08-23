@@ -129,7 +129,7 @@
 - **Fix:** pinar versões (pip-tools/uv com lockfile) e instalar do lock no Dockerfile. **Benefício:** deploy determinístico.
 
 ### IA-05 · Sem validação pós-resposta nem eval set — 🟠 Alto · M
-- **Status:** 🔶 Parcial em `fix/ia-confiabilidade`: validador pós-resposta (log-only) + 19 testes determinísticos. Eval set com LLM real em CI ainda pendente.
+- **Status:** 🔶 Parcial em `feat/motor-agente-onyx`: o eval set existe (10 casos, `apps/ai/tests/eval/`), roda com LLM real (`.github/workflows/eval-llm.yml`: noturno + label `eval`) e tem testes offline do próprio harness (`tests/test_eval_harness.py`). Validação R1–R4 implementada, log-only. **Primeira medição real com Haiku: 2/10 (20%), abaixo do limiar de 90% — e o número ainda não é confiável**: parte das falhas é de asserção do harness, não do produto (ver IA-11 e IA-14). Fechar exige calibrar as asserções e resolver IA-10/IA-11.
 - **Achado:** o enforcement de "não inventar pratos" é 100% prompt; nada confere se os pratos citados ⊆ cardápio retornado nem se números batem com o tool output; zero testes/evals em `apps/ai/`.
 - **Problema:** alucinação de prato ou número nutricional errado chega ao usuário sem nenhuma rede; regressões de prompt passam despercebidas.
 - **Fix:** validação pós-resposta (nomes citados contra o cardápio da sessão; re-render dos números) + eval set mínimo (cardápio/restrição/alergia/regra contratual) rodando no CI. **Benefício:** é a mitigação mais barata contra o risco de reputação nº 1 de um assistente nutricional.
@@ -151,6 +151,40 @@
 - **Achado:** a nota de sistema da regra contratual entra **dentro da mensagem do usuário** (`orchestrator.py`); `recursion_limit` no default do LangGraph (25 passos).
 - **Problema:** o usuário pode escrever instruções no mesmo nível de autoridade da nota; um loop de tools pode consumir 25 chamadas de LLM num turno.
 - **Fix:** mover a nota para o system message do turno; `recursion_limit` explícito (~8). **Benefício:** autoridade de prompt correta e teto de custo por turno.
+
+### IA-09 · Dado nutricional errado apresentado com confiança alta — 🔴 Crítico · G
+- **Status:** 🔴 Aberto. Medido em 2026-08-23 contra a stack real.
+- **Achado:** `POST /internal/consumo/calcular` para "2 conchas de arroz integral" devolve **601 kcal, 107 g de carboidrato e 13,9 g de gordura**, com `confianca: "alta"`. A base tem `Arroz Integral Cozido` a 257 kcal/100 g e 5,96 g de gordura; arroz integral cozido real fica em ~124 kcal/100 g e ~1 g de gordura — cerca de 2× as calorias e 6× a gordura. A `fonte` do registro é `*` (extração por visão de LLM sobre o PDF escaneado, não verificada), não `IBGE`. Entre os resultados de "arroz", 3 de 4 têm `fonte: *`.
+- **Problema:** atinge a tese central do produto. A promessa é "não gero número, resolvo contra a base" — mas `confianca` mede a certeza do CASAMENTO de string, não a CORREÇÃO do dado. O sistema fica confiantemente errado, que é o comportamento de LLM genérico que o produto existe para evitar. Toda a rede construída protege contra *não reconhecer*; nenhuma protege contra *reconhecer e o número estar errado*.
+- **Fix:** auditar `nutri_porcoes` com `fonte = '*'` contra TACO/IBGE; marcar divergentes e rebaixar a confiança do item quando a fonte não for verificada. **Benefício:** sem isto, o diferencial do produto não existe.
+
+### IA-10 · `registrar_consumo` bloqueada pelo cardápio — 🔴 Crítico · P
+- **Status:** 🔴 Aberto. Confirmado nos logs do worker (nenhum `TOOL START | name=registrar_consumo` em toda a conversa).
+- **Achado:** ao registrar "comi 2 conchas de arroz e um escondidinho da vovó", a Lia responde *"olhei o cardápio de hoje e não encontrei 'escondidinho da vovó' na lista"* e **nunca chama a tool**. Ela usa o cardápio (4 pratos da unidade) como porteiro do registro de consumo, que deveria aceitar qualquer alimento da base (144 alimentos, independentes do cardápio).
+- **Problema:** a regra "nunca invente pratos" vaza do domínio de recomendação para o de registro. Consequência: a maquinaria de incerteza (nota no resultado da tool, portão de gravação, campo `confianca` no chat) está correta em teste unitário e **nunca dispara em produção**.
+- **Fix:** separar no `SYSTEM_AGENT` "recomendar SÓ do cardápio" de "registrar o que a pessoa diz que comeu, venha de onde vier". **Benefício:** uma linha de prompt destrava uma feature inteira já construída.
+
+### IA-11 · Regras R2/R3 com falso positivo alto — 🟠 Alto · M
+- **Status:** 🟠 Aberto. Log-only, então não afeta o usuário — mas inviabiliza promover as regras e polui o eval.
+- **Achado:** medido em turnos reais. R2 assume que todo `**negrito**` é nome de prato e acusa `['recomendacao para voce', 'nutricao da combinacao', '235 kcal', 'segunda-feira (17/08)']`; o modelo usa negrito para rótulos e prosa. R3 acusou `235`, que é `110+95+30` — a soma legítima dos três pratos recomendados.
+- **Problema:** taxa alta demais para promoção via `VALIDACAO_BLOQUEANTE`, e as duas contaminam o resultado do eval (IA-05).
+- **Fix:** R2 só considera negrito curto, sem dígitos e sem pontuação de frase; R3 tolera somas e diferenças dos valores expostos.
+
+### IA-12 · `cardapio_da_semana` não responde "amanhã" no fim de semana — 🟡 Médio · P
+- **Status:** 🟡 Aberto.
+- **Achado:** num domingo, "e amanhã, o que vai ter?" fez a tool retornar a semana 17–23/08 ("semana atual"); amanhã era 24/08, da semana seguinte. A Lia apresentou **segunda-feira 17/08, já passada**, como sendo amanhã.
+- **Fix:** a tool aceita uma data-alvo e escolhe a semana que a contém, em vez de assumir a semana corrente.
+
+### IA-13 · Confiança "média" não vira sinal para o usuário — 🟡 Médio · P
+- **Status:** 🟡 Aberto.
+- **Achado:** o campo `confianca` da resposta do chat só reporta itens **não reconhecidos**. Item resolvido com `confianca: "media"` (casamento incerto, número provavelmente errado) não gera nota no front nem ressalva na fala.
+- **Fix:** propagar o nível de confiança agregado do turno, não só a lista de não reconhecidos.
+
+### IA-14 · Asserções do eval conflitam com a regra contratual — 🟡 Médio · P
+- **Status:** 🟡 Aberto.
+- **Achado:** a asserção `nao_deve_recomendar` procura o nome do prato proibido em TODA a resposta — mas a regra contratual (§3.1) **obriga** listar o cardápio completo, que inclui o prato proibido. Os casos de restrição e alergia reprovam por construção.
+- **Problema:** dois dos dez casos do eval são falso negativo garantido, e são justamente os de segurança alimentar — os que mais precisam de sinal confiável.
+- **Fix:** restringir a checagem à seção de recomendação da resposta.
 
 ---
 

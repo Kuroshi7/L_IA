@@ -6,3 +6,6 @@
 .env
 .env.local
 .env.*.local
+
+# Harness de e2e local (Playwright) — não faz parte do produto
+/_e2e/
