@@ -42,7 +42,9 @@ func (rl *Relay) Run(ctx context.Context) {
 
 func (rl *Relay) drain(ctx context.Context) {
 	// fetch + publish + mark rodam na mesma transação (lock segurado até o commit),
-	// então dois relays nunca publicam o mesmo evento em duplicidade.
+	// então dois relays concorrentes não pegam o mesmo evento. A entrega segue
+	// at-least-once (uma falha de commit após o publish reenvia o evento); a
+	// deduplicação final é do inbox do consumidor.
 	err := rl.store.ProcessPendingOutbox(ctx, 50, func(e store.OutboxEvent) error {
 		perr := rl.ch.PublishWithContext(ctx, ExchangeEvents, e.EventType, false, false, amqp.Publishing{
 			ContentType:  "application/json",

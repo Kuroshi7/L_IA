@@ -42,14 +42,30 @@ func (s *Store) SaveIdempotent(ctx context.Context, chave, requestHash string, s
 }
 
 // PurgeIdempotentKeys apaga chaves de idempotência mais antigas que `maxIdade`.
-// Sem isto a tabela cresce sem limite. Retorna quantas linhas foram removidas.
+// Sem isto a tabela cresce sem limite. Deleta em LOTES (cada um comita sozinho):
+// num backlog grande, um DELETE único não terminaria no timeout do chamador e
+// removeria zero — em lotes, faz progresso e retoma no próximo tick. Retorna o
+// total removido; ao expirar o ctx no meio, os lotes já comitados permanecem.
 func (s *Store) PurgeIdempotentKeys(ctx context.Context, maxIdade time.Duration) (int64, error) {
-	tag, err := s.pool.Exec(ctx,
-		`DELETE FROM idempotency_keys WHERE created_at < now() - make_interval(secs => $1)`,
-		maxIdade.Seconds(),
-	)
-	if err != nil {
-		return 0, err
+	const lote = 5000
+	var total int64
+	for {
+		tag, err := s.pool.Exec(ctx,
+			`DELETE FROM idempotency_keys
+			  WHERE ctid IN (
+			    SELECT ctid FROM idempotency_keys
+			     WHERE created_at < now() - make_interval(secs => $1)
+			     LIMIT $2
+			  )`,
+			maxIdade.Seconds(), lote,
+		)
+		if err != nil {
+			return total, err
+		}
+		n := tag.RowsAffected()
+		total += n
+		if n < lote {
+			return total, nil
+		}
 	}
-	return tag.RowsAffected(), nil
 }
