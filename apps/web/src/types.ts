@@ -5,10 +5,18 @@ export interface Unidade {
   ativo: boolean;
 }
 
+/** Sinal de incerteza do turno. Ausente quando a Lia reconheceu tudo. */
+export interface Confianca {
+  nivel: "alta" | "parcial";
+  /** Termos que a pessoa escreveu e a base nutricional não reconheceu. */
+  nao_reconhecidos?: string[];
+}
+
 export interface ChatResponse {
   session_id: string;
   resposta: string;
   fora_de_escopo: boolean;
+  confianca?: Confianca;
 }
 
 export interface Prato {

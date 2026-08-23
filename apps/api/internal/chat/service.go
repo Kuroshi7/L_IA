@@ -38,6 +38,21 @@ type Output struct {
 	SessionID    string `json:"session_id"`
 	Resposta     string `json:"resposta"`
 	ForaDeEscopo bool   `json:"fora_de_escopo"`
+
+	// Presente só quando há incerteza a declarar (ver Confianca). Omitido no
+	// caso normal, então clientes antigos seguem válidos.
+	Confianca *Confianca `json:"confianca,omitempty"`
+}
+
+// Confianca é o sinal de incerteza de um turno: o assistente não gera números,
+// ele os resolve contra a base — e quando a resolução falha, quem conversa
+// precisa saber disso em vez de receber um total com cara de exato.
+type Confianca struct {
+	Nivel string `json:"nivel"` // alta | parcial
+
+	// Termos que o usuário escreveu e a base não reconheceu. São acionáveis:
+	// a pessoa pode descrever o alimento de outro jeito.
+	NaoReconhecidos []string `json:"nao_reconhecidos,omitempty"`
 }
 
 // mensagem trafegada via RabbitMQ entre Go e o worker Python.
@@ -59,9 +74,10 @@ type histTurno struct {
 }
 
 type rpcResponse struct {
-	Resposta     string `json:"resposta"`
-	ForaDeEscopo bool   `json:"fora_de_escopo"`
-	Erro         string `json:"erro,omitempty"`
+	Resposta     string     `json:"resposta"`
+	ForaDeEscopo bool       `json:"fora_de_escopo"`
+	Erro         string     `json:"erro,omitempty"`
+	Confianca    *Confianca `json:"confianca,omitempty"`
 }
 
 // Responder resolve a sessão, persiste a mensagem do usuário, delega a inferência
@@ -117,7 +133,12 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		return Output{}, fmt.Errorf("persistir resposta: %w", err)
 	}
 
-	return Output{SessionID: sess.ID, Resposta: resp.Resposta, ForaDeEscopo: resp.ForaDeEscopo}, nil
+	return Output{
+		SessionID:    sess.ID,
+		Resposta:     resp.Resposta,
+		ForaDeEscopo: resp.ForaDeEscopo,
+		Confianca:    resp.Confianca,
+	}, nil
 }
 
 func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, error) {

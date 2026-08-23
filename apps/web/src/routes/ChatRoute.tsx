@@ -7,6 +7,7 @@ interface Msg {
   role: "ai" | "user";
   text: string;
   foraDeEscopo?: boolean;
+  naoReconhecidos?: string[];
 }
 
 const SUGESTOES = [
@@ -69,6 +70,32 @@ function MarkdownMessage({ text }: { text: string }) {
     return out;
   }, [text]);
   return <div className="msg-md">{blocks}</div>;
+}
+
+/**
+ * Nota de incerteza.
+ *
+ * A Lia nunca inventa número nutricional: ela resolve o que a pessoa escreveu
+ * contra a base de medidas caseiras. Quando um termo não resolve, o item fica
+ * de fora da conta — e é isso que a nota diz.
+ *
+ * Deliberadamente NÃO é um badge de alerta como o "fora de escopo": não houve
+ * erro, houve honestidade. Um aviso amarelo aqui puniria visualmente a pessoa
+ * por ter escrito "macarronada" em vez de "macarrão". É uma marginália: filete
+ * terracota, texto miúdo, minúscula, colada embaixo da fala.
+ */
+function NotaIncerteza({ termos }: { termos?: string[] }) {
+  if (!termos || termos.length === 0) return null;
+  return (
+    <p className="nota-incerteza">
+      não achei {termos.map((t, i) => (
+        <span key={t}>
+          {i > 0 && (i === termos.length - 1 ? " nem " : ", ")}
+          <span className="nota-termo">{t}</span>
+        </span>
+      ))} na tabela — {termos.length > 1 ? "esses itens ficaram" : "esse item ficou"} fora da conta
+    </p>
+  );
 }
 
 function AvatarLia() {
@@ -169,7 +196,12 @@ export default function ChatRoute() {
         setSessionId(data.session_id);
         localStorage.setItem(storageKey, data.session_id);
       }
-      setMensagens((prev) => [...prev, { role: "ai", text: data.resposta, foraDeEscopo: data.fora_de_escopo }]);
+      setMensagens((prev) => [...prev, {
+        role: "ai",
+        text: data.resposta,
+        foraDeEscopo: data.fora_de_escopo,
+        naoReconhecidos: data.confianca?.nao_reconhecidos,
+      }]);
       setErroConexao(false);
       // O usuário pode ter registrado consumo pelo chat — pontos podem ter mudado.
       atualizarGamificacao(true);
@@ -242,6 +274,7 @@ export default function ChatRoute() {
               <div className={`bubble bubble-${msg.role}${msg.foraDeEscopo ? " bubble-warning" : ""}`}>
                 <MarkdownMessage text={msg.text} />
                 {msg.foraDeEscopo && <span className="badge">fora de escopo</span>}
+                <NotaIncerteza termos={msg.naoReconhecidos} />
               </div>
               {msg.role === "user" && <div className="avatar avatar-user" title="Você">🙂</div>}
             </div>

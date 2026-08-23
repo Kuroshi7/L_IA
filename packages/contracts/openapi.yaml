@@ -335,6 +335,24 @@ components:
         session_id: { type: string }
         resposta: { type: string }
         fora_de_escopo: { type: boolean }
+        confianca:
+          $ref: '#/components/schemas/Confianca'
+    Confianca:
+      type: object
+      description: >
+        Sinal de incerteza do turno. AUSENTE quando tudo foi reconhecido — o campo
+        é opcional, então clientes que não o conhecem seguem válidos.
+        O assistente não gera números nutricionais, ele os resolve contra a base;
+        quando a resolução falha, o item fica de fora do total e quem conversa
+        precisa saber disso em vez de receber um número com cara de exato.
+      properties:
+        nivel:
+          type: string
+          enum: [alta, parcial]
+        nao_reconhecidos:
+          type: array
+          description: Termos escritos pelo usuário que a base não reconheceu.
+          items: { type: string }
     UsuarioInput:
       type: object
       required: [nome]
@@ -389,6 +407,11 @@ components:
         Índice de resto-ingesta proxy = resto / (consumido + resto), a partir do
         consumo auto-reportado. Classificação (referências de UAN — Vaz 2006 /
         Teixeira 1990): otimo ≤3%, bom ≤10%, atencao ≤15%, critico >15%.
+
+        COBERTURA: só entram refeições cujos itens foram todos resolvidos contra a
+        base nutricional (consumos.completo). Refeição com item não reconhecido tem
+        gramas/kcal subestimados e distorceria o índice — preferimos cobrir menos
+        refeições e responder certo.
       properties:
         unidade_id: { type: integer }
         de: { type: string, format: date }

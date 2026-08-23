@@ -656,3 +656,25 @@ th.celula-num { text-align: right; }
 .chart-col:hover .chart-bar { background: var(--primary-dark); }
 .chart-value { font-size: 11px; font-weight: 600; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .chart-label { font-size: 10px; color: var(--text-soft); white-space: nowrap; height: 13px; overflow: visible; }
+
+/* ============ NOTA DE INCERTEZA ============
+   O produto se distingue por não chutar número: quando a base não reconhece um
+   termo, o item fica fora da conta e a interface diz isso. Não é erro — é o
+   sistema mostrando o próprio limite, então nada de amarelo de alerta.
+   Marginália editorial: filete no acento terracota, texto miúdo, sem caixa. */
+.nota-incerteza {
+  margin: 10px 0 0;
+  padding: 1px 0 1px 10px;
+  border-left: 2px solid var(--accent);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.nota-termo {
+  color: var(--accent);
+  font-weight: 500;
+  /* Aspas tipográficas em vez de itálico: marca o texto como "o que a pessoa
+     escreveu", que é a informação acionável — ela pode reescrever. */
+}
+.nota-termo::before { content: "\201C"; }
+.nota-termo::after  { content: "\201D"; }
