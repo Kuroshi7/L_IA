@@ -14,11 +14,14 @@ Duas decisões guiam esta lista:
    fail-OPEN em is_in_scope evita rejeitar a pergunta mais comum do produto.
 """
 
-from langchain_ollama import ChatOllama
+import logging
+
 
 from app import config
 from app.agent.dominio.refeitorio.filters import normalizar
 from app.agent.dominio.refeitorio.prompts import SYSTEM_GUARDRAIL
+
+log = logging.getLogger("agent")
 
 _KEYWORDS_BASE = {
     "cardapio", "menu", "comer", "comida", "almoco", "jantar", "refeicao", "refeicoes",
@@ -60,32 +63,14 @@ _classificador = None
 
 
 def _get_classificador():
+    """Classificador de escopo: temperatura zero e saída de 4 tokens — ele só
+    responde sim ou não. Construído pela mesma fábrica do agente, para um
+    provider novo valer nos dois sem edição em dois lugares."""
     global _classificador
-    if _classificador is not None:
-        return _classificador
+    if _classificador is None:
+        from app.agent.motor import provedores
 
-    if config.LLM_PROVIDER == "anthropic":
-        from langchain_anthropic import ChatAnthropic
-
-        _classificador = ChatAnthropic(
-            model=config.ANTHROPIC_MODEL,
-            max_tokens=4,
-            temperature=0,
-            timeout=config.LLM_TIMEOUT_SECONDS,
-            max_retries=config.LLM_MAX_RETRIES,
-        )
-    else:
-        _classificador = ChatOllama(
-            model=config.OLLAMA_MODEL,
-            base_url=config.OLLAMA_BASE_URL,
-            temperature=0,
-            num_predict=4,
-            # Mesma janela do agent — evita o Ollama subir runner extra com
-            # n_ctx diferente, fragmentando memória e duplicando KV cache.
-            num_ctx=config.OLLAMA_NUM_CTX,
-            # Mesmo keep_alive — para o classificador não causar descarga do modelo.
-            keep_alive="30m",
-        )
+        _classificador = provedores.construir(temperatura=0, max_tokens=4)
     return _classificador
 
 
@@ -121,10 +106,22 @@ def is_in_scope(texto: str, tem_historico: bool = False) -> bool:
             ("human", texto),
         ])
         veredicto = normalizar(getattr(resp, "content", str(resp)))
-        return veredicto.startswith("sim")
-    except Exception:
-        # Fail-OPEN: se o classificador está fora/lento, rejeitar deixaria o usuário
-        # sem resposta para a pergunta mais comum ("o que tem hoje?"). Deixamos passar
-        # — o agente tem instrução de escopo no próprio prompt e a defesa real contra
+    except Exception as e:
+        # Fail-OPEN: se o classificador está fora ou lento, rejeitar deixaria o
+        # usuário sem resposta para a pergunta mais comum ("o que tem hoje?"). O
+        # agente tem instrução de escopo no próprio prompt, e a defesa real contra
         # abuso é o escopo das tools, não este guardrail.
+        log.warning("classificador indisponível (%s) — deixando passar", type(e).__name__)
         return True
+
+    if veredicto.startswith("nao"):
+        return False
+    if veredicto.startswith("sim"):
+        return True
+
+    # Resposta que não dá para interpretar — vazia, em outro idioma, ou de um
+    # modelo que gastou os poucos tokens de saída raciocinando. É a MESMA
+    # situação do erro acima: não temos veredicto. Tratar como "não" bloqueava
+    # o usuário em silêncio, e foi o que aconteceu ao trocar de provider.
+    log.warning("classificador respondeu algo ininteligível (%r) — deixando passar", veredicto[:40])
+    return True

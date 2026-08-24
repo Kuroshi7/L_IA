@@ -5,6 +5,8 @@ Regressão do achado da revisão de produto (IA-06): palavras genéricas ("tem",
 de injection — e o classificador LLM nunca rodava.
 """
 
+import pytest
+
 from app.agent.dominio.refeitorio.filters import normalizar
 from app.agent.dominio.refeitorio.guardrail import _bate_keyword, _eh_continuacao_curta, is_in_scope
 
@@ -74,3 +76,58 @@ def test_fail_open_quando_classificador_indisponivel(monkeypatch):
 
     monkeypatch.setattr(g, "_get_classificador", _boom)
     assert is_in_scope("o que tem hoje?", tem_historico=False) is True
+
+
+# --- fail-open consistente ---------------------------------------------------
+
+def _com_veredicto(monkeypatch, texto):
+    """Classificador que responde `texto`, seja ele qual for."""
+    import app.agent.dominio.refeitorio.guardrail as g
+    from langchain_core.messages import AIMessage
+
+    class _C:
+        def invoke(self, _):
+            return AIMessage(content=texto)
+
+    monkeypatch.setattr(g, "_get_classificador", lambda: _C())
+    return g
+
+
+def test_classificador_dizendo_nao_barra(monkeypatch):
+    g = _com_veredicto(monkeypatch, "nao")
+    assert not g.is_in_scope("me explica o teorema de Pitágoras")
+
+
+def test_classificador_dizendo_sim_deixa_passar(monkeypatch):
+    g = _com_veredicto(monkeypatch, "Sim.")
+    assert g.is_in_scope("me explica o teorema de Pitágoras")
+
+
+@pytest.mark.parametrize("resposta", [
+    "",                      # modelo gastou os poucos tokens de saída raciocinando
+    "   ",
+    "Yes",                   # respondeu em outro idioma
+    "Claro, posso ajudar",   # ignorou o formato pedido
+    "<think>",               # vazou marcador de raciocínio
+])
+def test_resposta_ininteligivel_deixa_passar(monkeypatch, resposta):
+    """Mesma decisão do erro: sem veredicto, não se bloqueia.
+
+    Antes, só a EXCEÇÃO falhava aberto — resposta ininteligível era tratada como
+    "não" e barrava o usuário em silêncio. Apareceu ao trocar de provider: um
+    modelo que emite tokens de raciocínio devolve vazio dentro do teto de 4
+    tokens, e três casos do eval foram barrados indevidamente.
+    """
+    g = _com_veredicto(monkeypatch, resposta)
+    assert g.is_in_scope("me explica o teorema de Pitágoras")
+
+
+def test_erro_do_classificador_deixa_passar(monkeypatch):
+    import app.agent.dominio.refeitorio.guardrail as g
+
+    class _Quebrado:
+        def invoke(self, _):
+            raise RuntimeError("fora do ar")
+
+    monkeypatch.setattr(g, "_get_classificador", lambda: _Quebrado())
+    assert g.is_in_scope("me explica o teorema de Pitágoras")
