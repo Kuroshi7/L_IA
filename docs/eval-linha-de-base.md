@@ -353,6 +353,43 @@ Três leituras:
    e gramas aceitos como medida caseira. Falso positivo é o erro grave — deixa o
    eval verde com o produto errado —, então ainda não passa a barra.
 
-Não medido por falta de espaço em disco (a partição ficou em 100%): Qwen2.5-1.5B
-com exemplos na rubrica, e Qwen2.5-3B. As duas são as continuações naturais, já
-que o 1.5B erra por permissividade em casos que um exemplo reprovado ancora.
+#### Rodada completa, com os dois que faltavam
+
+| modelo | rubrica | acurácia | falsos POS | latência | rodada (81) |
+|---|---|---|---|---|---|
+| Qwen2.5-1.5B | zero-shot | 82% | 2 | 2,4 s | 3 min |
+| Qwen2.5-1.5B | few-shot | 76% | 2 | 14,2 s* | 19 min |
+| Qwen2.5-3B | zero-shot | 94% | **0** | 38,7 s* | 52 min |
+| **Qwen2.5-3B** | **few-shot** | **100%** | **0** | **29,0 s** | **39 min** |
+
+\* medições feitas com um segundo container disputando CPU; o 29,0 s do 3B
+few-shot é a única leitura limpa, e é a mais baixa apesar da entrada 63% maior.
+
+**Qwen2.5-3B passa a barra**, e com exemplos acerta os 17. Um modelo aberto de
+3B, em CPU, sem chave e sem cota, serve como juiz — para rodada agendada, não
+para iteração: 39 minutos não competem com os US$ 0,04 e os segundos da nuvem.
+
+Ressalva que o número não carrega: **17 casos é pouco.** 100% aqui não é 100% no
+geral — é ausência de erro numa amostra pequena. O valor do resultado é ter zero
+falso positivo, que é o erro grave, nas duas rubricas.
+
+#### Few-shot depende do tamanho do modelo — e eu previ errado
+
+Previ que os exemplos piorariam o 3B, como pioraram o 1.5B. Deu o oposto.
+
+No **1.5B** os falsos positivos trocaram de identidade: sumiu o do critério
+*justificativa* — exatamente o critério dos meus exemplos — e apareceu um novo
+no critério *incerteza*, que os exemplos nem mencionavam. Os exemplos
+funcionaram, no critério errado: dois exemplos de um critério só, num conjunto
+que cobre seis, ancoram a atenção no lugar errado em 15 dos 17 julgamentos.
+
+No **3B** o mesmo material corrigiu o caso que faltava sem quebrar nenhum outro.
+
+A leitura: capacidade decide se exemplo ancora ou distrai. O modelo pequeno
+segue o padrão mais concreto que enxerga — e um exemplo é mais concreto que a
+instrução abstrata. O maior consegue usar o exemplo como referência de rigor sem
+confundi-lo com o critério em julgamento.
+
+Isso qualifica as duas medições de diluição registradas acima: contexto extra
+não é ruim por ser extra. É ruim quando compete com a instrução pela atenção de
+um modelo que não tem folga para as duas.
