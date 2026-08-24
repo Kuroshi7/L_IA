@@ -349,7 +349,7 @@
       <div class="fig"><span class="v">909</span><span class="k">linhas no motor reaproveitável</span></div>
       <div class="fig"><span class="v">1.349</span><span class="k">linhas no domínio (refeitório)</span></div>
       <div class="fig"><span class="v">4.773</span><span class="k">linhas de Go</span></div>
-      <div class="fig"><span class="v">223</span><span class="k">testes offline, sem LLM</span></div>
+      <div class="fig"><span class="v">296</span><span class="k">testes offline, sem LLM</span></div>
       <div class="fig"><span class="v">60</span><span class="k">casos de eval em 6 baterias</span></div>
       <div class="fig"><span class="v">10</span><span class="k">tools expostas ao modelo</span></div>
     </div>
@@ -387,7 +387,7 @@
       <div class="step">
         <span class="n">05</span>
         <span class="what">Pós-processamento do domínio</span>
-        <span class="how">Ajuste final em código, para o que não pode depender de o modelo lembrar — hoje, o encaminhamento obrigatório a profissional de saúde quando a conversa toca condição clínica.</span>
+        <span class="how">Ajuste final em código, para o que não pode depender de o modelo lembrar. Hoje: o encaminhamento obrigatório a médico ou nutricionista quando a conversa toca condição clínica — com prompt e reminder reinjetado a aderência ficou em 0 de 3 medições.</span>
         <span class="where">dominio/refeitorio/perfil.py</span>
       </div>
       <div class="step">
@@ -424,10 +424,13 @@
         estruturado, não como texto.
       </p>
       <p>
-        A mesma lógica governa a segurança alimentar: o conflito entre um prato e o perfil
-        de quem conversa é calculado em código e anotado no próprio item que o modelo lê,
-        porque a regra de negócio obriga listar o cardápio completo e não permite esconder
-        o prato perigoso.
+        A mesma lógica governa a restrição alimentar: o conflito entre um prato e o perfil
+        de quem conversa é calculado em código e anotado no próprio item que o modelo lê.
+        O texto dessa anotação já vem na posição de autoridade correta — <em>"você informou
+        alergia a amendoim, e este prato leva amendoim"</em> — porque o assistente não
+        determina o que alguém pode comer: ele cruza o que a pessoa declarou com um fato
+        verificável do prato. Recomendação nutricional individualizada é ato privativo de
+        nutricionista; reportar um ingrediente, não. Três testes travam essa voz.
       </p>
     </div>
   </section>
@@ -520,6 +523,21 @@
       </table>
     </div>
 
+    <div class="note">
+      <p>
+        <strong>Mudança de regra em 23/08/2026, posterior às medições deste documento.</strong>
+        Vigorava uma regra de negócio que exigia mostrar o cardápio completo antes de qualquer
+        recomendação. Foi removida: era cumprida em 3/3 quando pediam o cardápio e ficava
+        instável quando pediam recomendação, porque a listagem competia com a resposta útil.
+        No lugar entrou uma exigência sobre a recomendação — motivo concreto, porção em medida
+        caseira e menção de que há outras opções.
+      </p>
+      <p>
+        Nenhuma bateria foi executada depois dessa mudança. Os números adiante são todos
+        anteriores a ela.
+      </p>
+    </div>
+
     <div class="legend">
       <span><span class="tag t-ok">Existe</span> implementado e coberto por teste</span>
       <span><span class="tag t-partial">Parcial</span> funciona, com limitações descritas</span>
@@ -588,6 +606,24 @@
         de resposta boa e ruim por critério: <span class="num">17/17</span>, zero falso
         positivo. Aprovar resposta ruim tem tolerância zero, porque deixaria o eval verde
         com o produto errado; reprovar resposta boa apenas gera investigação à toa.
+      </p>
+    </div>
+
+    <h3>Custo, e o que roda de graça antes</h3>
+    <div class="col">
+      <p>
+        A bateria completa com três repetições sai por cerca de <strong>US$ 2,30</strong> em
+        Haiku 4.5 com prompt caching (US$ 3,50 sem), somando ~515 chamadas de modelo e ~100 do
+        juiz. Uma bateria isolada custa cerca de US$ 0,39.
+      </p>
+      <p>
+        Descobrir por esse preço que uma asserção tinha nome errado é caro, então o harness
+        inteiro é exercitado antes sem custo: um modelo roteirizado substitui o LLM e o
+        classificador do guardrail, e o eval roda o caminho real — seleção de tools, montagem
+        de contexto, execução contra a API falsificada, pós-processamento, validação e
+        conferência. Os 60 casos são percorridos. Isso não diz nada sobre a qualidade do
+        modelo; prova que o encanamento funciona, que é o que separa "o eval quebrou" de "o
+        modelo piorou".
       </p>
     </div>
 
@@ -730,7 +766,7 @@
 
 <pre>cd apps/ai
 
-# 223 testes offline, sem LLM
+# 296 testes offline, sem LLM
 pytest
 
 # eval com modelo real, com repetição

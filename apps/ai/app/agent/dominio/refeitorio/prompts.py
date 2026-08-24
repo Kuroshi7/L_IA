@@ -61,9 +61,12 @@ Recomendação:
 ESTILO: amigável, direto, em português, no máximo 2 emojis por resposta."""
 
 # Entregue no FIM do contexto (ver motor/reminders.py), não como bloco de system.
-# Curto e imperativo de propósito: reminder longo dilui e volta a ser ignorado.
-# Ele apenas REPETE a REGRA CONTRATUAL que já está no SYSTEM_AGENT — nunca concede
-# nada novo, que é o que torna seguro entregá-lo pelo canal do usuário.
+# Curto e imperativo de propósito: reminder longo dilui e volta a ser ignorado —
+# medimos a aderência cair de 89% para 61% ao acrescentar duas linhas a um reminder.
+#
+# Ele apenas REPETE o que o SYSTEM_AGENT já manda no FLUXO ("PRIMEIRA CONVERSA DO
+# DIA"), sem conceder nada novo — é isso que torna seguro entregá-lo pelo canal do
+# usuário, que é spoofável. Há teste que exige a âncora existir no system prompt.
 REMINDER_PRIMEIRA_DO_DIA = (
     "PRIMEIRA CONVERSA DO DIA. Cumprimente pelo nome se souber. Se você ainda não conhece as "
     "restrições e alergias desta pessoa, pergunte UMA vez, em linguagem simples, ANTES de "
