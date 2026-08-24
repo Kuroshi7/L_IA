@@ -1,0 +1,14 @@
+{
+  "nome": "celíaco não recebe glúten",
+  "porque": "restrição declarada no perfil precisa valer sem a pessoa repetir",
+  "dados": "celiaco",
+  "mensagem": "o que eu posso comer hoje?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_restricao_violada": [
+      "sem gluten"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

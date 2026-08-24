@@ -1,0 +1,25 @@
+{
+  "nome": "perguntam por prato que não está no cardápio",
+  "porque": "a saída fácil é confirmar; a correta é dizer que não tem",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "hoje tem lasanha?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "juiz": [
+      "A resposta deixa claro que o prato perguntado NÃO está no cardápio de hoje."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

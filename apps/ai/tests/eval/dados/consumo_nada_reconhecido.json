@@ -1,0 +1,185 @@
+{
+  "pratos": [
+    {
+      "id": 1,
+      "nome": "Frango grelhado com ervas",
+      "categoria": "proteina",
+      "calorias": 180,
+      "proteinas_g": 31.0,
+      "carboidratos_g": 0.5,
+      "gorduras_g": 5.2,
+      "ingredientes": [
+        "frango",
+        "alecrim",
+        "azeite"
+      ],
+      "alergenos": [],
+      "restricoes_atendidas": [
+        "sem gluten",
+        "sem lactose"
+      ],
+      "nao_indicado_para": [],
+      "is_proteina_do_dia": true
+    },
+    {
+      "id": 2,
+      "nome": "Estrogonofe de carne",
+      "categoria": "proteina",
+      "calorias": 320,
+      "proteinas_g": 22.0,
+      "carboidratos_g": 9.0,
+      "gorduras_g": 21.0,
+      "ingredientes": [
+        "carne",
+        "creme de leite",
+        "champignon"
+      ],
+      "alergenos": [
+        "lactose"
+      ],
+      "restricoes_atendidas": [],
+      "nao_indicado_para": [
+        "vegetariano",
+        "sem lactose"
+      ],
+      "is_proteina_do_dia": false
+    },
+    {
+      "id": 3,
+      "nome": "Arroz integral",
+      "categoria": "acompanhamento",
+      "calorias": 110,
+      "proteinas_g": 2.5,
+      "carboidratos_g": 23.0,
+      "gorduras_g": 0.9,
+      "ingredientes": [
+        "arroz integral"
+      ],
+      "alergenos": [],
+      "restricoes_atendidas": [
+        "vegetariano",
+        "vegano",
+        "sem gluten",
+        "sem lactose"
+      ],
+      "nao_indicado_para": [],
+      "is_proteina_do_dia": false
+    },
+    {
+      "id": 4,
+      "nome": "Salada de grao-de-bico com amendoim",
+      "categoria": "salada",
+      "calorias": 150,
+      "proteinas_g": 8.0,
+      "carboidratos_g": 18.0,
+      "gorduras_g": 5.0,
+      "ingredientes": [
+        "grao-de-bico",
+        "amendoim",
+        "salsinha"
+      ],
+      "alergenos": [
+        "amendoim"
+      ],
+      "restricoes_atendidas": [
+        "vegetariano",
+        "vegano"
+      ],
+      "nao_indicado_para": [],
+      "is_proteina_do_dia": false
+    },
+    {
+      "id": 5,
+      "nome": "Abobrinha refogada",
+      "categoria": "guarnicao",
+      "calorias": 45,
+      "proteinas_g": 1.4,
+      "carboidratos_g": 5.0,
+      "gorduras_g": 2.2,
+      "ingredientes": [
+        "abobrinha",
+        "alho",
+        "azeite"
+      ],
+      "alergenos": [],
+      "restricoes_atendidas": [
+        "vegetariano",
+        "vegano",
+        "sem gluten",
+        "sem lactose"
+      ],
+      "nao_indicado_para": [],
+      "is_proteina_do_dia": false
+    }
+  ],
+  "perfil": {
+    "nome": "Joao",
+    "restricoes": [],
+    "preferencias": [],
+    "alergias": [],
+    "imc": 26.1,
+    "classificacao_imc": "sobrepeso",
+    "meta_calorica_kcal": 2200
+  },
+  "medidas": [
+    {
+      "medida": "concha",
+      "alimento": "arroz integral",
+      "gramas": 90,
+      "kcal": 99
+    },
+    {
+      "medida": "file",
+      "alimento": "frango grelhado",
+      "gramas": 100,
+      "kcal": 180
+    },
+    {
+      "medida": "colher de sopa",
+      "alimento": "abobrinha refogada",
+      "gramas": 25,
+      "kcal": 11
+    }
+  ],
+  "gamificacao": {
+    "gamificacao": {
+      "usuario_id": 7,
+      "pontos": 140,
+      "nivel": 2,
+      "streak_dias": 3
+    },
+    "eventos": []
+  },
+  "rag": [
+    "Uma concha media de arroz corresponde a cerca de 90 g."
+  ],
+  "consumo": {
+    "itens": [
+      {
+        "entrada": {
+          "alimento": "xis coração",
+          "medida": "unidade",
+          "quantidade": 1
+        },
+        "alimento_resolvido": "",
+        "porcao_resolvida": "",
+        "gramas_totais": 0.0,
+        "kcal": 0.0,
+        "proteina_g": 0.0,
+        "carboidrato_g": 0.0,
+        "gordura_g": 0.0,
+        "confianca": "baixa",
+        "obs": "alimento não encontrado na base"
+      }
+    ],
+    "kcal": 0.0,
+    "proteina_g": 0.0,
+    "carboidrato_g": 0.0,
+    "gordura_g": 0.0,
+    "gramas_totais": 0.0,
+    "itens_ignorados": [
+      "xis coração"
+    ],
+    "completo": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "nome": "restrição dita na conversa, sem perfil",
+  "porque": "anônimo declara restrição no chat; precisa valer igual à do perfil",
+  "dados": "anonimo",
+  "usuario_id": null,
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "sou vegetariano"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Anotado! Vou considerar isso."
+    }
+  ],
+  "mensagem": "então o que eu posso comer?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_restricao_violada": [
+      "vegetariano"
+    ]
+  },
+  "primeira_do_dia": false
+}

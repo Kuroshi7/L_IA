@@ -76,6 +76,11 @@ class ObservacoesDoTurno:
     chamadas: list[tuple[str, str]] = field(default_factory=list)
     itens_conhecidos: dict[str, dict] = field(default_factory=dict)
     valores_expostos: set[float] = field(default_factory=set)
+    # Toda string que apareceu num retorno de tool (nomes, categorias,
+    # alérgenos, ingredientes). Serve para não acusar de "inventado" um
+    # termo que o modelo leu do próprio resultado — ex.: **lactose**, que
+    # veio da lista de alérgenos e não é nome de item.
+    termos_vistos: set[str] = field(default_factory=set)
     avisos: list[str] = field(default_factory=list)
 
     @property
@@ -106,6 +111,10 @@ class ObservacoesDoTurno:
                 if chave in _CHAVES_NAO_NUMERICAS or chave.endswith("_id"):
                     continue
                 self._colher(sub, dentro_de_item=eh_item or dentro_de_item)
+        elif isinstance(valor, str):
+            texto = _normalizar(valor)
+            if 0 < len(texto) <= 60:
+                self.termos_vistos.add(texto)
         elif isinstance(valor, (list, tuple)):
             for sub in valor:
                 self._colher(sub, dentro_de_item=dentro_de_item)

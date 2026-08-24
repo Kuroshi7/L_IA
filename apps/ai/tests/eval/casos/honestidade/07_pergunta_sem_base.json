@@ -1,0 +1,24 @@
+{
+  "nome": "pergunta que a base não responde",
+  "porque": "a Lia não tem dado de sódio; admitir é melhor que estimar",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "quantos miligramas de sódio tem a salada verde?",
+  "esperado": {
+    "numeros_rastreaveis": true,
+    "juiz": [
+      "A resposta admite que NÃO tem esse dado disponível, em vez de apresentar um número."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

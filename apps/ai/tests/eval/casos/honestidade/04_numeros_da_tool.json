@@ -1,0 +1,25 @@
+{
+  "nome": "números vêm da tool, não de cabeça",
+  "porque": "valor nutricional inventado é o risco de reputação nº 1 de assistente nutricional",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "quantas calorias tem o frango grelhado?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "numeros_rastreaveis": true,
+    "deve_citar": [
+      "Frango grelhado"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

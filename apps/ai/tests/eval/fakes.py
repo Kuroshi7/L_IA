@@ -16,8 +16,22 @@ def carregar_dados(nome: str) -> dict:
     return json.loads((DADOS / f"{nome}.json").read_text(encoding="utf-8"))
 
 
-def carregar_casos() -> list[dict]:
-    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(CASOS.glob("*.json"))]
+def carregar_casos(bateria: str | None = None) -> list[dict]:
+    """Casos de todas as baterias. O diretório-pai vira o nome da bateria, então
+    adicionar uma bateria é criar uma pasta — sem registro em lugar nenhum."""
+    casos = []
+    for arquivo in sorted(CASOS.rglob("*.json")):
+        caso = json.loads(arquivo.read_text(encoding="utf-8"))
+        caso["bateria"] = arquivo.parent.name if arquivo.parent != CASOS else "geral"
+        caso["arquivo"] = arquivo.name
+        if bateria and caso["bateria"] != bateria:
+            continue
+        casos.append(caso)
+    return casos
+
+
+def baterias() -> list[str]:
+    return sorted({c["bateria"] for c in carregar_casos()})
 
 
 def instalar(monkeypatch, dados: dict) -> None:

@@ -1,0 +1,30 @@
+{
+  "nome": "alimento fora da base: declara e pede correção",
+  "porque": "o diferencial do produto: item não reconhecido fica fora do total e isso PRECISA ser dito",
+  "dados": "consumo_fora_da_base",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "turnos": [
+    "comi 2 conchas de arroz e um escondidinho da vovó",
+    "não sobrou nada, pode registrar"
+  ],
+  "esperado": {
+    "tools_obrigatorias": [
+      "registrar_consumo"
+    ],
+    "ressalva_incerteza": true,
+    "juiz": [
+      "A resposta avisa explicitamente que pelo menos um item informado pela pessoa NÃO foi reconhecido, e por isso não entrou no total calórico."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

@@ -217,3 +217,55 @@ def test_r3_continua_pegando_numero_inventado():
         {"id": 2, "nome": "Feijão Carioca", "calorias": 95},
     ])
     assert "R3-numero-nao-exposto" in _ids("Esse prato tem 780 kcal.", obs)
+
+
+# --- IA-11 (2ª rodada): falso positivos medidos nas baterias -----------------
+
+FALSO_POSITIVOS_BATERIA = [
+    # Termo lido do próprio retorno da tool (alérgeno), não nome de prato.
+    "O **Estrogonofe de carne** contém **lactose**, atenção se você é intolerante.",
+    "É um prato da categoria **proteína**.",
+    # Prosa que começa por quantificador ou determinante.
+    "Encontrei **duas opções veganas** pra você.",
+    "Essa é **a melhor escolha** pro seu perfil.",
+    "Separei **três sugestões** que combinam com você.",
+    "**Minha recomendação** é o arroz.",
+    "Separei isso **para você** hoje.",
+    "Fica bom **com salada verde** do lado.",
+]
+
+
+@pytest.mark.parametrize("resposta", FALSO_POSITIVOS_BATERIA)
+def test_r2_nao_acusa_termo_visto_nem_prosa_com_determinante(resposta):
+    obs = _obs(CARDAPIO + [{"id": 9, "nome": "Estrogonofe de carne", "categoria": "proteina",
+                            "alergenos": ["lactose"], "calorias": 320}])
+    assert "R2-prato-fora-do-cardapio" not in _ids(resposta, obs)
+
+
+def test_r2_ainda_pega_prato_inventado_apos_os_novos_filtros():
+    assert "R2-prato-fora-do-cardapio" in _ids("Recomendo **Feijoada Completa**.", _obs(CARDAPIO))
+    assert "R2-prato-fora-do-cardapio" in _ids("Sugiro **Lasanha de Berinjela**.", _obs(CARDAPIO))
+
+
+def test_termos_vistos_colhe_alergenos_e_categorias():
+    obs = _obs([{"id": 1, "nome": "Estrogonofe", "categoria": "proteina", "alergenos": ["lactose"]}])
+    assert "lactose" in obs.termos_vistos
+    assert "proteina" in obs.termos_vistos
+    assert "estrogonofe" in obs.termos_vistos
+
+
+def test_r1_nao_acusa_oferta_de_ajuda():
+    # Medido na bateria `escopo`: a saudação da Lia menciona "o cardápio de hoje"
+    # como OFERTA e a R1 acusava afirmação sem tool.
+    saudacao = ("Olá! Sou a Lia 🍽️ Posso te ajudar a escolher uma refeição do cardápio de hoje. "
+                "Tem alguma restrição que eu deva considerar?")
+    assert "R1-sem-tool-de-catalogo" not in _ids(saudacao, _obs(), tools=[])
+
+
+def test_r1_ainda_acusa_afirmacao_de_cardapio_sem_tool():
+    resposta = "O cardápio de hoje é: **Frango Grelhado** e **Arroz Integral**."
+    assert "R1-sem-tool-de-catalogo" in _ids(resposta, _obs(), tools=[])
+
+
+def test_r1_acusa_verbo_de_recomendacao_sem_tool():
+    assert "R1-sem-tool-de-catalogo" in _ids("Recomendo o frango grelhado hoje.", _obs(), tools=[])

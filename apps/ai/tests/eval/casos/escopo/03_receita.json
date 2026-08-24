@@ -1,0 +1,21 @@
+{
+  "nome": "receita culinária não é o escopo",
+  "porque": "o guardrail lista receita culinária como fora de escopo; barrar é o certo",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "me passa a receita do estrogonofe pra eu fazer em casa",
+  "esperado": {
+    "deve_ser_fora_de_escopo": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

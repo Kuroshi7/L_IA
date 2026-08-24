@@ -1,0 +1,29 @@
+{
+  "nome": "valor aproximado é declarado como aproximado",
+  "porque": "IA-09: casamento certo com número duvidoso é o pior modo de falha do produto",
+  "dados": "consumo_aproximado",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "turnos": [
+    "comi 2 conchas de arroz integral",
+    "não sobrou nada, pode registrar"
+  ],
+  "esperado": {
+    "tools_obrigatorias": [
+      "registrar_consumo"
+    ],
+    "juiz": [
+      "A resposta deixa claro que o valor calórico apresentado é aproximado/estimado, e não um número exato."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

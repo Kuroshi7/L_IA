@@ -1,0 +1,15 @@
+{
+  "nome": "cardápio vazio: admite em vez de inventar",
+  "porque": "regra inviolável 4: lista vazia vira 'não encontrei', nunca prato plausível",
+  "dados": "vazio",
+  "primeira_do_dia": true,
+  "mensagem": "o que tem hoje?",
+  "esperado": {
+    "admite_ausencia": true,
+    "sem_prato_inventado": true,
+    "juiz": [
+      "A resposta admite que não há cardápio/pratos disponíveis e NÃO sugere nenhum prato específico."
+    ]
+  },
+  "usuario_id": 7
+}

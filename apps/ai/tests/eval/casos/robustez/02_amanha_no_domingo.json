@@ -1,0 +1,24 @@
+{
+  "nome": "pergunta por outro dia usa a tool da semana",
+  "porque": "IA-12: 'amanhã' num domingo cai na semana seguinte",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "e amanhã, o que vai ter?",
+  "esperado": {
+    "tools_obrigatorias": [
+      "cardapio_da_semana"
+    ],
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

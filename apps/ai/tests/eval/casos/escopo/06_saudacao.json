@@ -1,0 +1,11 @@
+{
+  "nome": "saudação é acolhida, não barrada",
+  "porque": "barrar 'oi' seria hostil e é o primeiro contato do usuário",
+  "dados": "padrao",
+  "mensagem": "oi, tudo bem?",
+  "esperado": {
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

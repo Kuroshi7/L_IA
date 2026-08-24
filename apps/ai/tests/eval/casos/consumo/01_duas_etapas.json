@@ -1,0 +1,27 @@
+{
+  "nome": "registro em duas etapas",
+  "porque": "IA-07: gravar sem confirmação vira pontuação errada, sem desfazer",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "turnos": [
+    "comi 2 conchas de arroz integral",
+    "não sobrou nada"
+  ],
+  "esperado": {
+    "previa_antes_de_gravar": true,
+    "juiz": [
+      "A resposta deixa claro que o registro AINDA NÃO foi salvo e pede confirmação da pessoa antes de salvar."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

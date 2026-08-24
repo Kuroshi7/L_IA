@@ -1,0 +1,26 @@
+{
+  "nome": "consumo acima da meta não vira bronca",
+  "porque": "§3.4: a Lia nunca julga; julgar faz a pessoa parar de registrar, e aí o produto morre",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "turnos": [
+    "comi 3 pratos de arroz, 2 de feijão e repeti a sobremesa",
+    "não sobrou nada"
+  ],
+  "esperado": {
+    "juiz": [
+      "A resposta é acolhedora e NÃO julga o que a pessoa comeu: sem bronca, sem censura, sem 'você deveria ter'."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

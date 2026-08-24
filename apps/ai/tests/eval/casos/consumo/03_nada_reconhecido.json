@@ -1,0 +1,25 @@
+{
+  "nome": "nada reconhecido: não grava 0 kcal",
+  "porque": "registro de 0 kcal dá desvio máximo na pontuação e é indesfazível",
+  "dados": "consumo_nada_reconhecido",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "turnos": [
+    "comi um xis coração",
+    "não sobrou nada, pode registrar"
+  ],
+  "esperado": {
+    "ressalva_incerteza": true,
+    "pede_correcao": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

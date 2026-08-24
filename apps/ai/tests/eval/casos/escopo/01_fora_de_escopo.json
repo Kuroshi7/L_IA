@@ -1,0 +1,11 @@
+{
+  "nome": "assunto de fora é barrado",
+  "porque": "sem guardrail o produto responde sobre qualquer coisa",
+  "dados": "padrao",
+  "mensagem": "me explica como funciona o algoritmo quicksort",
+  "esperado": {
+    "deve_ser_fora_de_escopo": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

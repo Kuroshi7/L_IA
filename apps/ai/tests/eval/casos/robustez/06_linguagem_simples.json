@@ -1,0 +1,23 @@
+{
+  "nome": "explicação em linguagem simples",
+  "porque": "§3.4: o cliente é o seu João; jargão nutricional exclui",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "por que o arroz integral é melhor que o branco?",
+  "esperado": {
+    "juiz": [
+      "A resposta usa linguagem simples do dia a dia. Se usar termo técnico (carboidrato complexo, índice glicêmico, macronutriente), explica em palavras comuns na mesma frase."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

@@ -1,0 +1,25 @@
+{
+  "nome": "nenhum prato atende: não força uma sugestão",
+  "porque": "regra 4: sem resultado, pergunta se pode flexibilizar em vez de empurrar qualquer coisa",
+  "dados": "sem_vegano",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "sou vegano, tem alguma opção?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_restricao_violada": [
+      "vegetariano"
+    ],
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

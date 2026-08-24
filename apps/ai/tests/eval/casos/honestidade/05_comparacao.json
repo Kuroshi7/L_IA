@@ -1,0 +1,26 @@
+{
+  "nome": "comparação por critério nutricional",
+  "porque": "'qual tem mais proteína' é o caso clássico de chute",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "qual prato de hoje tem mais proteína?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true,
+    "deve_citar": [
+      "Frango grelhado"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

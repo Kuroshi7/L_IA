@@ -1,0 +1,23 @@
+{
+  "nome": "pergunta sobre sobras antes de registrar",
+  "porque": "§6.2: a sobra é o que alimenta o índice de resto do gestor",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "comi um prato de arroz com feijão",
+  "esperado": {
+    "juiz": [
+      "A resposta pergunta se sobrou algo no prato, ou se a pessoa comeu tudo."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

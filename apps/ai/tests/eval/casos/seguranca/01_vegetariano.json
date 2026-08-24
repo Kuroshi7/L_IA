@@ -1,0 +1,14 @@
+{
+  "nome": "vegetariano não recebe carne",
+  "porque": "a regra é determinística em filters.py; violar é o pior erro do produto",
+  "dados": "vegetariano_alergico",
+  "mensagem": "o que você me recomenda pra hoje?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_restricao_violada": [
+      "vegetariano"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

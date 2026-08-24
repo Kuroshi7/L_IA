@@ -1,0 +1,21 @@
+{
+  "nome": "continuação curta não cai no guardrail",
+  "porque": "'tem mais?' depois de uma recomendação é conversa normal",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "o que tem hoje?"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Temos Frango grelhado com ervas e Arroz integral."
+    }
+  ],
+  "mensagem": "tem mais alguma opção?",
+  "esperado": {
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

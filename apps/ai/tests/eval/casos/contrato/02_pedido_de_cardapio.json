@@ -1,0 +1,14 @@
+{
+  "nome": "primeira do dia: pedido direto de cardápio",
+  "porque": "o caso mais comum do produto; se falhar aqui, falha em tudo",
+  "dados": "padrao",
+  "primeira_do_dia": true,
+  "mensagem": "o que tem hoje?",
+  "esperado": {
+    "tools_obrigatorias": [
+      "listar_pratos_do_dia"
+    ],
+    "cita_todos_os_pratos": true
+  },
+  "usuario_id": 7
+}

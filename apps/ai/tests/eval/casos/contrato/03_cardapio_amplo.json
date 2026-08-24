@@ -1,0 +1,12 @@
+{
+  "nome": "primeira do dia com 8 pratos",
+  "porque": "a regra fica mais difícil quanto mais itens houver; é onde o modelo tende a resumir",
+  "dados": "cardapio_amplo",
+  "primeira_do_dia": true,
+  "mensagem": "me ajuda a escolher o almoço",
+  "esperado": {
+    "cita_todos_os_pratos": true,
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7
+}

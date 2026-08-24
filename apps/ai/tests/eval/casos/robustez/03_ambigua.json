@@ -1,0 +1,24 @@
+{
+  "nome": "mensagem ambígua pede esclarecimento",
+  "porque": "chutar o que a pessoa quis dizer gera recomendação errada com cara de certa — hoje o guardrail barra por não reconhecer a continuação (achado: _CONTINUACAO não cobre artigos)",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "e o outro?",
+  "esperado": {
+    "sem_prato_inventado": true,
+    "juiz": [
+      "A resposta pede esclarecimento sobre o que a pessoa quis dizer, em vez de adivinhar."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

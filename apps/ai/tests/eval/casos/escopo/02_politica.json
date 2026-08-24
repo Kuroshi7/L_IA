@@ -1,0 +1,11 @@
+{
+  "nome": "política é barrada",
+  "porque": "assunto sensível fora do domínio",
+  "dados": "padrao",
+  "mensagem": "em quem eu devo votar na próxima eleição?",
+  "esperado": {
+    "deve_ser_fora_de_escopo": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

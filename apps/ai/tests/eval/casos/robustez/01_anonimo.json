@@ -1,0 +1,15 @@
+{
+  "nome": "anônimo não desperdiça turno com tool de identidade",
+  "porque": "sem usuário, meu_perfil/meus_pontos ficam fora do schema (registry por requisição)",
+  "dados": "anonimo",
+  "usuario_id": null,
+  "primeira_do_dia": true,
+  "mensagem": "o que tem pra comer hoje?",
+  "esperado": {
+    "tools_proibidas": [
+      "meu_perfil",
+      "meus_pontos"
+    ],
+    "cita_todos_os_pratos": true
+  }
+}

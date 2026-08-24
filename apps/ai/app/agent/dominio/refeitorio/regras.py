@@ -15,10 +15,14 @@ from app.agent.dominio.refeitorio.filters import normalizar
 from app.agent.motor.registry import CATALOGO, nomes_com_capacidade
 from app.agent.motor.validacao import Achado
 
-# Sinais de que a resposta está recomendando ou afirmando conteúdo do cardápio.
-_PADRAO_RECOMENDACAO = re.compile(
-    r"\b(recomendo|sugiro|indico|cardapio de hoje|cardapio do dia|"
-    r"opcao de hoje|opcoes de hoje|prato do dia)\b"
+# A Lia ASSUMINDO uma escolha. Basta o verbo para a regra valer.
+_VERBO_DE_RECOMENDACAO = re.compile(r"\b(recomendo|recomendacao|sugiro|sugestao|indico)\b")
+
+# Menção ao cardápio. Sozinha não basta: "posso te ajudar com o cardápio de hoje"
+# é OFERTA, não afirmação de conteúdo — e acusar oferta gerava falso positivo em
+# toda saudação. Só conta quando vem junto com um item citado.
+_AFIRMA_CARDAPIO = re.compile(
+    r"\b(cardapio de hoje|cardapio do dia|opcao de hoje|opcoes de hoje|prato do dia)\b"
 )
 
 # O FORMATO do SYSTEM_AGENT manda o nome do prato vir em **negrito**. R2 se
@@ -40,6 +44,19 @@ _ROTULOS = {
 _MAX_PALAVRAS_NOME = 5
 _PONTUACAO_DE_FRASE = ("?", "!", ";", ":")
 
+# Classe fechada de palavras funcionais. Nome de prato em português começa por
+# substantivo ("Frango grelhado"), nunca por determinante ou quantificador —
+# então "duas opções veganas" e "a melhor escolha" são prosa em negrito, não
+# item do cardápio. É critério linguístico, não lista de termos do domínio.
+_INICIO_DE_PROSA = {
+    "um", "uma", "uns", "umas", "o", "a", "os", "as", "dois", "duas", "tres", "três",
+    "meu", "minha", "seu", "sua", "esse", "essa", "este", "esta", "aquele", "aquela",
+    "alguns", "algumas", "muitos", "muitas", "mais", "menos", "todos", "todas",
+    "qualquer", "cada", "nosso", "nossa", "outro", "outra", "melhor", "pior",
+    # Preposições: "para você", "com salada", "sem gluten" também são prosa.
+    "para", "pra", "com", "sem", "de", "do", "da", "em", "no", "na", "por", "ao", "aos",
+}
+
 
 def _parece_nome_de_item(bruto: str, seguinte: str) -> bool:
     nome = bruto.strip()
@@ -53,7 +70,10 @@ def _parece_nome_de_item(bruto: str, seguinte: str) -> bool:
     # Número no meio é rótulo ou data, não nome ("235 kcal", "segunda-feira (17/08)").
     if any(c.isdigit() for c in nome):
         return False
-    if len(nome.split()) > _MAX_PALAVRAS_NOME:
+    palavras = normalizar(nome).split()
+    if len(palavras) > _MAX_PALAVRAS_NOME:
+        return False
+    if palavras and palavras[0] in _INICIO_DE_PROSA:
         return False
     return True
 
@@ -66,8 +86,15 @@ _RESSALVAS = ("nao reconheci", "nao encontrei", "nao entrou", "nao entraram",
 
 
 def resposta_recomenda(resposta: str) -> bool:
-    """True se a resposta aparenta recomendar prato ou afirmar o cardápio."""
-    return bool(_PADRAO_RECOMENDACAO.search(normalizar(resposta)))
+    """True se a resposta assume uma escolha ou afirma o conteúdo do cardápio.
+
+    Oferta de ajuda ("posso te mostrar o cardápio de hoje") NÃO conta: sem verbo
+    de recomendação e sem item citado, não há o que ter sido inventado.
+    """
+    norm = normalizar(resposta)
+    if _VERBO_DE_RECOMENDACAO.search(norm):
+        return True
+    return bool(_AFIRMA_CARDAPIO.search(norm)) and bool(_itens_citados(resposta))
 
 
 def _itens_citados(resposta: str) -> list[str]:
@@ -119,7 +146,14 @@ def _prato_fora_do_cardapio(a: Achado) -> str | None:
     obs = a.observacoes
     if obs is None or not obs.itens_conhecidos:
         return None  # nada foi lido no turno; R1 cobre esse caso
-    inventados = [n for n in _itens_citados(a.resposta) if not _casa_com_algum(n, obs.itens_conhecidos)]
+    # Um termo que apareceu em QUALQUER retorno de tool não foi inventado — o
+    # modelo leu de lá. É o caso de **lactose** (alérgeno) ou **proteína**
+    # (categoria), que não são nomes de prato mas vieram do dado.
+    vistos = getattr(obs, "termos_vistos", set())
+    inventados = [
+        n for n in _itens_citados(a.resposta)
+        if n not in vistos and not _casa_com_algum(n, obs.itens_conhecidos)
+    ]
     if not inventados:
         return None
     return f"pratos citados que nenhuma tool retornou: {inventados}"

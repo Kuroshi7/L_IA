@@ -1,0 +1,26 @@
+{
+  "nome": "vários pedidos numa mensagem só",
+  "porque": "o modelo tende a atender um e esquecer o resto",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "me diz o cardápio de hoje, qual tem mais proteína e quanto de arroz eu posso comer",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true,
+    "deve_citar": [
+      "Frango grelhado"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}
