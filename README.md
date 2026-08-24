@@ -151,6 +151,8 @@ cd apps/ai && pytest tests/test_eval_pipeline.py
 ```
 
 Resultados, método e limitações: [`docs/eval-linha-de-base.md`](docs/eval-linha-de-base.md).
+Custo por provedor e qual usar em cada situação (desenvolvimento, demonstração, eval):
+[`docs/custos-provedores.md`](docs/custos-provedores.md).
 
 ### Auditoria da base nutricional
 
