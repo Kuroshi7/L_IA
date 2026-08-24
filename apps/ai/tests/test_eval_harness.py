@@ -149,3 +149,30 @@ def test_asercao_inexistente_no_caso_e_denunciada():
 def test_asercao_desligada_com_false_nao_roda(valor, deve_falhar):
     ctx = _ctx("Recomendo a **Feijoada Completa**.", tools=["filtrar_pratos"], retornos=[DADOS["pratos"]])
     assert bool(assercoes.conferir(ctx, {"sem_prato_inventado": valor})) is deve_falhar
+
+
+def test_fake_de_consumo_responde_a_entrada(monkeypatch):
+    """O fake precisa variar com o que recebe, senão anula checagens do produto.
+
+    Enquanto ele devolvia o mesmo total para qualquer item, "1 colher" e "3
+    conchas" saíam idênticos — e o caso de sobra maior que o consumo media 0/3
+    com o código correto.
+    """
+    import app.agent.dominio.refeitorio.tools as t
+
+    fakes.instalar(monkeypatch, fakes.carregar_dados("padrao"))
+    pouco = t.go_api.calcular_consumo([{"alimento": "arroz", "medida": "colher de sopa", "quantidade": 1}])
+    muito = t.go_api.calcular_consumo([{"alimento": "arroz", "medida": "concha", "quantidade": 3}])
+    assert muito["gramas_totais"] > pouco["gramas_totais"] * 5
+    assert muito["kcal"] > pouco["kcal"]
+
+
+def test_fake_preserva_o_que_o_dataset_declara(monkeypatch):
+    # Escalar os totais não pode apagar `itens_ignorados`/`completo`, que é o que
+    # os casos de incerteza exercitam.
+    import app.agent.dominio.refeitorio.tools as t
+
+    fakes.instalar(monkeypatch, fakes.carregar_dados("consumo_fora_da_base"))
+    out = t.go_api.calcular_consumo([{"alimento": "arroz", "medida": "concha", "quantidade": 2}])
+    assert out["itens_ignorados"] == ["escondidinho da vovo"]
+    assert out["completo"] is False

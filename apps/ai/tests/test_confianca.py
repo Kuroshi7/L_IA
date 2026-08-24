@@ -177,3 +177,49 @@ def test_aproximado_sozinho_ja_gera_sinal(monkeypatch):
 
     assert cache[CACHE_APROXIMADOS] == ["arroz"]
     assert "nota_do_sistema" in out and "aproxima" in out["nota_do_sistema"].lower()
+
+
+# --- incoerência aritmética: sai do prompt, entra no código ------------------
+
+def _totais_g(gramas):
+    return {"itens": [_item("arroz", "Arroz Integral Cozido")], "kcal": 100.0,
+            "gramas_totais": gramas, "itens_ignorados": [], "completo": True}
+
+
+def test_sobra_maior_que_consumo_e_sinalizada(monkeypatch):
+    """Medido em 0 de 3 enquanto dependia de o modelo "perceber". É uma
+    comparação de dois números — não pertence ao prompt."""
+    chamadas = []
+
+    def fake(itens):
+        chamadas.append(itens)
+        return _totais_g(20.0) if len(chamadas) == 1 else _totais_g(270.0)
+
+    monkeypatch.setattr(t.go_api, "calcular_consumo", fake)
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+
+    out = registrar_consumo.invoke({
+        "itens": [{"alimento": "arroz", "medida": "colher de sopa", "quantidade": 1}],
+        "sobras": [{"alimento": "arroz", "medida": "concha", "quantidade": 3}],
+        "confirmado": False,
+    })
+    assert "nota_do_sistema" in out
+    assert "MAIOR que o consumo" in out["nota_do_sistema"]
+
+
+def test_sobra_menor_nao_gera_ruido(monkeypatch):
+    chamadas = []
+
+    def fake(itens):
+        chamadas.append(itens)
+        return _totais_g(270.0) if len(chamadas) == 1 else _totais_g(20.0)
+
+    monkeypatch.setattr(t.go_api, "calcular_consumo", fake)
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+
+    out = registrar_consumo.invoke({
+        "itens": [{"alimento": "arroz", "medida": "concha", "quantidade": 3}],
+        "sobras": [{"alimento": "arroz", "medida": "colher de sopa", "quantidade": 1}],
+        "confirmado": False,
+    })
+    assert "MAIOR que o consumo" not in out.get("nota_do_sistema", "")

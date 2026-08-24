@@ -34,6 +34,39 @@ def baterias() -> list[str]:
     return sorted({c["bateria"] for c in carregar_casos()})
 
 
+# Gramas por medida caseira, o suficiente para o fake responder à ENTRADA.
+# Sem isto ele devolvia o mesmo total para qualquer item, e "1 colher" saía do
+# mesmo tamanho de "3 conchas" — o que anulava silenciosamente a checagem de
+# sobra maior que consumo, e fazia o caso medir 0/3 com o produto correto.
+_GRAMAS = {
+    "concha": 90, "colher de sopa": 20, "colher": 20, "colher de arroz": 45,
+    "file": 100, "filé": 100, "prato": 250, "prato raso": 250, "prato fundo": 300,
+    "unidade": 80, "porcao": 100, "porção": 100, "pegador": 40, "fatia": 30,
+    "escumadeira": 60, "pedaco": 70, "pedaço": 70,
+}
+
+
+def _gramas(itens) -> float:
+    total = 0.0
+    for i in itens or []:
+        medida = str(i.get("medida", "")).strip().lower()
+        total += _GRAMAS.get(medida, 60) * float(i.get("quantidade", 1) or 1)
+    return total
+
+
+def _consumo_proporcional(base: dict, itens) -> dict:
+    """O total do dataset, reescalado pelo que foi de fato informado."""
+    gramas = _gramas(itens)
+    ref = float(base.get("gramas_totais") or 0) or gramas or 1.0
+    fator = gramas / ref if ref else 1.0
+    out = dict(base)
+    out["gramas_totais"] = round(gramas, 1)
+    for chave in ("kcal", "proteina_g", "carboidrato_g", "gordura_g"):
+        if base.get(chave) is not None:
+            out[chave] = round(float(base[chave]) * fator, 2)
+    return out
+
+
 def instalar(monkeypatch, dados: dict) -> None:
     import app.agent.dominio.refeitorio.tools as t
 
@@ -42,7 +75,8 @@ def instalar(monkeypatch, dados: dict) -> None:
     monkeypatch.setattr(t.go_api, "get_perfil", lambda usuario_id: dict(dados["perfil"]))
     monkeypatch.setattr(t.go_api, "get_medidas_caseiras", lambda: list(dados["medidas"]))
     monkeypatch.setattr(t.go_api, "get_gamificacao", lambda usuario_id: dict(dados["gamificacao"]))
-    monkeypatch.setattr(t.go_api, "calcular_consumo", lambda itens: dict(dados["consumo"]))
+    monkeypatch.setattr(t.go_api, "calcular_consumo",
+                        lambda itens: _consumo_proporcional(dados["consumo"], itens))
     monkeypatch.setattr(
         t.go_api, "get_cardapio_semana",
         lambda unidade_id, inicio="": {

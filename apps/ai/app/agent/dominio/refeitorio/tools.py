@@ -129,6 +129,26 @@ def _acumular(chave: str, termos) -> None:
 MARCA_INCERTEZA = "INCERTEZA:"
 
 
+def _incoerencia(consumido: dict, resto: dict) -> str:
+    """Sobra maior que o consumo é impossível, e é aritmética — não opinião.
+
+    Pedir ao modelo que "perceba" isso é gastar atenção com o que uma
+    comparação resolve. Medido em 0 de 3 enquanto dependia dele.
+
+    Não bloqueia: a pessoa pode ter se enganado na medida, e travar o registro
+    por isso seria pior que registrar com ressalva.
+    """
+    c = float(consumido.get("gramas_totais") or 0)
+    r = float(resto.get("gramas_totais") or 0)
+    if r <= c or c <= 0:
+        return ""
+    return (
+        f"ATENÇÃO: a sobra informada ({r:.0f} g) é MAIOR que o consumo ({c:.0f} g), o que não "
+        "é possível. Antes de registrar, confirme com o usuário o que ele comeu e o que sobrou "
+        "— provavelmente uma das medidas saiu trocada."
+    )
+
+
 def _nota_de_incerteza(q: Qualidade) -> str:
     partes = []
     if q.ignorados:
@@ -403,6 +423,7 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
 
         q = _qualidade(consumido, resto)
         _registrar_qualidade(q)
+        notas = [n for n in (_incoerencia(consumido, resto), _nota_de_incerteza(q)) if n]
         resultado = {
             "previa": previa,
             "instrucao": (
@@ -412,7 +433,7 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
                 "de novo com os MESMOS itens/sobras e confirmado=true."
             ),
         }
-        return anexar_ao_resultado(resultado, _nota_de_incerteza(q))
+        return anexar_ao_resultado(resultado, " ".join(notas))
 
     # Confirmado: antes de gravar, checa a cobertura. O cálculo é sem efeito
     # colateral, então custa uma chamada a mais só no caminho de escrita.
