@@ -1,13 +1,17 @@
 # Menu-AI — Lia (v2)
 
 Assistente de IA para refeitório self-service. O cliente escolhe uma **unidade**, conversa com a **Lia**,
-vê o cardápio do dia completo e recebe recomendações personalizadas (restrições, preferências e meta calórica),
+consulta o cardápio do dia e recebe recomendações personalizadas (restrições, preferências e meta calórica),
 com porções em medidas caseiras. Depois da refeição, registra o que comeu (e o que sobrou) em linguagem
 natural e **pontua** pela proximidade da meta (gamificação); o admin acompanha o **desperdício** por
 unidade (índice de resto-ingesta) além de gerir unidades, alimentos, cardápios e usuários.
 
-> O MVP validado está preservado na tag **`mvp-v1`**. Esta branch (`produto-v2`) é a reestruturação para produto.
-> Regras de negócio: [`docs/regras-de-negocio.md`](docs/regras-de-negocio.md).
+> O MVP validado está preservado na tag **`mvp-v1`**; `produto-v2` é a reestruturação para produto.
+> Esta branch (**`feat/motor-agente-onyx`**) reorganiza a camada de agente em **motor reaproveitável +
+> domínio**, com barreiras de segurança em código e um harness de avaliação medido. Ainda não integrada.
+>
+> Regras de negócio: [`docs/regras-de-negocio.md`](docs/regras-de-negocio.md) ·
+> Medições do agente: [`docs/eval-linha-de-base.md`](docs/eval-linha-de-base.md)
 
 ## Arquitetura (monorepo)
 
@@ -15,21 +19,60 @@ unidade (índice de resto-ingesta) além de gerir unidades, alimentos, cardápio
 apps/
   api/   Go   — fonte da verdade (Postgres), API pública+interna+admin, sessões, idempotência,
                 outbox/relay, gamificação (pontuação síncrona) e ETL de desperdício (worker)
-  ai/    Py   — agente LLM (LangChain), tools que chamam a API Go, RAG (pgvector),
-                worker RabbitMQ, canal Telegram (webhook + polling dev)
+  ai/    Py   — agente LLM: motor reaproveitável + domínio do refeitório, tools que chamam a
+                API Go, RAG (pgvector), worker RabbitMQ, canal Telegram (webhook + polling dev)
   web/   TS   — Vite + React: seletor de unidade → chat; cadastro/perfil; ranking;
                 admin (unidades, alimentos, cardápio, usuários, desperdício)
 packages/contracts/   openapi.yaml — contrato da API pública+admin
 deploy/docker-compose.yml   Postgres+pgvector, RabbitMQ, api, workers, ai, web, ollama
 docs/regras-de-negocio.md   referência permanente das regras
+.github/workflows/          CI dos três apps (offline) + eval com LLM real (sob demanda)
 ```
 
 ### Fluxo do chat
 1. Front: usuário escolhe a **unidade** (a `unidade_id` acompanha toda a sessão — sem "unit resolver").
 2. `POST /chat` na **API Go** (resolve sessão, idempotência) → publica em **RabbitMQ** (`chat.requests`, RPC).
-3. **Worker Python** consome, roda o agente: guardrail → tools (cardápio/perfil via **API interna do Go**) + **RAG** (medidas caseiras/nutrição) → resposta.
+3. **Worker Python** consome e roda um turno (detalhado abaixo).
 4. Go correlaciona a resposta (RPC reply) e responde ao front; sessão persistida no Postgres.
 5. Efeitos assíncronos via **Outbox → RabbitMQ → consumer idempotente** (inbox).
+
+## Camada de agente (`apps/ai/app/agent/`)
+
+Partida em duas metades, com a fronteira defendida por teste:
+
+```
+motor/      reaproveitável — não conhece cardápio, prato, unidade nem alimento.
+            Consome apenas um PerfilDeDominio (prompt, tools, guardrail, reminders,
+            regras de validação, pós-processamento e textos de resposta).
+dominio/refeitorio/   este produto: as 10 tools, prompts, filtros e regras.
+```
+
+`tests/test_fronteira_motor.py` varre os fontes do motor procurando vocabulário de domínio e proíbe
+`import` do lado do produto. Trocar de produto significa escrever outro perfil ao lado — não mexer no motor.
+
+### O que acontece em um turno
+
+| | | onde |
+|---|---|---|
+| 1 | **Guardrail de escopo** — keywords decidem na hora (latência); o resto vai a um classificador, que falha aberto | `dominio/refeitorio/guardrail.py` |
+| 2 | **Tools escolhidas por requisição** — sem usuário identificado, as de identidade saem do schema | `motor/registry.py` |
+| 3 | **Contexto montado** — reminders vão no fim da mensagem, não no system prompt | `motor/turn.py` |
+| 4 | **Loop de tool-calling** — um decorator aplica prazo, memoiza leituras repetidas e colhe o que voltou | `motor/observacao.py` |
+| 5 | **Pós-processamento** — o que não pode depender de o modelo lembrar (hoje: encaminhamento a profissional de saúde) | `dominio/refeitorio/perfil.py` |
+| 6 | **Validação** — 5 regras; 4 registram em log, 1 bloqueia | `motor/validacao.py` |
+
+### Dois princípios que valem para todo o resto
+
+**Números não são gerados.** O valor nutricional nunca vem do modelo: o termo que a pessoa escreveu é
+resolvido contra a base no Postgres (alimento → medida caseira → gramas → macros) e volta com procedência
+e nível de confiança. Item que não resolve fica **fora do total**, e isso sobe até a interface como campo
+estruturado.
+
+**Segurança alimentar mora no código.** O conflito entre um prato e o perfil de quem conversa é calculado
+em código e anotado no próprio item que o modelo lê — a regra de negócio não permite esconder o prato, só
+não recomendá-lo. Uma regra bloqueante é a última barreira. O aviso reporta em vez de proibir: *"você
+informou alergia a amendoim, e este prato leva amendoim"* — o assistente cruza o que a pessoa declarou com
+um fato do prato, não determina o que ela pode comer.
 
 ## Como rodar (Docker)
 
@@ -52,10 +95,56 @@ Para usar Claude em vez do Ollama: `LLM_PROVIDER=anthropic` + `ANTHROPIC_API_KEY
 
 Escalar concorrência de IA: `docker compose up -d --scale ai-worker=3`.
 
+## Testes e avaliação
+
+A suíte padrão é **offline**: não gasta API, não depende de modelo local, roda em todo commit.
+
+```bash
+cd apps/ai && pytest                 # ~300 testes, sem LLM
+cd apps/api && go test ./...         # unidade
+cd apps/api && ./scripts/test-integration.sh   # integração, sobe um Postgres descartável
+cd apps/web && npm run typecheck && npm run build
+```
+
+O eval com **modelo real** é separado (`pytest.ini` exclui o marcador `llm`) porque gasta API e é
+estocástico — misturar faria o gate de merge depender do humor de um modelo.
+
+```bash
+cd apps/ai
+EVAL_REPETICOES=3 LLM_PROVIDER=anthropic pytest tests/eval -m llm -s      # 60 casos, 6 baterias
+EVAL_REPETICOES=3 EVAL_BATERIA=seguranca LLM_PROVIDER=anthropic pytest tests/eval -m llm -s
+LLM_PROVIDER=anthropic pytest tests/eval/test_juiz_calibracao.py -m llm -s   # calibra o juiz
+```
+
+Cada caso roda N vezes: **3/3** é estável, **0/3** é defeito reproduzível, o meio é instabilidade do
+modelo. Sem repetição não dá para separar as duas coisas. Custo da rodada completa: ~US$ 2,30 em Haiku 4.5.
+
+Antes de gastar, o harness inteiro é exercitado de graça — um modelo roteirizado substitui o LLM e o
+classificador do guardrail, e o caminho real roda sem API:
+
+```bash
+cd apps/ai && pytest tests/test_eval_pipeline.py
+```
+
+Resultados, método e limitações: [`docs/eval-linha-de-base.md`](docs/eval-linha-de-base.md).
+
+### Auditoria da base nutricional
+
+A base vem de uma tabela de medidas caseiras impressa. Parte dos valores não sobrevive à conferência
+contra a TACO (NEPA/UNICAMP) — arroz integral cozido consta com 257 kcal/100 g contra 123,5 da referência.
+Não corrigimos o número (sem medição primária seria trocar um palpite por outro): marcamos a porção,
+a confiança do cálculo cai e a Lia declara a aproximação.
+
+```bash
+cd apps/ai
+python -m app.nutrition.auditoria             # relatório
+python -m app.nutrition.auditoria --aplicar   # marca nutri_porcoes.suspeito
+```
+
 ## Desenvolvimento local (sem Docker)
 
 - **API Go** (`apps/api`): `go build ./...`; precisa de Postgres+pgvector e RabbitMQ acessíveis (ver `.env`). `go run ./cmd/api`, `go run ./cmd/seed`, `go run ./cmd/worker`.
-- **IA** (`apps/ai`): `pip install -r requirements.txt`; worker: `python -m app.workers.chat_worker`; API: `uvicorn app.api.main:app`.
+- **IA** (`apps/ai`): `pip install -r requirements-dev.txt`; worker: `python -m app.workers.chat_worker`; API: `uvicorn app.api.main:app`.
 - **Web** (`apps/web`): `npm install`; `npm run dev` (typecheck: `npm run typecheck`, build: `npm run build`).
 
 ## Endpoints principais (API Go)
@@ -64,11 +153,16 @@ Contrato completo em [`packages/contracts/openapi.yaml`](packages/contracts/open
 
 - `GET /unidades` · `GET /unidades/{id}/cardapio?data=hoje` · `GET /unidades/{id}/ranking`
 - `POST /chat` (`{unidade_id, session_id?, usuario_id?, mensagem}`; header `Idempotency-Key` opcional) · `DELETE /chat/{sessionId}`
+  - resposta traz `confianca` (opcional) quando há incerteza a declarar — itens não reconhecidos ou valor aproximado
 - Usuários: `POST/GET/PUT /usuarios[/{id}]` (devolve IMC + meta calórica) · `GET /usuarios/{id}/gamificacao`
 - Admin (`X-Admin-Token`): unidades (CRUD + ativo), alimentos, cardápio-semana, `GET /admin/usuarios`,
   `GET /admin/unidades/{id}/desperdicio?de=&ate=` (índice de resto-ingesta, série diária, top alimentos)
 - Internos (consumidos pela IA): cardápio dia/semana, perfil, gamificação, medidas caseiras,
   `POST /internal/consumo/registrar` (persiste, pontua e alimenta o desperdício), vínculo Telegram
+
+> Consumo com item não reconhecido é gravado mas **não pontua** (`pontuacao_pendente` explica o motivo) e
+> fica fora do agregado de desperdício — o total sai subestimado, e pontuar sobre ele corromperia o ranking
+> e o KPI do gestor.
 
 ## Telegram
 
