@@ -106,7 +106,44 @@ EVAL_REPETICOES=3 EVAL_BATERIA=seguranca LLM_PROVIDER=anthropic pytest tests/eva
 LLM_PROVIDER=anthropic pytest tests/eval/test_juiz_calibracao.py -m llm -s
 ```
 
-Custo aproximado da bateria completa com 3 repetições: alguns centavos em Haiku.
+### Custo
+
+Estimado a partir do prefill documentado em `app/config.py` (~2,5k tokens de system +
+schemas das 10 tools) e do preço do Haiku 4.5 (US$ 1,00/1M entrada · US$ 5,00/1M saída):
+
+| Rodada | Chamadas | Custo |
+|---|---|---|
+| Bateria completa, 3 repetições, **com** prompt caching | ~515 + 100 do juiz | **≈ US$ 2,30** |
+| Bateria completa, 3 repetições, sem caching | ~515 + 100 | ≈ US$ 3,50 |
+| Bateria completa, 1 repetição | ~170 + 35 | ≈ US$ 0,78 |
+| Uma bateria isolada (10 casos × 3) | ~85 + 17 | ≈ US$ 0,39 |
+| Só a calibração do juiz | 17 | ≈ US$ 0,03 |
+
+> Uma versão anterior deste documento dizia "alguns centavos". Estava errado por duas
+> ordens de grandeza.
+
+Some a isso o **classificador do guardrail**, que é um segundo LLM: ele só é chamado quando
+nenhuma keyword do domínio decide, o que na prática acontece nos casos de fora-de-escopo e
+nas mensagens ambíguas. São chamadas curtas (4 tokens de saída) e o custo é desprezível —
+mas ele existe, e não estava contabilizado.
+
+### Verificação sem custo
+
+Antes de gastar qualquer coisa, o harness inteiro é exercitado de graça:
+
+```bash
+pytest tests/test_eval_pipeline.py
+```
+
+Um modelo roteirizado (`tests/eval/modelo_scriptado.py`) substitui o LLM e o classificador
+do guardrail, e o eval roda o caminho de verdade — seleção de tools, montagem de contexto,
+execução contra os fakes da API Go, pós-processamento, validação e conferência de
+asserções. Os 60 casos são percorridos: dataset existe, fakes instalam, guardrail decide
+como o caso espera.
+
+Isso **não diz nada sobre o modelo** — o modelo roteirizado faz o que o roteiro manda. O
+que ele prova é que o encanamento funciona, e é o que separa "o eval quebrou" de "o modelo
+piorou" sem pagar US$ 2,30 para descobrir.
 
 ## Mudança de regra de 23/08/2026 — medição pendente
 
