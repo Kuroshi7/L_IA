@@ -17,6 +17,14 @@ ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
 OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
+# Qualquer outro endpoint que fale o protocolo da OpenAI: Hugging Face, Together,
+# Groq, DeepInfra, vLLM ou LiteLLM auto-hospedado. Todos entram por aqui, em
+# configuração, porque nenhum deles justifica código próprio — o que muda entre
+# eles é URL, chave e nome do modelo. Um `if` por fornecedor viraria uma lista
+# que envelhece sozinha e que só o `.env` precisava saber.
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_MODEL = os.getenv("LLM_MODEL", "")
 
 # Limites do LLM. O pior caso de UMA chamada é LLM_TIMEOUT_SECONDS × (LLM_MAX_RETRIES+1)
 # e precisa caber no CHAT_TIMEOUT_SECONDS do Go (default 60s), senão o Go desiste antes,

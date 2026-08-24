@@ -237,3 +237,41 @@ def test_juiz_cacheia_veredicto_de_verdade(monkeypatch):
     assert len(chamadas) == 1, "veredicto real deveria vir do cache"
     assert juiz.INDISPONIVEIS == []
     juiz.limpar()
+
+
+# --- fornecedor compatível com OpenAI é configuração, não código -------------
+
+def test_provider_compat_usa_a_url_configurada(monkeypatch):
+    """Hugging Face, Together, Groq, vLLM e LiteLLM falam o mesmo protocolo.
+
+    Um `if` por fornecedor viraria uma lista que envelhece sozinha, e o único
+    lugar que precisava saber o nome deles era o `.env`.
+    """
+    from app import config
+    from app.agent.motor import provedores
+
+    capturado = {}
+    monkeypatch.setattr(provedores, "_openai_compativel",
+                        lambda base, chave, mod, t, mx: capturado.update(
+                            base=base, chave=chave, modelo=mod, temp=t))
+    monkeypatch.setattr(config, "LLM_BASE_URL", "https://router.huggingface.co/v1")
+    monkeypatch.setattr(config, "LLM_API_KEY", "hf_xxx")
+    monkeypatch.setattr(config, "LLM_MODEL", "google/gemma-4-31B-it")
+
+    provedores.construir(temperatura=0, max_tokens=4, provider="openai_compat")
+    assert capturado["base"] == "https://router.huggingface.co/v1"
+    assert capturado["modelo"] == "google/gemma-4-31B-it"
+    assert capturado["temp"] == 0
+
+
+def test_provider_compat_sem_url_falha_dizendo_o_que_falta(monkeypatch):
+    # Sem URL o cliente OpenAI iria para api.openai.com e falharia com 401 —
+    # erro que não ensina nada sobre a configuração que faltou.
+    import pytest as _pytest
+
+    from app import config
+    from app.agent.motor import provedores
+
+    monkeypatch.setattr(config, "LLM_BASE_URL", "")
+    with _pytest.raises(RuntimeError, match="LLM_BASE_URL"):
+        provedores.construir(temperatura=0, max_tokens=4, provider="openai_compat")

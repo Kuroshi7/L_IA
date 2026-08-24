@@ -91,6 +91,18 @@ def construir(temperatura: float, max_tokens: int, num_ctx: int | None = None,
             nome, temperatura, max_tokens,
         )
 
+    if provider in ("openai_compat", "openai-compat", "compat"):
+        if not config.LLM_BASE_URL:
+            raise RuntimeError(
+                "LLM_PROVIDER=openai_compat exige LLM_BASE_URL (e normalmente LLM_API_KEY "
+                "e LLM_MODEL). Ex.: https://router.huggingface.co/v1"
+            )
+        nome = modelo or config.LLM_MODEL
+        log.info("LLM provider=openai_compat | base=%s | model=%s", config.LLM_BASE_URL, nome)
+        return _openai_compativel(
+            config.LLM_BASE_URL, config.LLM_API_KEY, nome, temperatura, max_tokens,
+        )
+
     # default: ollama
     from langchain_ollama import ChatOllama
 

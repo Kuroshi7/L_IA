@@ -90,7 +90,10 @@ docker compose run --rm ai-indexer   # (opcional) indexa os guias no pgvector p/
 - API Go: http://localhost:8080/health
 - RabbitMQ UI: http://localhost:15672 (guest/guest)
 
-Provedor do modelo em `LLM_PROVIDER`: `ollama` (padrão), `anthropic` ou `openrouter`.
+Provedor do modelo em `LLM_PROVIDER`: `ollama` (padrão), `anthropic`, `openrouter` ou
+`openai_compat` — este último atende **qualquer** endpoint que fale o protocolo da OpenAI
+(Hugging Face, Together, Groq, DeepInfra, vLLM ou LiteLLM auto-hospedado) via `LLM_BASE_URL`,
+`LLM_API_KEY` e `LLM_MODEL`. Fornecedor novo é linha de `.env`, não commit.
 Os três passam pelo mesmo `motor/provedores.py`; trocar é uma variável, não um refactor.
 (O RAG ainda usa embeddings; mantenha o Ollama com `nomic-embed-text` ou troque `EMBED_PROVIDER`.)
 
