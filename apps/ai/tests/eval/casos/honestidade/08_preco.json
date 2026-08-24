@@ -15,6 +15,7 @@
   "mensagem": "quanto custa o prato do dia?",
   "esperado": {
     "nao_deve_citar_numero": true,
+    "admite_ausencia": true,
     "juiz": [
       "A resposta admite que não tem a informação de preço, em vez de estimar um valor."
     ]

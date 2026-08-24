@@ -20,6 +20,7 @@
     "tools_obrigatorias": [
       "registrar_consumo"
     ],
+    "ressalva_incerteza": true,
     "juiz": [
       "A resposta deixa claro que o valor calórico apresentado é aproximado/estimado, e não um número exato."
     ]

@@ -15,6 +15,7 @@ Duas regras aqui:
    mesma coisa, o conserto é um teste a mais, não um ajuste no caso.
 """
 
+import json
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -62,7 +63,7 @@ _INCERTEZA = re.compile(
 
 # "não temos cardápio", "ainda não foi carregado", "está vazio"…
 _AUSENCIA = re.compile(
-    r"\bnao (encontr|h[aá]|temos|tem|foi|consta|localiz|apareceu|identifiq)"
+    r"\bnao (encontr|h[aá]|temos|tenho|tem|foi|consta|localiz|apareceu|identifiq)"
     r"|\bainda nao\b|\bsem (cardapio|pratos|opcoes|itens)"
     r"|\bindisponivel|\bnao (esta|estao) (disponivel|disponiveis|cadastrad)"
     r"|\bvazio\b|\bnenhum (prato|item|cardapio)"
@@ -80,6 +81,21 @@ _PEDE_CORRECAO = re.compile(
     r"|\bqual (e|foi|era)\b|\bcomo (era|foi|e)\b|\bdescrev|\bespecific"
     r"|\bde outro jeito|\bde outra forma|\btente\b|\breformul"
 )
+
+
+# "sobrou algo?", "comeu tudo?", "raspou o prato?" — mais estreito que
+# _CONFIRMACAO de propósito: "confirma?" genérico não pergunta sobre sobra, e
+# aceitar isso deixaria passar a resposta que pula a etapa do desperdício.
+_SOBRAS = re.compile(
+    r"\bsobr(ou|a|aram|ando)\b|\bcomeu tudo\b|\bcomeu td\b|\braspou\b"
+    r"|\bdeixou (algo|alguma coisa|um pouco|sobra)|\bterminou (tudo|o prato)"
+    r"|\bficou (algo|alguma coisa|um pouco)\b|\brestou\b"
+)
+
+
+def pergunta_sobras(texto: str) -> bool:
+    """A resposta pergunta o que ficou no prato?"""
+    return bool(_SOBRAS.search(normalizar(texto)))
 
 
 def declara_incerteza(texto: str) -> bool:
@@ -216,6 +232,12 @@ def _admite_ausencia(ctx: Contexto, _e) -> str | None:
     return None if admite_ausencia(ctx.resposta) else "não admitiu que não há o que mostrar"
 
 
+def _pergunta_sobras(ctx: Contexto, _e) -> str | None:
+    if pergunta_sobras(ctx.resposta):
+        return None
+    return "resposta não pergunta o que sobrou no prato"
+
+
 def _pede_confirmacao(ctx: Contexto, _e) -> str | None:
     return None if pede_confirmacao(ctx.resposta) else "não pediu confirmação ao usuário"
 
@@ -270,6 +292,104 @@ def _numeros_rastreaveis(ctx: Contexto, _e) -> str | None:
 
 
 # Nome da chave em `esperado` → função. Ordem = ordem do relatório.
+# ---------------------------------------------------------------------------
+# Estrutural no lugar de juiz
+# ---------------------------------------------------------------------------
+# Cada função aqui aposentou um critério que estava sendo julgado por LLM. O
+# ganho não é só custo: "a resposta usa medida caseira" é uma lista fechada de
+# palavras, e uma lista fechada não tem opinião, não tem cota, não fica fora do
+# ar e não devolve vazio porque gastou o teto de saída pensando.
+
+_MEDIDAS_CASEIRAS = re.compile(
+    r"\b(conchas?|colheres?|colher|filés?|files?|pegador(es)?|fatias?|"
+    r"prato (raso|fundo|cheio)|unidades?|porç(ão|ões)|porc(ao|oes)|"
+    r"escumadeiras?|pedaços?|pedacos?|xícaras?|xicaras?|copos?)\b",
+    re.IGNORECASE,
+)
+
+# Classe fechada de palavras funcionais do português. Não são traduzíveis por
+# acaso: um texto em espanhol ou inglês não as acumula.
+_FUNCIONAIS_PT = re.compile(
+    r"\b(você|voce|não|nao|está|esta|com|para|uma|dos|das|mais|"
+    r"que|por|como|seu|sua|então|entao|também|tambem|hoje)\b",
+    re.IGNORECASE,
+)
+
+
+def usa_medida_caseira(texto: str) -> bool:
+    return bool(_MEDIDAS_CASEIRAS.search(texto))
+
+
+def parece_portugues(texto: str) -> bool:
+    """Três palavras funcionais distintas. Uma só apareceria por acaso
+    ('como' existe em espanhol, 'para' também)."""
+    achados = {m.group(0).lower() for m in _FUNCIONAIS_PT.finditer(texto)}
+    return len(achados) >= 3
+
+
+def _medida_caseira(ctx: Contexto, _e) -> str | None:
+    if usa_medida_caseira(ctx.resposta):
+        return None
+    return "resposta não expressa porção em medida caseira"
+
+
+def _em_portugues(ctx: Contexto, _e) -> str | None:
+    if parece_portugues(ctx.resposta):
+        return None
+    return f"resposta não parece estar em português: {ctx.resposta[:60]!r}"
+
+
+def _nao_deve_citar(ctx: Contexto, esperado) -> str | None:
+    vazados = [t for t in esperado if normalizar(t) in ctx.norm]
+    return f"resposta cita o que não deveria: {vazados}" if vazados else None
+
+
+def _par_existe(no, campo: str, valor) -> bool:
+    """Procura `campo: valor` em qualquer profundidade dos argumentos.
+
+    Os argumentos chegam como JSON canônico, então dá para casar chave e valor
+    em vez de procurar substring — `"3"` casaria "23", um id ou um horário.
+    """
+    if isinstance(no, dict):
+        for k, v in no.items():
+            if k == campo and (v == valor or str(v) == str(valor)):
+                return True
+            if _par_existe(v, campo, valor):
+                return True
+    elif isinstance(no, list):
+        return any(_par_existe(x, campo, valor) for x in no)
+    return False
+
+
+def _argumento_de_tool(ctx: Contexto, esperado) -> str | None:
+    """O que o sistema FEZ, não o que ele disse que fez.
+
+    Quando a pessoa se corrige ("2, não, 3"), o que importa é a quantidade que
+    chegou na tool. Julgar isso pelo texto aceita que uma resposta bem escrita
+    encubra uma chamada errada — e custa uma ida ao juiz para medir pior.
+    """
+    faltas = []
+    for regra in esperado:
+        tool = regra["tool"]
+        brutos = [a for nome, a in ctx.chamadas if nome == tool]
+        if not brutos:
+            faltas.append(f"{tool} não foi chamada")
+            continue
+        arvores = []
+        for b in brutos:
+            try:
+                arvores.append(json.loads(b))
+            except (ValueError, TypeError):
+                arvores.append(b)
+        for campo, valor in (regra.get("valores") or {}).items():
+            if not any(_par_existe(a, campo, valor) for a in arvores):
+                faltas.append(f"{tool} não recebeu {campo}={valor!r} (recebeu: {brutos})")
+        for campo, valor in (regra.get("sem_valores") or {}).items():
+            if any(_par_existe(a, campo, valor) for a in arvores):
+                faltas.append(f"{tool} recebeu {campo}={valor!r}, que não deveria")
+    return "; ".join(faltas) if faltas else None
+
+
 ASSERCOES = {
     "tools_obrigatorias": _tools_obrigatorias,
     "tools_proibidas": _tools_proibidas,
@@ -287,9 +407,14 @@ ASSERCOES = {
     "ressalva_incerteza": _ressalva_incerteza,
     "admite_ausencia": _admite_ausencia,
     "pede_confirmacao": _pede_confirmacao,
+    "pergunta_sobras": _pergunta_sobras,
     "pede_correcao": _pede_correcao,
     "deve_conter_algum": _deve_conter_algum,
     "juiz": _juiz,
+    "medida_caseira": _medida_caseira,
+    "em_portugues": _em_portugues,
+    "nao_deve_citar": _nao_deve_citar,
+    "argumento_de_tool": _argumento_de_tool,
 }
 
 

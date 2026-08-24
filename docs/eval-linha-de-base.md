@@ -271,3 +271,44 @@ informada, e dois testes offline garantem que ele responda à entrada e continue
 preservando o que o dataset declara (`itens_ignorados`, `completo`).
 
 Sem nova rodada paga depois da correção, o caso segue **não medido** com LLM real.
+
+### Onde o dinheiro do eval realmente vai
+
+Ao procurar um provedor mais barato para o juiz, medimos a repartição e ela
+desautoriza a busca:
+
+| | chamadas/rodada | US$ | share |
+|---|---|---|---|
+| Juiz (27 critérios × 3) | 81 | 0,04 | **1,3%** |
+| Agente (60 casos × 3) | 450 | 2,96 | **98,7%** |
+
+O juiz emite **4 tokens de saída**; o agente carrega system prompt, esquema das
+tools e retornos, e gera ~350. Trocar o juiz por um modelo gratuito economiza
+quatro centavos e custa a única coisa que ele precisa ter: ser fixo e calibrado.
+
+Daí a divisão adotada:
+
+- **Agente no OpenRouter** — os 98,7%. É onde "modelo não deveria importar" vale,
+  porque a segurança alimentar está em código (R5 bloqueia, conflito anotado no
+  próprio item, número nunca gerado). Requer os US$ 10 que elevam a cota para
+  1.000 requisições/dia; as 450 do agente não cabem nas 50 do free tier.
+- **Juiz na Anthropic** — os 1,3%. Modelo fixo, calibrado, medido. US$ 0,04 por
+  rodada não justifica instrumento variável.
+
+Paga-se em ~3 rodadas contra o custo de rodar tudo na Anthropic.
+
+### Estrutura não substitui o juiz — soma a ele
+
+Dez casos ganharam asserção estrutural **sem perder o critério de juiz**:
+`medida_caseira`, `em_portugues`, `pergunta_sobras`, `nao_deve_citar` e
+`argumento_de_tool`. O último é o mais importante: em `usuario_se_corrige`, o
+que importa é a quantidade que chegou na tool, não como o texto ficou. Casar
+chave e valor no JSON dos argumentos (`quantidade=3`, e **não** `quantidade=2`)
+verifica o que o sistema fez; julgar o texto aceitaria que uma resposta bem
+escrita encobrisse uma chamada errada.
+
+Houve tentação de aposentar os critérios cobertos e cortar a conta do juiz.
+Não se fez, e o motivo é o caso `registro em duas etapas`: ele mede 0/3 **só
+pelo juiz** — a asserção estrutural passa. O sistema faz certo e o texto não
+deixa claro para quem lê. Remover ali não simplificaria o eval, subiria a nota
+apagando um defeito real de UX.

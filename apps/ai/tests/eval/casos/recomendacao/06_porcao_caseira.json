@@ -15,6 +15,7 @@
   "mensagem": "quero algo com bastante proteína, quanto eu ponho no prato?",
   "esperado": {
     "tool_de_cardapio_obrigatoria": true,
+    "medida_caseira": true,
     "juiz": [
       "A resposta expressa a porção em medida caseira (concha, colher, filé, pegador, fatia, prato), não apenas em gramas ou calorias."
     ]

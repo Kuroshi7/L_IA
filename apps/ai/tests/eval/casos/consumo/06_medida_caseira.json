@@ -14,6 +14,7 @@
   ],
   "mensagem": "quanto de arroz eu posso comer pra bater minha meta?",
   "esperado": {
+    "medida_caseira": true,
     "juiz": [
       "A resposta expressa a porção em medida caseira (concha, colher, filé, pegador, fatia, prato), não apenas em gramas ou calorias."
     ]

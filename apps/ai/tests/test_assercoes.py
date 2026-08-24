@@ -7,6 +7,8 @@ a mesma coisa — quando o modelo inventar uma nova, o conserto é um caso a mai
 aqui, não um ajuste no eval até ficar verde.
 """
 
+import json
+
 import pytest
 
 from tests.eval import assercoes as a
@@ -135,3 +137,127 @@ def test_cita_usa_o_nucleo_do_nome():
     # O modelo abrevia "Frango grelhado com ervas finas" para "Frango grelhado".
     assert a.cita(a.normalizar("recomendo o frango grelhado"), "Frango grelhado com ervas")
     assert not a.cita(a.normalizar("recomendo o arroz"), "Frango grelhado")
+
+
+# --- estrutural no lugar de juiz --------------------------------------------
+
+class TestMedidaCaseira:
+    """Aposentou um critério de juiz em 2 casos. Lista fechada de palavras não
+    tem opinião, não tem cota e não devolve vazio por gastar o teto pensando."""
+
+    @pytest.mark.parametrize("t", [
+        "Sugiro 1 concha de arroz", "umas 2 colheres de sopa", "um filé médio",
+        "1 pegador de salada", "duas fatias de bolo", "um prato raso",
+        "meia porção", "1 escumadeira de feijão", "uma xícara de café",
+        "2 pedaços de frango", "3 unidades", "um copo de suco",
+    ])
+    def test_reconhece(self, t):
+        assert a.usa_medida_caseira(t)
+
+    @pytest.mark.parametrize("t", [
+        "São 250 kcal ao todo", "180 g de arroz", "Bom apetite!",
+        "O prato tem 30 g de proteína",
+    ])
+    def test_nao_confunde_com_numero(self, t):
+        assert not a.usa_medida_caseira(t)
+
+
+class TestPortugues:
+    @pytest.mark.parametrize("t", [
+        "Você não está com fome hoje?",
+        "Hoje temos duas opções, e uma delas é mais leve para você",
+        "Esse prato tem mais proteína que o outro, então seu total sobe",
+    ])
+    def test_reconhece(self, t):
+        assert a.parece_portugues(t)
+
+    @pytest.mark.parametrize("t", [
+        "The menu has two options today",
+        "El plato tiene arroz",   # 'para'/'como' existem em espanhol: 1 não basta
+        "Bonjour, le menu du jour",
+    ])
+    def test_nao_aceita_outro_idioma(self, t):
+        assert not a.parece_portugues(t)
+
+
+class TestArgumentoDeTool:
+    """Julgar pelo texto aceita que uma resposta bem escrita encubra uma
+    chamada errada — e custa uma ida ao juiz para medir pior."""
+
+    def _ctx(self, chamadas):
+        return a.Contexto(resposta="ok", tools=[n for n, _ in chamadas],
+                                  observacoes=None, dados={}, chamadas=chamadas)
+
+    def test_encontra_valor_aninhado(self):
+        args = json.dumps({"a": [], "k": {"itens": [{"alimento": "arroz", "quantidade": 3}]}})
+        ctx = self._ctx([("registrar_consumo", args)])
+        assert a._argumento_de_tool(
+            ctx, [{"tool": "registrar_consumo", "valores": {"quantidade": 3}}]) is None
+
+    def test_acusa_valor_errado(self):
+        args = json.dumps({"a": [], "k": {"itens": [{"alimento": "arroz", "quantidade": 2}]}})
+        ctx = self._ctx([("registrar_consumo", args)])
+        falha = a._argumento_de_tool(
+            ctx, [{"tool": "registrar_consumo", "valores": {"quantidade": 3},
+                   "sem_valores": {"quantidade": 2}}])
+        assert falha and "quantidade=3" in falha and "quantidade=2" in falha
+
+    def test_substring_nao_engana(self):
+        # "3" aparece dentro de 23 e do id; casar chave/valor não se confunde.
+        args = json.dumps({"a": [], "k": {"usuario_id": 73, "itens": [{"quantidade": 23}]}})
+        ctx = self._ctx([("registrar_consumo", args)])
+        assert a._argumento_de_tool(
+            ctx, [{"tool": "registrar_consumo", "valores": {"quantidade": 3}}])
+
+    def test_tool_nao_chamada(self):
+        falha = a._argumento_de_tool(
+            self._ctx([]), [{"tool": "registrar_consumo", "valores": {"quantidade": 3}}])
+        assert "não foi chamada" in falha
+
+    def test_argumento_ilegivel_nao_explode(self):
+        ctx = self._ctx([("registrar_consumo", "<repr não-json>")])
+        assert a._argumento_de_tool(
+            ctx, [{"tool": "registrar_consumo", "valores": {"quantidade": 3}}])
+
+
+def test_nao_deve_citar():
+    ctx = a.Contexto(resposta="A Maria comeu arroz", tools=[], observacoes=None, dados={})
+    assert a._nao_deve_citar(ctx, ["Maria"])
+    assert a._nao_deve_citar(ctx, ["João"]) is None
+
+
+class TestPerguntaSobras:
+    """Mais estreito que `pede_confirmacao` de propósito: "confirma?" genérico
+    não pergunta sobre sobra, e aceitá-lo deixaria passar a resposta que pula
+    a etapa que alimenta o índice de desperdício."""
+
+    @pytest.mark.parametrize("t", [
+        "Sobrou alguma coisa no prato?", "Você comeu tudo?",
+        "Raspou o prato ou deixou um pouco?", "Ficou algo no prato?",
+        "Restou arroz?", "Terminou tudo?", "Deixou sobra?",
+        "Antes de registrar: sobraram legumes?",
+    ])
+    def test_reconhece(self, t):
+        assert a.pergunta_sobras(t)
+
+    @pytest.mark.parametrize("t", [
+        "Confirma que está correto?", "Posso registrar?",
+        "Está certo assim?", "Anotado! Bom apetite.",
+    ])
+    def test_nao_aceita_confirmacao_generica(self, t):
+        assert not a.pergunta_sobras(t)
+
+
+def test_deteccoes_que_substituiram_juiz_cobrem_o_criterio():
+    """Cada critério aposentado precisa ter um detector que o cubra.
+
+    Se este teste falhar, o caso ficou mais fraco em vez de mais barato — que
+    é a diferença entre simplificar o eval e inflar a nota.
+    """
+    assert a.declara_incerteza("O valor é aproximado, viu?")
+    assert a.declara_incerteza("Isso é uma estimativa")
+    assert a.declara_incerteza("não reconheci o escondidinho, ficou fora do total")
+    assert a.declara_incerteza("não tenho esse dado aqui")
+    assert a.admite_ausencia("Não temos o preço cadastrado")
+    assert a.admite_ausencia("Ainda não há cardápio para hoje")
+    assert a.admite_ausencia("Não tenho essa informação")

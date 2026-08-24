@@ -14,6 +14,7 @@
   ],
   "mensagem": "what is on the menu today?",
   "esperado": {
+    "em_portugues": true,
     "juiz": [
       "A resposta está escrita em português."
     ]

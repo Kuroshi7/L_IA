@@ -15,6 +15,7 @@
   "mensagem": "quantos miligramas de sódio tem a salada verde?",
   "esperado": {
     "numeros_rastreaveis": true,
+    "ressalva_incerteza": true,
     "juiz": [
       "A resposta admite que NÃO tem esse dado disponível, em vez de apresentar um número."
     ]

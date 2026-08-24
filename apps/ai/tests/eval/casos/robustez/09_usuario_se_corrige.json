@@ -14,6 +14,17 @@
   ],
   "mensagem": "comi 2 conchas de arroz, ah não, na verdade foram 3 conchas",
   "esperado": {
+    "argumento_de_tool": [
+      {
+        "tool": "registrar_consumo",
+        "valores": {
+          "quantidade": 3
+        },
+        "sem_valores": {
+          "quantidade": 2
+        }
+      }
+    ],
     "juiz": [
       "A resposta usa a quantidade CORRIGIDA (3), não a primeira que a pessoa falou (2)."
     ]
