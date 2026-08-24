@@ -19,6 +19,7 @@ Como este juiz evita os defeitos clássicos:
 """
 
 import logging
+import os
 import re
 
 from app import config
@@ -41,22 +42,15 @@ def _modelo():
     """Instância dedicada: temperatura 0 e saída mínima. Reaproveitar o LLM do
     agente traria temperatura 0.3 e as tools no contexto."""
     global _MODELO
-    if _MODELO is not None:
-        return _MODELO
+    if _MODELO is None:
+        from app.agent.motor import provedores
 
-    if config.LLM_PROVIDER == "anthropic":
-        from langchain_anthropic import ChatAnthropic
-
-        _MODELO = ChatAnthropic(
-            model=config.ANTHROPIC_MODEL, max_tokens=4, temperature=0,
-            timeout=config.LLM_TIMEOUT_SECONDS, max_retries=config.LLM_MAX_RETRIES,
-        )
-    else:
-        from langchain_ollama import ChatOllama
-
-        _MODELO = ChatOllama(
-            model=config.OLLAMA_MODEL, base_url=config.OLLAMA_BASE_URL,
-            temperature=0, num_predict=4, num_ctx=config.OLLAMA_NUM_CTX, keep_alive="30m",
+        # EVAL_JUIZ_PROVIDER desacopla o juiz do agente. Sem isso, medir o
+        # agente em outro provider trocava o juiz junto — e um juiz não
+        # calibrado, com falha fechada, reprova o que não consegue julgar.
+        _MODELO = provedores.construir(
+            temperatura=0, max_tokens=4,
+            provider=os.getenv("EVAL_JUIZ_PROVIDER") or None,
         )
     return _MODELO
 

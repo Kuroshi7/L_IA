@@ -11,6 +11,12 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower().strip()
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
+# OpenRouter: endpoint compatível com a OpenAI que revende dezenas de modelos,
+# incluindo alguns gratuitos. Serve para medir o mesmo eval em outro modelo sem
+# tocar no código — o que o harness já permitia e nenhum provider exercitava.
+OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
 
 # Limites do LLM. O pior caso de UMA chamada é LLM_TIMEOUT_SECONDS × (LLM_MAX_RETRIES+1)
 # e precisa caber no CHAT_TIMEOUT_SECONDS do Go (default 60s), senão o Go desiste antes,

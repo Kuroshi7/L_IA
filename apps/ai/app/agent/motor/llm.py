@@ -23,6 +23,7 @@ from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app import config
+from app.agent.motor import provedores
 
 log = logging.getLogger("agent")
 
@@ -30,39 +31,6 @@ LLM_PROVIDER = config.LLM_PROVIDER
 OLLAMA_BASE_URL = config.OLLAMA_BASE_URL
 OLLAMA_MODEL = config.OLLAMA_MODEL
 ANTHROPIC_MODEL = config.ANTHROPIC_MODEL
-
-
-def _build_llm():
-    if LLM_PROVIDER == "anthropic":
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            raise RuntimeError(
-                "LLM_PROVIDER=anthropic mas ANTHROPIC_API_KEY não está definida. "
-                "Defina no .env ou troque LLM_PROVIDER=ollama."
-            )
-        from langchain_anthropic import ChatAnthropic
-
-        log.info(f"LLM provider=anthropic | model={ANTHROPIC_MODEL}")
-        return ChatAnthropic(
-            model=ANTHROPIC_MODEL,
-            max_tokens=config.LLM_MAX_TOKENS,
-            temperature=0.3,
-            timeout=config.LLM_TIMEOUT_SECONDS,
-            max_retries=config.LLM_MAX_RETRIES,
-        )
-
-    # default: ollama
-    from langchain_ollama import ChatOllama
-
-    log.info(f"LLM provider=ollama | model={OLLAMA_MODEL} | base={OLLAMA_BASE_URL}")
-    return ChatOllama(
-        model=OLLAMA_MODEL,
-        base_url=OLLAMA_BASE_URL,
-        temperature=0.3,
-        keep_alive="30m",
-        num_predict=config.LLM_MAX_TOKENS,
-        num_ctx=config.OLLAMA_NUM_CTX,
-        client_kwargs={"timeout": config.LLM_TIMEOUT_SECONDS},
-    )
 
 
 _llm = None
@@ -74,7 +42,7 @@ def obter_llm():
     suíte de testes e o runner de eval."""
     global _llm
     if _llm is None:
-        _llm = _build_llm()
+        _llm = provedores.construir(temperatura=0.3, max_tokens=config.LLM_MAX_TOKENS)
     return _llm
 
 
@@ -103,8 +71,8 @@ def construir_executor(system_prompt: str, tools, nota_extra: str | None = None)
 def prewarm(system_prompt: str, tools) -> None:
     """Pré-aquecimento — só faz sentido pro Ollama local (cold start de modelo).
     Em providers de API (Anthropic) não há cold start, então pulamos."""
-    if LLM_PROVIDER == "anthropic":
-        log.info("PREWARM skipped | provider=anthropic (sem cold start)")
+    if LLM_PROVIDER != "ollama":
+        log.info("PREWARM skipped | provider=%s (sem cold start)", LLM_PROVIDER)
         return
 
     t0 = time.perf_counter()
