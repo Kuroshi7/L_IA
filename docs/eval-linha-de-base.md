@@ -4,8 +4,13 @@ Medição de **2026-08-23**, provider Anthropic `claude-haiku-4-5`, API Go falsi
 (o eval mede o modelo, não a integração).
 
 ```
-39 casos × 3 repetições = 117 execuções
+60 casos × 3 repetições = 180 execuções
 ```
+
+> **Resolução.** Com 10 casos no total, cada um valia 10 pontos e a variância entre
+> rodadas chegou a 20. Com 6 por bateria, ainda valia 5,5 — o suficiente para uma
+> oscilação de duas execuções parecer regressão, que foi o que aconteceu na bateria
+> `robustez`. Com 10 por bateria, um caso vale 3,3 pontos.
 
 ## Por que 3 repetições
 
@@ -50,9 +55,9 @@ Rodada única e simultânea de todas as baterias:
 | contrato | 78% | **89%** | `total` explícito na listagem — o caso de 8 pratos foi de 1/3 a 3/3 |
 | seguranca | 67% | **81%** | conflito anotado no prato + R5 bloqueante |
 | consumo | 86% | 76%* | sem mudança direcionada; oscilação de amostra |
-| robustez | 83% | 67%* | o guardrail parou de barrar "e o outro?", e a falha migrou para uma asserção mais profunda (a Lia adivinha em vez de perguntar) |
+| robustez | 83% | 67%* | **não é regressão de produto.** São 3 execuções de 18: (a) "mensagem ambígua" seguiu 0/3, mas o motivo mudou de "barrado pelo guardrail" para "a Lia adivinha em vez de perguntar" — a barreira externa saiu e expôs o defeito interno; (b) a R3 passou a enxergar `mg`, e flagrou sódio/cálcio inventados que antes eram invisíveis; (c) um flip num critério de juiz |
 
-\* **Estas taxas não vieram de uma rodada única.** Cada bateria foi medida logo
+\* **ATENÇÃO — estas taxas não vieram de uma rodada única, e a comparação bateria a bateria não sustenta conclusão nesta granularidade.** Cada bateria foi medida logo
 após a correção que a afetava, em estados de código ligeiramente diferentes.
 Servem como indicação, não como linha de base nova. A rodada completa e
 simultânea ficou pendente por limite de crédito de API.

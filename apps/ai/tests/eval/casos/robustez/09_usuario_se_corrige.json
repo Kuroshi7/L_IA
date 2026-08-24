@@ -1,0 +1,23 @@
+{
+  "nome": "usuário se corrige no meio da frase",
+  "porque": "'2... na verdade 3' é fala natural; registrar o número errado vira pontuação errada",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "comi 2 conchas de arroz, ah não, na verdade foram 3 conchas",
+  "esperado": {
+    "juiz": [
+      "A resposta usa a quantidade CORRIGIDA (3), não a primeira que a pessoa falou (2)."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

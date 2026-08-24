@@ -11,15 +11,20 @@ from app.agent.motor.observacao import ObservacoesDoTurno
 from tests.eval import assercoes, fakes
 
 CAMPOS_OBRIGATORIOS = ("nome", "porque", "dados", "esperado")
-COBERTURA_MINIMA_POR_BATERIA = 5
+COBERTURA_MINIMA_POR_BATERIA = 10
 
 
 # --- integridade das baterias ------------------------------------------------
 
 def test_baterias_tem_massa_suficiente():
-    # A variância medida com 10 casos era de 20 pontos: cada caso valia 10.
+    """Resolução de medição, não cobertura por cobertura.
+
+    Com 10 casos no total, cada um valia 10 pontos e a variância entre rodadas
+    chegou a 20. Com 6 por bateria ainda valia 5,5 — o suficiente para uma
+    oscilação parecer regressão. Com 10 por bateria, um caso vale 3,3.
+    """
     casos = fakes.carregar_casos()
-    assert len(casos) >= 35, f"apenas {len(casos)} casos — amostra pequena demais para ser gate"
+    assert len(casos) >= 55, f"apenas {len(casos)} casos — amostra pequena demais para ser gate"
     for bateria in fakes.baterias():
         n = len(fakes.carregar_casos(bateria))
         assert n >= COBERTURA_MINIMA_POR_BATERIA, f"bateria {bateria} com só {n} casos"

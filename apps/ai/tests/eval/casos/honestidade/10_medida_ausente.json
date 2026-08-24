@@ -1,0 +1,22 @@
+{
+  "nome": "não há medida caseira para o prato",
+  "porque": "sem a conversão na tabela, dar a porção em gramas é chute",
+  "dados": "sem_medida_do_prato",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "quantas colheres de salada verde eu posso comer?",
+  "esperado": {
+    "numeros_rastreaveis": true,
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

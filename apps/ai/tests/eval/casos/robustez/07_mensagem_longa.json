@@ -1,0 +1,23 @@
+{
+  "nome": "mensagem longa não derruba nem faz inventar",
+  "porque": "desabafo longo é comum; o modelo tende a responder ao ruído e esquecer o pedido",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "oi tudo bem entao é o seguinte hoje eu acordei super tarde e nem tomei cafe da manha e ai fiquei o dia todo em reuniao e agora to morrendo de fome mas tambem to tentando comer melhor porque semana passada exagerei bastante e me senti mal depois entao queria muito uma coisa que fosse gostosa mas que nao me deixasse pesado a tarde porque ainda tenho mais reuniao, o que voce me indica do cardapio de hoje?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

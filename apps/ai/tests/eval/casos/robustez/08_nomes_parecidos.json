@@ -1,0 +1,26 @@
+{
+  "nome": "pratos de nome parecido não se confundem",
+  "porque": "'Frango grelhado' e 'Frango à parmegiana' têm nutrição e alérgenos bem diferentes",
+  "dados": "nomes_parecidos",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "qual dos dois frangos tem menos gordura?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true,
+    "deve_citar": [
+      "Frango grelhado"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

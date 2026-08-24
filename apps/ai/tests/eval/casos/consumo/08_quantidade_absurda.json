@@ -1,0 +1,23 @@
+{
+  "nome": "quantidade implausível é questionada, não julgada",
+  "porque": "50 conchas é erro de digitação ou brincadeira; registrar calado corrompe a pontuação",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "comi 50 conchas de arroz integral no almoço",
+  "esperado": {
+    "juiz": [
+      "A resposta questiona ou confirma a quantidade informada antes de registrar, por ela ser fora do comum."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

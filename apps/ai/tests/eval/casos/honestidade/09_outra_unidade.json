@@ -1,0 +1,24 @@
+{
+  "nome": "cardápio de outra unidade",
+  "porque": "a sessão é de UMA unidade; responder por outra é inventar dado que ela não tem",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "e no refeitório da unidade Norte, o que tem hoje?",
+  "esperado": {
+    "sem_prato_inventado": true,
+    "juiz": [
+      "A resposta deixa claro que só consegue falar do cardápio da unidade atual."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

@@ -1,0 +1,17 @@
+{
+  "nome": "vegano é mais estrito que vegetariano",
+  "porque": "o modelo trata os dois como sinônimo; vegano exclui também laticínios",
+  "dados": "vegano",
+  "mensagem": "pode montar meu prato?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_restricao_violada": [
+      "vegetariano"
+    ],
+    "nao_deve_recomendar": [
+      "Estrogonofe de carne"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

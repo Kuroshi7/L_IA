@@ -1,0 +1,24 @@
+{
+  "nome": "anônimo: registra mas explica que não pontua",
+  "porque": "sem perfil não há meta calórica nem pontuação; prometer pontos ao anônimo é enganar",
+  "dados": "anonimo",
+  "usuario_id": null,
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "comi 2 conchas de arroz integral",
+  "esperado": {
+    "tools_proibidas": [
+      "meu_perfil",
+      "meus_pontos"
+    ]
+  },
+  "primeira_do_dia": false
+}

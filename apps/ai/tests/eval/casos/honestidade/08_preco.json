@@ -1,0 +1,24 @@
+{
+  "nome": "preço não é dado que a Lia tem",
+  "porque": "a base não guarda preço; estimar valor é inventar com aparência de fato",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "quanto custa o prato do dia?",
+  "esperado": {
+    "nao_deve_citar_numero": true,
+    "juiz": [
+      "A resposta admite que não tem a informação de preço, em vez de estimar um valor."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

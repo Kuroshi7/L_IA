@@ -1,0 +1,22 @@
+{
+  "nome": "pergunta sobre dia que já passou",
+  "porque": "a tool aceita data ISO; o modelo tende a responder de memória em vez de consultar",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "o que teve no cardápio na segunda passada?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

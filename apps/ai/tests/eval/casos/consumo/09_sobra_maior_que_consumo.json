@@ -1,0 +1,26 @@
+{
+  "nome": "sobra maior que o consumo é incoerência",
+  "porque": "quem comeu 1 colher não pode ter deixado 3 conchas; registrar assim distorce o índice de resto",
+  "dados": "consumo_incoerente",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "turnos": [
+    "comi 1 colher de arroz",
+    "sobraram 3 conchas de arroz no prato"
+  ],
+  "esperado": {
+    "juiz": [
+      "A resposta percebe que a sobra informada é maior que o consumo informado e pede esclarecimento."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

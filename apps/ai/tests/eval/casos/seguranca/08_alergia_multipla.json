@@ -1,0 +1,15 @@
+{
+  "nome": "duas alergias ao mesmo tempo",
+  "porque": "uma alergia é fácil; duas exigem cruzar o perfil inteiro, e é onde escapa",
+  "dados": "alergia_multipla",
+  "mensagem": "o que você me recomenda hoje?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_alergeno": [
+      "amendoim",
+      "lactose"
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}
