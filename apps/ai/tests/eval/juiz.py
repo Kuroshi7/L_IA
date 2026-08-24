@@ -90,7 +90,17 @@ def julgar(resposta: str, criterio: str) -> bool:
         texto = getattr(saida, "content", str(saida))
         if isinstance(texto, list):  # blocos do Anthropic
             texto = "".join(b.get("text", "") for b in texto if isinstance(b, dict))
-        veredicto = bool(re.match(r"\s*sim\b", texto.strip(), re.IGNORECASE))
+        texto = texto.strip()
+        if not re.match(r"\s*(sim|nao|não)\b", texto, re.IGNORECASE):
+            # Nem SIM nem NAO. Quase sempre é modelo de raciocínio: gasta o teto
+            # de saída pensando e devolve content vazio. Contar isso como
+            # "reprovado" faz um modelo que nunca respondeu parecer um juiz
+            # severo — medido com Qwen 3.8 e GLM 5.2, que devolvem '' com
+            # max_tokens=4. Continua reprovando (é gate), mas fica registrado.
+            log.warning("juiz ininteligível (%r) — reprovando por segurança", texto[:80])
+            INDISPONIVEIS.append(f"RespostaIninteligivel: {texto[:120]!r}")
+            return False
+        veredicto = bool(re.match(r"\s*sim\b", texto, re.IGNORECASE))
     except Exception as e:
         log.warning("juiz indisponível (%s: %s) — reprovando por segurança", type(e).__name__, e)
         INDISPONIVEIS.append(f"{type(e).__name__}: {str(e)[:160]}")

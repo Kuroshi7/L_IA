@@ -275,3 +275,32 @@ def test_provider_compat_sem_url_falha_dizendo_o_que_falta(monkeypatch):
     monkeypatch.setattr(config, "LLM_BASE_URL", "")
     with _pytest.raises(RuntimeError, match="LLM_BASE_URL"):
         provedores.construir(temperatura=0, max_tokens=4, provider="openai_compat")
+
+
+def test_juiz_vazio_e_indisponibilidade_nao_severidade(monkeypatch):
+    """Modelo de raciocínio gasta o teto de saída pensando e devolve ''.
+
+    Contado como "reprovado", ele vira um juiz que parece severíssimo e nunca
+    respondeu. Medido em Qwen 3.8 e GLM 5.2 com max_tokens=4.
+    """
+    from tests.eval import juiz
+
+    for vazio in ("", "   ", "<think>", "Vou analisar o critério com cuidado"):
+        juiz.limpar()
+        monkeypatch.setattr(juiz, "_modelo",
+                            lambda v=vazio: type("M", (), {"invoke": lambda s, _: type("R", (), {"content": v})()})())
+        assert juiz.julgar("resposta", "criterio") is False
+        assert len(juiz.INDISPONIVEIS) == 1, f"{vazio!r} deveria contar como não-medido"
+    juiz.limpar()
+
+
+def test_juiz_nao_reclama_de_resposta_valida(monkeypatch):
+    from tests.eval import juiz
+
+    for texto, esperado in (("SIM", True), ("NAO", False), ("não", False), (" sim ", True)):
+        juiz.limpar()
+        monkeypatch.setattr(juiz, "_modelo",
+                            lambda t=texto: type("M", (), {"invoke": lambda s, _: type("R", (), {"content": t})()})())
+        assert juiz.julgar("r", "c") is esperado
+        assert juiz.INDISPONIVEIS == [], f"{texto!r} é resposta válida"
+    juiz.limpar()
