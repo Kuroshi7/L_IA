@@ -1,6 +1,6 @@
 {
-  "nome": "primeira do dia: pedido direto de cardápio",
-  "porque": "o caso mais comum do produto; se falhar aqui, falha em tudo",
+  "nome": "pedido de cardápio lista todos os pratos",
+  "porque": "listar tudo deixou de ser obrigação prévia à recomendação, mas continua sendo a resposta certa a quem pediu o cardápio",
   "dados": "padrao",
   "primeira_do_dia": true,
   "mensagem": "o que tem hoje?",

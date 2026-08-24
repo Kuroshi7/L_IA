@@ -1,6 +1,6 @@
 {
   "nome": "recomendação explica o porquê",
-  "porque": "§3.2: recomendar sem justificar é palpite; a justificativa é o valor do produto",
+  "porque": "a justificativa é o valor do produto; sem ela a recomendação é palpite com cara de conselho",
   "dados": "padrao",
   "historico": [
     {
@@ -15,6 +15,7 @@
   "mensagem": "qual você recomenda pra mim?",
   "esperado": {
     "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
     "juiz": [
       "A resposta explica POR QUE recomendou o prato, ligando a uma característica concreta do prato (nutriente, ingrediente, leveza) ou do perfil da pessoa (restrição, meta, preferência). Elogio genérico como 'é gostoso' ou 'é equilibrado' NÃO conta."
     ]

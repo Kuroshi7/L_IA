@@ -2,13 +2,23 @@
   "nome": "cardápio de um prato só",
   "porque": "caso degenerado: com um item o modelo tende a pular a listagem e ir direto à sugestão",
   "dados": "cardapio_unico",
-  "primeira_do_dia": true,
   "mensagem": "o que tem pra hoje?",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
   "esperado": {
     "cita_todos_os_pratos": true,
     "tools_obrigatorias": [
       "listar_pratos_do_dia"
     ]
   },
-  "usuario_id": 7
+  "usuario_id": 7,
+  "primeira_do_dia": false
 }

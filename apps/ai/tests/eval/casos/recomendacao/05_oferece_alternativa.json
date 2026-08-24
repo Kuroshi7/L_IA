@@ -1,0 +1,24 @@
+{
+  "nome": "recomendação diz que há outras opções",
+  "porque": "recomendar sem sinalizar alternativa vira imposição; é o que substitui a listagem obrigatória",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "me indica alguma coisa boa pra hoje",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "juiz": [
+      "A resposta deixa claro que existem OUTRAS opções no cardápio além da que foi recomendada, mesmo sem listar todas."
+    ]
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

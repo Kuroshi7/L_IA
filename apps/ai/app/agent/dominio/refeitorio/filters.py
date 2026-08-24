@@ -65,17 +65,17 @@ def resumir(prato: dict) -> dict:
 
 
 def conflitos_com_perfil(prato: dict, perfil: dict | None) -> list[str]:
-    """Por que este prato é incompatível com o perfil desta pessoa.
+    """Por que este prato é inadequado para esta pessoa, na voz certa.
 
     Existe porque filtrar não bastou. `filtrar_pratos` já devolve só o que é
-    seguro, mas o modelo às vezes recomenda a partir da lista CRUA de
-    `listar_pratos_do_dia` — e a regra contratual obriga mostrar essa lista
-    completa. Medido: numa a cada três conversas a salada com amendoim era
-    recomendada a quem tem alergia a amendoim no perfil.
+    seguro, mas o modelo às vezes recomenda a partir da lista crua — e o produto
+    não pode esconder o prato, porque a pessoa tem o direito de saber o que está
+    sendo servido.
 
-    Esconder o prato não é opção (a regra contratual manda listar tudo). Então o
-    aviso vai junto do item, no mesmo dicionário que o modelo lê. Segurança
-    alimentar não pode depender de o modelo lembrar de chamar a tool certa.
+    O texto é escrito para ser PARAFRASEADO pela Lia, e por isso já vem na
+    posição de autoridade correta: quem declarou a alergia foi a pessoa, e o
+    ingrediente é fato verificável do prato. O assistente não determina o que
+    alguém pode comer — ele cruza as duas coisas e devolve o motivo.
     """
     if not perfil:
         return []
@@ -84,12 +84,20 @@ def conflitos_com_perfil(prato: dict, perfil: dict | None) -> list[str]:
     alergias = [a for a in (perfil.get("alergias") or []) if a]
     if not prato_seguro_para_alergias(prato, alergias):
         alergenos = {normalizar(a) for a in prato.get("alergenos", [])}
-        culpadas = [a for a in alergias if normalizar(a).replace("alergico a ", "") in alergenos
-                    or any(normalizar(a).replace("alergico a ", "") in x for x in alergenos)]
-        motivos.append(f"ALERGIA: contém {', '.join(culpadas or alergias)}")
+        culpadas = [
+            a for a in alergias
+            if normalizar(a).replace("alergico a ", "") in alergenos
+            or any(normalizar(a).replace("alergico a ", "") in x for x in alergenos)
+        ] or alergias
+        motivos.append(
+            f"você informou alergia a {', '.join(culpadas)} — e este prato leva "
+            f"{', '.join(sorted(prato.get('alergenos') or culpadas))}"
+        )
 
     for restricao in (perfil.get("restricoes") or []):
         if restricao and not prato_atende_restricao(prato, restricao):
-            motivos.append(f"RESTRIÇÃO: não atende '{restricao}'")
+            ingredientes = [i for i in (prato.get("ingredientes") or [])][:3]
+            porque = f" — leva {', '.join(ingredientes)}" if ingredientes else ""
+            motivos.append(f"você informou a restrição '{restricao}', e este prato não atende{porque}")
 
     return motivos

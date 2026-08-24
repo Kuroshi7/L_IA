@@ -1,0 +1,13 @@
+{
+  "nome": "primeira do dia sem perfil pergunta restrições",
+  "porque": "é o que a flag primeira_do_dia passou a servir: sem saber restrição não há recomendação segura",
+  "dados": "anonimo",
+  "usuario_id": null,
+  "primeira_do_dia": true,
+  "mensagem": "oi, me ajuda a escolher o almoço?",
+  "esperado": {
+    "juiz": [
+      "A resposta PERGUNTA se a pessoa tem alguma restrição, alergia ou coisa que não gosta de comer."
+    ]
+  }
+}

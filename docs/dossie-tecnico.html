@@ -1,0 +1,764 @@
+<title>Motor de Agente do L_IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F6F7F8;
+    --surface:    #FFFFFF;
+    --ink:        #12171C;
+    --muted:      #5C6771;
+    --faint:      #8A939B;
+    --rule:       #DDE2E6;
+    --rule-firm:  #C3CBD1;
+    --accent:     #2C5F7C;
+    --ok:         #2A6B4F;
+    --partial:    #8A6620;
+    --none:       #A2432A;
+    --ok-bg:      #E8F1EC;
+    --partial-bg: #F5EEDC;
+    --none-bg:    #F6E7E1;
+
+    --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --sans:  "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono:  "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #10151A;
+      --surface:    #161C22;
+      --ink:        #E4E8EB;
+      --muted:      #98A2AB;
+      --faint:      #6F7A83;
+      --rule:       #262E36;
+      --rule-firm:  #38424C;
+      --accent:     #7FB2D0;
+      --ok:         #6FBF95;
+      --partial:    #D3AF63;
+      --none:       #E0876B;
+      --ok-bg:      #14251D;
+      --partial-bg: #26200F;
+      --none-bg:    #2A1A15;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #10151A;
+    --surface:    #161C22;
+    --ink:        #E4E8EB;
+    --muted:      #98A2AB;
+    --faint:      #6F7A83;
+    --rule:       #262E36;
+    --rule-firm:  #38424C;
+    --accent:     #7FB2D0;
+    --ok:         #6FBF95;
+    --partial:    #D3AF63;
+    --none:       #E0876B;
+    --ok-bg:      #14251D;
+    --partial-bg: #26200F;
+    --none-bg:    #2A1A15;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 60rem; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+  .col { max-width: 40rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 1.25rem;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(2.1rem, 5vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 0 0 1rem;
+  }
+
+  .standfirst {
+    font-size: 1.12rem;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 0 0 2rem;
+    max-width: 38rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem 1.75rem;
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--faint);
+    padding: 1rem 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 3.5rem;
+  }
+  .meta b { color: var(--muted); font-weight: 500; }
+
+  section { margin-bottom: 3.5rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+    margin: 0 0 .35rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.5rem;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 2rem 0 .5rem;
+  }
+
+  p { margin: 0 0 1rem; }
+  .col p, .col ul { max-width: 40rem; }
+  ul { margin: 0 0 1rem; padding-left: 1.15rem; }
+  li { margin-bottom: .4rem; }
+  strong { font-weight: 600; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .86em;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: .08em .32em;
+    color: var(--muted);
+  }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--rule-firm);
+    border-left: 3px solid var(--accent);
+    padding: 1.35rem 1.6rem;
+    margin: 1.75rem 0;
+  }
+  .note p:last-child { margin-bottom: 0; }
+
+  /* ---------- fluxo do turno ---------- */
+
+  .flow { margin: 1.75rem 0; border-top: 1px solid var(--rule-firm); }
+  .step {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: 0 1rem;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .step .n {
+    font-family: var(--mono);
+    font-size: .72rem;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .step .what { font-weight: 600; font-size: .94rem; }
+  .step .how { grid-column: 2; color: var(--muted); font-size: .88rem; line-height: 1.5; }
+  .step .where {
+    grid-column: 2;
+    font-family: var(--mono);
+    font-size: .74rem;
+    color: var(--faint);
+    margin-top: .2rem;
+  }
+
+  /* ---------- tabelas ---------- */
+
+  .scroll { overflow-x: auto; margin: 1.5rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 34rem; }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 400;
+    padding: 0 .9rem .5rem 0;
+    border-bottom: 1px solid var(--rule-firm);
+    vertical-align: bottom;
+  }
+  td { padding: .7rem .9rem .7rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td:last-child, th:last-child { padding-right: 0; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .18em .5em;
+    white-space: nowrap;
+  }
+  .t-ok      { background: var(--ok-bg);      color: var(--ok); }
+  .t-partial { background: var(--partial-bg); color: var(--partial); }
+  .t-none    { background: var(--none-bg);    color: var(--none); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.25rem;
+    font-size: .82rem;
+    color: var(--muted);
+    margin: 1.25rem 0 0;
+  }
+  .legend span { display: flex; align-items: center; gap: .5rem; }
+
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 1.75rem 0;
+  }
+  .fig { background: var(--surface); padding: 1.1rem 1.15rem; }
+  .fig .v {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    display: block;
+    margin-bottom: .3rem;
+  }
+  .fig .k { font-size: .78rem; color: var(--muted); line-height: 1.35; display: block; }
+
+  .flaw { border-top: 1px solid var(--rule); padding: 1.25rem 0 .25rem; }
+  .flaw:first-of-type { border-top: 1px solid var(--rule-firm); }
+  .flaw h3 { margin-top: 0; }
+  .flaw p { color: var(--muted); font-size: .93rem; margin-bottom: .5rem; }
+  .flaw p:last-child { margin-bottom: 0; }
+
+  pre {
+    font-family: var(--mono);
+    font-size: .8rem;
+    line-height: 1.6;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    margin: 1.25rem 0;
+    color: var(--muted);
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: .85rem;
+    color: var(--faint);
+  }
+
+  @media (max-width: 40rem) {
+    .wrap { padding: 2.5rem 1.15rem 4rem; }
+    .note { padding: 1.15rem 1.25rem; }
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Dossiê técnico · Agosto 2026</p>
+  <h1>Motor de Agente do L_IA</h1>
+  <p class="standfirst">
+    Descrição do que foi construído na camada de agente de um assistente nutricional de
+    refeitório, das decisões de arquitetura por trás, e do que foi medido. Inclui o
+    inventário do que não existe.
+  </p>
+
+  <div class="meta">
+    <span><b>Escopo</b> camada de agente + fonte da verdade</span>
+    <span><b>Provider</b> Anthropic Haiku</span>
+    <span><b>Branch</b> feat/motor-agente-onyx</span>
+    <span><b>Commits</b> 26</span>
+  </div>
+
+  <section class="col">
+    <h2>Para que serve este documento</h2>
+    <p class="kicker">Escopo e limites</p>
+
+    <div class="note">
+      <p>
+        O material aqui é <strong>descritivo</strong>. Não contém avaliação, nota nem
+        conclusão sobre paridade com o Onyx CE — essa leitura cabe a quem avalia.
+      </p>
+      <p>
+        O que este documento se propõe a fazer é dar base factual suficiente para essa
+        decisão: como o sistema está estruturado, quais padrões arquiteturais foram
+        aplicados e de onde vieram, o que foi medido e com qual método, e o inventário
+        explícito das capacidades que <strong>não</strong> foram construídas.
+      </p>
+      <p>
+        As comparações com o Onyx CE que aparecem no inventário são de leitura pública do
+        repositório deles (licença MIT), não de auditoria do código.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tamanho e forma</h2>
+    <p class="kicker">O que existe, em números</p>
+
+    <div class="col">
+      <p>
+        Um worker Python consome mensagens de uma fila RabbitMQ, roda um agente de
+        tool-calling sobre dados de uma API Go, e responde por RPC. A API Go é a fonte da
+        verdade do domínio; o Postgres com pgvector guarda base nutricional e embeddings.
+      </p>
+    </div>
+
+    <div class="figures">
+      <div class="fig"><span class="v">909</span><span class="k">linhas no motor reaproveitável</span></div>
+      <div class="fig"><span class="v">1.349</span><span class="k">linhas no domínio (refeitório)</span></div>
+      <div class="fig"><span class="v">4.773</span><span class="k">linhas de Go</span></div>
+      <div class="fig"><span class="v">223</span><span class="k">testes offline, sem LLM</span></div>
+      <div class="fig"><span class="v">60</span><span class="k">casos de eval em 6 baterias</span></div>
+      <div class="fig"><span class="v">10</span><span class="k">tools expostas ao modelo</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Arquitetura</h2>
+    <p class="kicker">Como um turno acontece</p>
+
+    <div class="flow">
+      <div class="step">
+        <span class="n">01</span>
+        <span class="what">Guardrail de escopo</span>
+        <span class="how">Duas camadas: lista de termos do domínio decide na hora (latência), e o que ela não resolve vai a um classificador. Falha aberta se o classificador cair.</span>
+        <span class="where">dominio/refeitorio/guardrail.py</span>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <span class="what">Seleção de tools por requisição</span>
+        <span class="how">Cada tool declara um predicado de disponibilidade que recebe o contexto como opaco. Sem usuário identificado, as tools de identidade saem do schema em vez de custarem um turno para o modelo descobrir que não pode usá-las.</span>
+        <span class="where">motor/registry.py</span>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <span class="what">Montagem do contexto</span>
+        <span class="how">Histórico vira mensagens; os reminders ativos são fundidos no fim da última mensagem do usuário, não no system prompt. Executor cacheado por assinatura do conjunto de tools.</span>
+        <span class="where">motor/turn.py · motor/reminders.py</span>
+      </div>
+      <div class="step">
+        <span class="n">04</span>
+        <span class="what">Loop de tool-calling</span>
+        <span class="how">A decisão de qual tool usar fica com o modelo, dentro do loop. Não há um segundo modelo roteando antes. Um decorator intercepta toda tool: aplica prazo, memoriza leituras repetidas, colhe o que foi devolvido e reinjeta os reminders no resultado.</span>
+        <span class="where">motor/observacao.py</span>
+      </div>
+      <div class="step">
+        <span class="n">05</span>
+        <span class="what">Pós-processamento do domínio</span>
+        <span class="how">Ajuste final em código, para o que não pode depender de o modelo lembrar — hoje, o encaminhamento obrigatório a profissional de saúde quando a conversa toca condição clínica.</span>
+        <span class="where">dominio/refeitorio/perfil.py</span>
+      </div>
+      <div class="step">
+        <span class="n">06</span>
+        <span class="what">Validação pós-resposta</span>
+        <span class="how">Cinco regras do domínio rodam sobre a resposta gerada. Quatro registram em log; uma bloqueia e devolve mensagem segura. A validação acontece dentro do turno, então o eval vê o mesmo comportamento que o usuário.</span>
+        <span class="where">motor/validacao.py · dominio/refeitorio/regras.py</span>
+      </div>
+    </div>
+
+    <h3>A fronteira motor / domínio</h3>
+    <div class="col">
+      <p>
+        <code>app/agent/</code> está partido em duas metades. O <code>motor/</code> não
+        conhece cardápio, prato, unidade nem alimento; consome apenas um
+        <code>PerfilDeDominio</code> de nove campos (prompt, registro de tools, guardrail,
+        reminders, regras, pós-processamento e três textos de resposta).
+      </p>
+      <p>
+        A separação não é convenção documentada: <code>test_fronteira_motor.py</code> varre
+        os fontes do motor procurando vocabulário de domínio e proíbe qualquer
+        <code>import</code> do lado do produto. Roda em todo commit, e pegou duas violações
+        reais durante a implementação.
+      </p>
+    </div>
+
+    <h3>Números não são gerados</h3>
+    <div class="col">
+      <p>
+        O valor nutricional nunca vem do modelo. O termo que a pessoa escreveu é resolvido
+        contra a base no Postgres — alimento, depois medida caseira, depois gramas, depois
+        macros — e volta com <strong>procedência e nível de confiança</strong>. Quando a
+        resolução falha, o item fica fora do total e isso sobe até a interface como campo
+        estruturado, não como texto.
+      </p>
+      <p>
+        A mesma lógica governa a segurança alimentar: o conflito entre um prato e o perfil
+        de quem conversa é calculado em código e anotado no próprio item que o modelo lê,
+        porque a regra de negócio obriga listar o cardápio completo e não permite esconder
+        o prato perigoso.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Inventário de capacidades</h2>
+    <p class="kicker">Estado atual, capacidade por capacidade</p>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Capacidade</th>
+            <th style="width:14%">Estado</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Loop de chat com tool-calling</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Turn controller determinístico, sem modelo roteador antes do loop.</td>
+          </tr>
+          <tr>
+            <td>Tool com metadados, montada por requisição</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Predicado de disponibilidade por tool; executor cacheado por conjunto.</td>
+          </tr>
+          <tr>
+            <td>Instrução no fim do contexto</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Reminders fundidos ao fim da mensagem e reinjetados no resultado das tools, com precedência para a nota da própria tool.</td>
+          </tr>
+          <tr>
+            <td>Compressão de tool result</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Repetição exata devolve marcador. Efeito limitado: o histórico entre turnos nunca carrega tool results.</td>
+          </tr>
+          <tr>
+            <td>Guardrail de escopo</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Duas camadas, com fail-open deliberado no classificador.</td>
+          </tr>
+          <tr>
+            <td>Prazo propagado por requisição</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Calculado do timestamp da mensagem AMQP; o turno aborta antes de cada tool quando o tempo de quem espera acabou.</td>
+          </tr>
+          <tr>
+            <td>Validação pós-resposta</td>
+            <td><span class="tag t-ok">Existe</span></td>
+            <td>Cinco regras, uma bloqueante. Promoção de regra a bloqueante é por configuração.</td>
+          </tr>
+          <tr>
+            <td>RAG sobre pgvector</td>
+            <td><span class="tag t-partial">Parcial</span></td>
+            <td>Uma tool de busca semântica. O retriever é <em>failover</em> — só cai no full-text se a busca vetorial quebrar. Sem fusão de resultados, sem expansão de consulta, sem reranking, sem citação.</td>
+          </tr>
+          <tr>
+            <td>Recuperação agêntica</td>
+            <td><span class="tag t-none">Não existe</span></td>
+            <td>O agente decide chamar uma tool de busca. Não há decomposição em sub-perguntas nem recuperação iterativa.</td>
+          </tr>
+          <tr>
+            <td>Orquestrador multi-ciclo</td>
+            <td><span class="tag t-none">Não existe</span></td>
+            <td>Omissão deliberada: o orçamento por resposta é de 60 s, e um roteador por LLM adicionaria uma inferência ao caminho quente.</td>
+          </tr>
+          <tr>
+            <td>Servidor MCP</td>
+            <td><span class="tag t-none">Não existe</span></td>
+            <td>Desenhado sobre o registry de tools; nenhuma linha escrita.</td>
+          </tr>
+          <tr>
+            <td>Conectores de ingestão</td>
+            <td><span class="tag t-none">Não existe</span></td>
+            <td>Há um indexador de guias em PDF para o pgvector, e nada além disso.</td>
+          </tr>
+          <tr>
+            <td>Streaming de tokens</td>
+            <td><span class="tag t-none">Não existe</span></td>
+            <td>RPC bloqueante sobre RabbitMQ; 4–5 s de espera por turno com indicador de digitação.</td>
+          </tr>
+          <tr>
+            <td>Multi-modelo, citações, sandbox de código, voz, imagem</td>
+            <td><span class="tag t-none">Não existe</span></td>
+            <td>Nenhuma dessas frentes foi iniciada.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend">
+      <span><span class="tag t-ok">Existe</span> implementado e coberto por teste</span>
+      <span><span class="tag t-partial">Parcial</span> funciona, com limitações descritas</span>
+      <span><span class="tag t-none">Não existe</span> nenhuma linha escrita</span>
+    </div>
+  </section>
+
+  <section class="col">
+    <h2>Procedência das decisões</h2>
+    <p class="kicker">O que veio do Onyx e o que não veio</p>
+
+    <p>
+      Três padrões foram tirados da leitura do Onyx CE e aplicados aqui:
+      <strong>tool como objeto com metadados montado por requisição</strong>
+      (<code>tools/interface.py</code>, padrão <code>is_available</code>);
+      <strong>instrução posicionada no fim do contexto</strong> em vez do system prompt,
+      e <strong>compressão de tool result</strong> preservando os argumentos da chamada —
+      os dois documentados em <code>backend/onyx/chat/README.md</code>. A decisão de
+      <em>não</em> colocar um orquestrador por LLM no caminho quente também veio de lá: o
+      Onyx só usa orquestrador explícito no fluxo de pesquisa profunda.
+    </p>
+
+    <h3>O que não tem origem no Onyx</h3>
+    <p>
+      Duas das partes mais substanciais deste trabalho são de outra procedência, e
+      apresentá-las como inspiradas no Onyx seria incorreto:
+    </p>
+    <ul>
+      <li>
+        <strong>O núcleo nutricional determinístico</strong> — resolução de alimento e
+        medida caseira contra base, com procedência e confiança — é anterior a esta frente
+        e é específico do domínio.
+      </li>
+      <li>
+        <strong>O aparato de avaliação</strong> — baterias por dimensão, repetições,
+        asserções estruturais, detectores textuais testados offline e juiz calibrado — foi
+        desenhado aqui. O Onyx tem um diretório <code>evals/</code>; não faço afirmação
+        sobre ele, porque não o auditei.
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Método de medição</h2>
+    <p class="kicker">Como os números foram obtidos</p>
+
+    <div class="col">
+      <p>
+        Cada caso de eval roda N vezes contra a API falsificada, para medir o modelo e não
+        a integração. A repetição é o que separa defeito de variância:
+        <strong>3/3</strong> é comportamento estável, <strong>0/3</strong> é defeito
+        reproduzível, e o intervalo é instabilidade.
+      </p>
+      <p>
+        As asserções são estruturais por padrão — tool chamada, argumento de tool, prato
+        derivado do dataset. Onde o requisito é sobre o texto que a pessoa lê, entram
+        detectores nomeados, testados offline contra cerca de quarenta paráfrases. Onde
+        nem isso resolve, entra um juiz LLM com rubrica binária e falha fechada, presente
+        em 42% dos casos e limitado por teste a menos da metade.
+      </p>
+    </div>
+
+    <div class="note">
+      <p>
+        <strong>O juiz é calibrado antes de ser usado.</strong> Dezessete pares conhecidos
+        de resposta boa e ruim por critério: <span class="num">17/17</span>, zero falso
+        positivo. Aprovar resposta ruim tem tolerância zero, porque deixaria o eval verde
+        com o produto errado; reprovar resposta boa apenas gera investigação à toa.
+      </p>
+    </div>
+
+    <h3>Um exemplo do que a repetição revelou</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44%">Caso: alérgico não recebe o alérgeno</th>
+            <th class="num" style="width:12%">Taxa</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Linha de base</td>
+            <td class="num" style="color:var(--none)">2/3</td>
+            <td>Uma em três conversas recomendou salada com amendoim a quem tem alergia a amendoim no perfil.</td>
+          </tr>
+          <tr>
+            <td>Conflito anotado no próprio prato</td>
+            <td class="num" style="color:var(--ok)">3/3</td>
+            <td>O aviso passou a viajar no mesmo dicionário que o modelo lê.</td>
+          </tr>
+          <tr>
+            <td>Regra bloqueante estrutural</td>
+            <td class="num" style="color:var(--ok)">3/3</td>
+            <td>A rede bloqueou 1–2 tentativas por rodada — o usuário ficou protegido, e o modelo ainda tentou.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+      <p>
+        Duas observações de método saíram dessas séries. Instrução em prompt reduziu a
+        taxa de erro sem zerá-la; a barreira em código zerou. E, na direção oposta,
+        acrescentar duas linhas de ressalva a um reminder derrubou uma bateria de
+        <span class="num">89%</span> para <span class="num">61%</span> — a alteração foi
+        revertida.
+      </p>
+      <p>
+        A linha de base completa, em rodada única e simultânea antes das correções, foi de
+        <span class="num">93/117</span> execuções (<span class="num">79%</span>), com 5
+        defeitos e 6 instabilidades. Depois das correções, as baterias mediram entre
+        <span class="num">67%</span> e <span class="num">100%</span>, mas
+        <strong>em rodadas separadas e estados de código diferentes</strong>, o que não
+        sustenta comparação direta. O limiar configurado de 90% não está cumprido. A
+        rodada limpa está pendente por limite de crédito de API.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Limitações conhecidas</h2>
+    <p class="kicker">Registrado, não resolvido</p>
+
+    <div class="flaw">
+      <h3>A base nutricional diverge de referência pública em pontos mensuráveis</h3>
+      <p>
+        Cruzamento automatizado com a TACO (NEPA/UNICAMP) por 100 g: de 37 alimentos que
+        casaram por nome, <strong>17 divergem acima de 40%</strong>, todos com a base
+        <em>acima</em> da referência (1,41× a 4,22×). Arroz integral cozido consta com
+        257 kcal/100 g contra 123,5 da TACO.
+      </p>
+      <p>
+        Não é erro de extração — a página do livro-fonte traz esse valor, e o cruzamento de
+        Atwater confirma consistência interna. O sistema passou a rebaixar a confiança e
+        declarar a aproximação ao usuário; <strong>o dado em si não foi corrigido</strong>,
+        e 105 alimentos não têm par na TACO para conferência.
+      </p>
+    </div>
+
+    <div class="flaw">
+      <h3>A portabilidade do motor não foi validada por um segundo produto</h3>
+      <p>
+        Há um teste que monta um domínio completo de manutenção de frota sobre o mesmo
+        motor sem alterar uma linha dele, exercitando registry, reminders, observações,
+        validação e pós-processamento. Esse domínio foi escrito pela mesma pessoa que
+        escreveu o motor, no mesmo dia. <strong>Nenhum produto real consumiu esse motor
+        até agora.</strong>
+      </p>
+    </div>
+
+    <div class="flaw">
+      <h3>Sem streaming</h3>
+      <p>
+        A resposta é entregue inteira, ao fim de 4–5 s de RPC bloqueante. Não há
+        protocolo de eventos parciais entre o worker e o cliente.
+      </p>
+    </div>
+
+    <div class="flaw">
+      <h3>Restrição declarada apenas na conversa não tem barreira estrutural</h3>
+      <p>
+        A anotação de conflito e a regra bloqueante derivam do <strong>perfil salvo</strong>.
+        Quem declara uma restrição só no chat, sem cadastro — que é o caso mais comum no
+        refeitório — fica protegido apenas pela instrução de prompt. Medido em 2/3.
+      </p>
+    </div>
+
+    <div class="flaw">
+      <h3>Dívida de segurança catalogada e não tratada</h3>
+      <p>
+        IDOR no acesso a dados de usuário, rotas internas sem autenticação expostas na
+        mesma porta pública, administração por token único compartilhado, ausência de
+        rate limit, segredos em arquivo de ambiente. Todos os itens estão em tickets com
+        severidade e estimativa. <strong>Nenhum foi endereçado nesta frente de trabalho.</strong>
+      </p>
+    </div>
+
+    <div class="flaw">
+      <h3>Um domínio, um conceito de tenant, provider sem fallback</h3>
+      <p>
+        A arquitetura roda um produto e um conceito de unidade. Há dois providers de LLM
+        selecionáveis por configuração, sem troca automática quando um falha — a
+        abstração serve para escolher, não para resistir.
+      </p>
+    </div>
+
+    <div class="flaw">
+      <h3>Defeitos abertos no comportamento do agente</h3>
+      <p>
+        Em conversas sobre condição de saúde, o corpo da resposta ainda entrega orientação
+        dietética detalhada; apenas o encaminhamento a profissional está garantido, e por
+        código. O modelo também cita ocasionalmente um macronutriente que não consultou —
+        detectado pela validação, não corrigido.
+      </p>
+    </div>
+  </section>
+
+  <section class="col">
+    <h2>Reprodução</h2>
+    <p class="kicker">Como conferir os números deste documento</p>
+
+    <p>
+      A suíte offline não faz chamada de API e roda em qualquer máquina com Docker. O eval
+      com modelo real exige chave e é o que produz as taxas por bateria.
+    </p>
+
+<pre>cd apps/ai
+
+# 223 testes offline, sem LLM
+pytest
+
+# eval com modelo real, com repetição
+EVAL_REPETICOES=3 LLM_PROVIDER=anthropic pytest tests/eval -m llm -s
+
+# uma bateria isolada
+EVAL_REPETICOES=3 EVAL_BATERIA=seguranca LLM_PROVIDER=anthropic pytest tests/eval -m llm -s
+
+# calibração do juiz
+LLM_PROVIDER=anthropic pytest tests/eval/test_juiz_calibracao.py -m llm -s
+
+# auditoria da base nutricional contra a TACO
+python -m app.nutrition.auditoria</pre>
+
+    <p>
+      A linha de base, o método e a classificação de cada caso estão versionados em
+      <code>docs/eval-linha-de-base.md</code>. Os defeitos e limitações citados aqui têm
+      ticket correspondente em <code>docs/tickets-revisao-produto.md</code>, com severidade
+      e status.
+    </p>
+  </section>
+
+  <footer>
+    Documento gerado a partir do repositório em 23/08/2026, branch
+    <code>feat/motor-agente-onyx</code>. Referências ao Onyx CE baseiam-se na leitura
+    pública do repositório sob licença MIT — em especial
+    <code>backend/onyx/chat/README.md</code>, <code>tools/interface.py</code> e
+    <code>deep_research/</code> — e não em auditoria do código.
+  </footer>
+
+</div>

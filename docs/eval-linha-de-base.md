@@ -41,7 +41,7 @@ Rodada única e simultânea de todas as baterias:
 | escopo | 17/18 | 94% | — | 1 |
 | consumo | 18/21 | 86% | — | 2 |
 | robustez | 15/18 | 83% | 1 | — |
-| contrato | 14/18 | 78% | — | 2 |
+| recomendacao (antes: contrato) | 14/18 | 78% | — | 2 |
 | honestidade | 15/21 | 71% | 2 | — |
 | **seguranca** | **14/21** | **67%** | **2** | **1** |
 | **TOTAL** | **93/117** | **79%** | **5** | **6** |
@@ -52,7 +52,7 @@ Rodada única e simultânea de todas as baterias:
 |---|---|---|---|
 | escopo | 94% | **100%** | continuações com artigo deixam de ser barradas; R1 não acusa mais oferta de ajuda |
 | honestidade | 71% | **90%** | listagem devolve `total` e instrução; lista vazia proíbe sugestão explicitamente; dado inexistente (sódio) é admitido |
-| contrato | 78% | **89%** | `total` explícito na listagem — o caso de 8 pratos foi de 1/3 a 3/3 |
+| recomendacao (antes: contrato) | 78% | **89%** | `total` explícito na listagem — o caso de 8 pratos foi de 1/3 a 3/3 |
 | seguranca | 67% | **81%** | conflito anotado no prato + R5 bloqueante |
 | consumo | 86% | 76%* | sem mudança direcionada; oscilação de amostra |
 | robustez | 83% | 67%* | **não é regressão de produto.** São 3 execuções de 18: (a) "mensagem ambígua" seguiu 0/3, mas o motivo mudou de "barrado pelo guardrail" para "a Lia adivinha em vez de perguntar" — a barreira externa saiu e expôs o defeito interno; (b) a R3 passou a enxergar `mg`, e flagrou sódio/cálcio inventados que antes eram invisíveis; (c) um flip num critério de juiz |
@@ -107,6 +107,22 @@ LLM_PROVIDER=anthropic pytest tests/eval/test_juiz_calibracao.py -m llm -s
 ```
 
 Custo aproximado da bateria completa com 3 repetições: alguns centavos em Haiku.
+
+## Mudança de regra de 23/08/2026 — medição pendente
+
+A obrigatoriedade de mostrar o cardápio completo antes de recomendar foi **removida**
+(decisão de produto; ver `docs/regras-de-negocio.md` §3.1). A bateria `contrato` foi
+substituída por `recomendacao`, que mede o que passou a valer: motivo concreto, porção em
+medida caseira e menção de que há outras opções.
+
+Junto com isso, o aviso de restrição/alergia mudou de voz — de "você não pode comer" para
+"com base no que você me contou, esse prato não é indicado, porque leva X". A mudança é de
+autoridade, não de educação: o assistente reporta em vez de prescrever, o que também
+endereça o risco regulatório do IA-17.
+
+> **Todos os números por bateria neste documento são anteriores a essa mudança.** A bateria
+> `recomendacao` nunca foi executada, e os critérios de juiz dos casos de segurança foram
+> reescritos. A próxima rodada completa reinicia a linha de base.
 
 ## Aberto
 

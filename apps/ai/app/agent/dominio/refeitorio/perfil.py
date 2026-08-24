@@ -48,10 +48,10 @@ REGISTRO: tuple[ToolSpec, ...] = (
 # A âncora `regra_de_origem` PRECISA aparecer literalmente no SYSTEM_AGENT — é a
 # invariante que impede um reminder de conceder algo que o system não autoriza.
 # Há teste que verifica isso para cada reminder declarado aqui.
-REMINDER_CARDAPIO_COMPLETO = Reminder(
+REMINDER_ABERTURA_DO_DIA = Reminder(
     nome="primeira_do_dia",
     texto=prompts.REMINDER_PRIMEIRA_DO_DIA,
-    regra_de_origem="REGRA CONTRATUAL",
+    regra_de_origem="PRIMEIRA CONVERSA DO DIA",
 )
 
 
@@ -74,7 +74,7 @@ _CONDICAO_DE_SAUDE = re.compile(
 def reminders_do_turno(gatilhos: Gatilhos, mensagem: str = "") -> tuple[Reminder, ...]:
     ativos = []
     if gatilhos.primeira_interacao_do_dia:
-        ativos.append(REMINDER_CARDAPIO_COMPLETO)
+        ativos.append(REMINDER_ABERTURA_DO_DIA)
     if _CONDICAO_DE_SAUDE.search(normalizar(mensagem or "")):
         ativos.append(REMINDER_SAUDE)
     return tuple(ativos)
@@ -108,8 +108,9 @@ PERFIL = PerfilDeDominio(
     resposta_fora_de_escopo=prompts.RESPOSTA_FORA_DE_ESCOPO,
     resposta_erro_transiente=RESPOSTA_ERRO_TRANSIENTE,
     resposta_bloqueada=(
-        "Opa, quase te indiquei algo que não combina com o seu perfil 😅 "
-        "Deixa eu conferir direitinho — pode me pedir a recomendação de novo?"
+        "Opa, deixa eu refazer essa recomendação 😅 Pelo que você me contou sobre "
+        "restrições e alergias, o que eu ia indicar não é o mais adequado pra você. "
+        "Pode me pedir de novo?"
     ),
     reminders=reminders_do_turno,
     regras=_regras.construir(REGISTRO),

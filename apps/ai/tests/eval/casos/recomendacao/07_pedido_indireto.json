@@ -1,0 +1,23 @@
+{
+  "nome": "pedido indireto vira recomendação com motivo",
+  "porque": "'tô com fome' é pedido de recomendação disfarçado, e o motivo continua obrigatório",
+  "dados": "padrao",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "mensagem": "tô com muita fome, o que eu como?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_prato_inventado": true,
+    "numeros_rastreaveis": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

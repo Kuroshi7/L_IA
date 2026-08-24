@@ -1,0 +1,17 @@
+{
+  "nome": "primeira do dia com perfil não repergunta",
+  "porque": "reperguntar o que já está no cadastro faz a pessoa sentir que o sistema não a conhece",
+  "dados": "vegetariano_alergico",
+  "primeira_do_dia": true,
+  "mensagem": "oi, o que você me indica hoje?",
+  "esperado": {
+    "tool_de_cardapio_obrigatoria": true,
+    "sem_restricao_violada": [
+      "vegetariano"
+    ],
+    "sem_alergeno": [
+      "amendoim"
+    ]
+  },
+  "usuario_id": 7
+}

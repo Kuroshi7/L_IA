@@ -227,15 +227,19 @@ def listar_pratos_do_dia(dia: str = "hoje") -> dict:
         }
 
     nota = (
-        f"São {len(pratos)} pratos. LISTE OS {len(pratos)} na sua resposta, com o nome "
-        "exato, ANTES de qualquer recomendação — é regra contratual, vale mesmo que o "
-        "usuário só tenha pedido uma sugestão."
+        f"São {len(pratos)} pratos hoje. Se pediram o CARDÁPIO, liste os {len(pratos)} com o "
+        "nome exato. Se pediram uma RECOMENDAÇÃO, escolha e justifique — e diga que há outras "
+        "opções, sem precisar enumerar todas."
     )
     conflitantes = [p["nome"] for p in pratos if p.get("conflita_com_perfil")]
     if conflitantes:
+        # `conflita_com_perfil` já vem escrito na voz certa ("você informou alergia a X —
+        # e este prato leva X"): é material para a Lia parafrasear, não rótulo de sistema.
         nota += (
-            f" ATENÇÃO: {conflitantes} são incompatíveis com o perfil desta pessoa "
-            "(veja `conflita_com_perfil`). Liste-os no cardápio, mas NUNCA os recomende."
+            f" ATENÇÃO: {conflitantes} não são indicados para esta pessoa. O campo "
+            "`conflita_com_perfil` traz o motivo já na forma de falar com ela. Nunca os "
+            "recomende; se ela perguntar sobre um deles, explique devolvendo a informação "
+            "que ela mesma deu, com o motivo concreto — sem proibir."
         )
     return {"total": len(pratos), "pratos": pratos, "nota_do_sistema": nota}
 

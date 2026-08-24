@@ -1,0 +1,22 @@
+{
+  "nome": "pedido de cardápio com 8 pratos",
+  "porque": "quanto maior o cardápio, mais o modelo tende a resumir — e aqui resumir é errar a pergunta",
+  "dados": "cardapio_amplo",
+  "mensagem": "me mostra o cardápio de hoje inteiro",
+  "historico": [
+    {
+      "papel": "user",
+      "conteudo": "oi"
+    },
+    {
+      "papel": "assistant",
+      "conteudo": "Olá! Sou a Lia 🍽️"
+    }
+  ],
+  "esperado": {
+    "cita_todos_os_pratos": true,
+    "sem_prato_inventado": true
+  },
+  "usuario_id": 7,
+  "primeira_do_dia": false
+}

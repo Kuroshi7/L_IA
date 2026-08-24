@@ -160,7 +160,7 @@ def test_reminder_volta_no_resultado_da_tool(monkeypatch):
         encerrar_turno(token)
 
     # A nota da própria tool tem precedência: ela sabe da situação concreta.
-    assert "LISTE" in out[CHAVE_NOTA]
+    assert "CARDÁPIO" in out[CHAVE_NOTA]
     assert "LEMBRETE DE TESTE" not in out[CHAVE_NOTA]
 
 
@@ -188,3 +188,30 @@ def test_reinjecao_so_atua_onde_a_tool_nao_falou():
 
     sem_nota = _reinjetar({"x": 1}, ("reminder",))
     assert sem_nota[CHAVE_NOTA] == "reminder"
+
+
+# --- a obrigatoriedade de listar o cardápio foi removida ---------------------
+
+def test_prompt_nao_exige_mais_cardapio_completo_antes_de_recomendar():
+    """Decisão de produto de 23/08/2026 (docs/regras-de-negocio.md §3.1).
+
+    A listagem obrigatória empurrava a resposta para formato de catálogo e
+    competia com a qualidade da recomendação: era cumprida em 3/3 quando pediam
+    o cardápio e ficava instável quando pediam recomendação.
+    """
+    prompt = PERFIL.system_prompt
+    assert "REGRA CONTRATUAL" not in prompt
+    assert "MOSTRE PRIMEIRO o cardápio COMPLETO" not in prompt
+    # O que entrou no lugar: recomendação com motivo, porção e alternativa.
+    assert "RECOMENDAR É ESCOLHER POR ALGUÉM" in prompt
+    assert "OUTRAS OPÇÕES" in prompt
+
+
+def test_reminder_do_dia_virou_onboarding():
+    # A flag `primeira_do_dia` continua sendo calculada no Go; sem novo uso ela
+    # viraria encanamento morto.
+    r = reminders_do_turno(rem.Gatilhos(primeira_interacao_do_dia=True), "oi")
+    assert any(x.nome == "primeira_do_dia" for x in r)
+    texto = next(x.texto for x in r if x.nome == "primeira_do_dia")
+    assert "restrições" in texto and "pergunte" in texto.lower()
+    assert "COMPLETO" not in texto

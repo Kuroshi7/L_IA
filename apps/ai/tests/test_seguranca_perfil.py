@@ -33,14 +33,19 @@ PERFIL_SO_ALERGIA = {"nome": "Joao", "alergias": ["amendoim"], "restricoes": []}
 # --- detecção de conflito ----------------------------------------------------
 
 def test_detecta_alergia():
+    # O texto é material de fala, não rótulo de sistema: precisa dizer QUEM
+    # informou e QUAL ingrediente, para a Lia parafrasear sem prescrever.
     motivos = conflitos_com_perfil(AMENDOIM, PERFIL_ALERGICO)
-    assert any("ALERGIA" in m for m in motivos)
-    assert any("amendoim" in m for m in motivos)
+    assert motivos
+    assert any("você informou" in m and "alergia" in m for m in motivos)
+    assert any("leva amendoim" in m for m in motivos)
 
 
 def test_detecta_restricao():
     motivos = conflitos_com_perfil(CARNE, PERFIL_ALERGICO)
-    assert any("RESTRIÇÃO" in m for m in motivos)
+    assert any("você informou a restrição 'vegetariano'" in m for m in motivos)
+    # O ingrediente entra para a Lia poder dizer "porque leva carne".
+    assert any("leva carne" in m for m in motivos)
 
 
 def test_prato_seguro_nao_gera_ruido():
@@ -84,10 +89,10 @@ def test_anotacao_cobre_os_dois_eixos(monkeypatch):
         encerrar_turno(token)
 
     por_nome = {p["nome"]: p.get("conflita_com_perfil", []) for p in out["pratos"]}
-    assert any("ALERGIA" in m for m in por_nome["Salada de grao-de-bico com amendoim"])
-    assert any("RESTRIÇÃO" in m for m in por_nome["Estrogonofe de carne"])
+    assert any("alergia" in m for m in por_nome["Salada de grao-de-bico com amendoim"])
+    assert any("restrição" in m for m in por_nome["Estrogonofe de carne"])
     # E a instrução vai junto, no fim do contexto.
-    assert "NUNCA os recomende" in out["nota_do_sistema"]
+    assert "nunca os recomende" in out["nota_do_sistema"].lower()
 
 
 def test_sem_usuario_nao_ha_anotacao(monkeypatch):
@@ -248,3 +253,38 @@ def test_conversa_comum_nao_ganha_rodape():
 
     assert pos_processar("O cardápio de hoje tem frango.", Gatilhos(), "o que tem hoje?") \
         == "O cardápio de hoje tem frango."
+
+
+# --- a voz do aviso: reportar, não prescrever --------------------------------
+
+PROIBITIVAS = ("voce nao pode", "você não pode", "proibido", "nao e permitido",
+               "não é permitido", "evite comer", "nao coma", "não coma")
+
+
+def test_motivo_nao_usa_linguagem_de_proibicao():
+    """Recomendação nutricional individualizada é ato privativo de nutricionista.
+
+    A diferença entre "você não pode comer isso" e "com base no que você me
+    contou, esse prato não é indicado, porque leva amendoim" não é de educação:
+    é de AUTORIDADE. A primeira determina, a segunda reporta — e só a segunda a
+    Lia tem competência para dizer.
+    """
+    for prato in (AMENDOIM, CARNE):
+        for motivo in conflitos_com_perfil(prato, PERFIL_ALERGICO):
+            baixo = motivo.lower()
+            for termo in PROIBITIVAS:
+                assert termo not in baixo, f"linguagem de proibição em: {motivo!r}"
+
+
+def test_motivo_atribui_a_origem_da_informacao():
+    # Quem declarou foi a pessoa. Sem isso, a Lia soa como se tivesse
+    # diagnosticado a alergia.
+    for prato in (AMENDOIM, CARNE):
+        for motivo in conflitos_com_perfil(prato, PERFIL_ALERGICO):
+            assert "você informou" in motivo, motivo
+
+
+def test_motivo_traz_o_fato_do_prato():
+    # "porque leva X" é o que torna o aviso verificável em vez de opinião.
+    assert "leva" in " ".join(conflitos_com_perfil(AMENDOIM, PERFIL_ALERGICO))
+    assert "leva" in " ".join(conflitos_com_perfil(CARNE, PERFIL_ALERGICO))

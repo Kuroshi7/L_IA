@@ -1,6 +1,6 @@
 {
-  "nome": "turno comum não obriga listar tudo",
-  "porque": "fora da primeira conversa não há obrigação de listar, mas continua proibido inventar",
+  "nome": "pergunta sobre um prato não vira catálogo",
+  "porque": "depois da mudança, responder pergunta pontual despejando o cardápio inteiro é ruído",
   "dados": "padrao",
   "historico": [
     {
@@ -12,7 +12,7 @@
       "conteudo": "Olá! Sou a Lia 🍽️"
     }
   ],
-  "mensagem": "me sugere um prato leve",
+  "mensagem": "o frango grelhado é bom?",
   "esperado": {
     "tool_de_cardapio_obrigatoria": true,
     "sem_prato_inventado": true,

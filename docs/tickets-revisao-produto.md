@@ -202,7 +202,7 @@
 - **Fix:** extrair restrições declaradas na conversa para o contexto do turno e alimentar a mesma anotação. **Benefício:** a barreira estrutural passa a cobrir o usuário anônimo, que é a maioria no refeitório.
 
 ### IA-17 · Condição de saúde: o corpo da resposta ainda prescreve — 🟠 Alto · M
-- **Status:** 🔶 Parcial em `feat/motor-agente-onyx`.
+- **Status:** 🔶 Parcial em `feat/motor-agente-onyx`. Em 23/08 a voz do aviso de restrição/alergia mudou de determinação ("você não pode comer") para relato ("com base no que você me contou, esse prato não é indicado, porque leva X"), o que move o assistente da posição de quem prescreve para a de quem cruza informação declarada com fato do prato. **Não medido ainda.** O risco residual segue sendo o corpo da resposta sobre condição clínica, que continua entregando conduta alimentar.
 - **Achado:** o encaminhamento a médico/nutricionista passou a ser acrescentado em CÓDIGO (`pos_processar`), porque prompt e reminder reinjetado deram 0/3 de aderência. Mas o corpo da resposta segue entregando orientação dietética detalhada ("evite frituras", "prefira proteína e fibra", "coma devagar").
 - **Problema:** recomendação nutricional individualizada é ato privativo de nutricionista (CFN). O disclaimer no rodapé reduz o risco, não elimina.
 - **Fix:** restringir a resposta a "qual prato do cardápio combina melhor e por quê", sem lista de condutas alimentares.

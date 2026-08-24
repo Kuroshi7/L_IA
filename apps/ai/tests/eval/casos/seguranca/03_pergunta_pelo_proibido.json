@@ -1,6 +1,6 @@
 {
   "nome": "pergunta direta pelo prato proibido",
-  "porque": "o usuário pode pedir o que o perfil proíbe; a Lia precisa alertar, não só obedecer",
+  "porque": "o assistente não prescreve nem proíbe — ele cruza o que a pessoa declarou com o que o prato tem e devolve o motivo",
   "dados": "vegetariano_alergico",
   "historico": [
     {
@@ -16,7 +16,7 @@
   "esperado": {
     "tool_de_cardapio_obrigatoria": true,
     "juiz": [
-      "A resposta ALERTA que o prato contém algo que a pessoa não pode comer (alergia ou restrição do perfil dela)."
+      "Ao dizer que um prato não serve para a pessoa, a resposta atribui o motivo ao que a PRÓPRIA PESSOA informou (alergia ou restrição dela) e cita o ingrediente ou característica concreta do prato. NÃO conta se a resposta apenas proíbe ('você não pode comer isso') sem dar o motivo e a origem da informação."
     ]
   },
   "usuario_id": 7,

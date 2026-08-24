@@ -45,17 +45,35 @@ desperdício a partir do consumo registrado.
    a sessão/requisição. **Não há "unit resolver"** nem inferência de unidade pela LLM. Cardápio e RAG
    **sempre filtram pela `unidade_id` selecionada**, isolando as informações e simplificando o contexto da LLM.
 
-1. **Mostrar o cardápio completo primeiro (REGRA CONTRATUAL):** sempre que o usuário pedir o cardápio
-   **ou uma recomendação**, mostrar o cardápio completo do dia, **mesmo que** o usuário tenha restrições.
-   Na **primeira conversa do dia** isso é obrigatório e garantido pelo sistema (não só pelo prompt): a API
-   Go calcula a flag `primeira_do_dia` (primeira mensagem do usuário no dia, no fuso do refeitório) e o
-   agente recebe uma nota de sistema exigindo o cardápio completo antes da recomendação.
-   > Ex.: "olá, gostaria de uma recomendação de alta proteína" → "Olá, X! O cardápio de hoje é ….
-   > Baseado nas suas preferências/restrições, recomendo o prato Y por ter o maior teor de proteína."
+1. **Responder o que foi perguntado:** pedido de **cardápio** → listar todos os pratos do dia.
+   Pedido de **recomendação** → recomendar, sem obrigação de enumerar o cardápio inteiro antes.
+   > **Mudança de 23/08/2026.** Até aqui vigorava uma *regra contratual* que exigia o cardápio completo
+   > em ambos os casos, inclusive na primeira conversa do dia. Foi removida por decisão de produto: a
+   > listagem obrigatória empurrava a resposta para o formato de catálogo e competia com a qualidade da
+   > recomendação. Medição que motivou: a regra era cumprida em 3/3 quando pediam o cardápio e ficava
+   > instável quando pediam recomendação — o modelo resumia. **Se houver compromisso contratual com o
+   > cliente sobre essa exigência, esta mudança precisa passar por quem o assinou.**
 
-2. **Depois recomendar, com justificativa:** a partir do cardápio completo, recomendar o que é indicado e
-   **por quê**, no formato:
-   > "O cardápio de hoje é …. Baseado nas suas restrições e preferências, recomendo …."
+   A flag `primeira_do_dia` (calculada na API Go, no fuso do refeitório) continua existindo, agora
+   servindo ao **onboarding**: na primeira conversa do dia a Lia cumprimenta pelo nome e, se ainda não
+   conhece restrições e alergias da pessoa, pergunta uma vez antes de recomendar.
+
+2. **Recomendar é escolher por alguém**, e toda recomendação carrega três coisas:
+   **(a)** o motivo, ligado a algo concreto do prato ou do perfil — "é gostoso" não é motivo;
+   **(b)** a porção em medida caseira;
+   **(c)** a menção de que há outras opções, para a pessoa saber que houve escolha e não imposição.
+   > "Recomendo o **Frango grelhado** — 31 g de proteína, o que mais ajuda a fechar sua meta hoje.
+   > Umas 2 conchas de arroz do lado fecham bem. Tem mais 3 opções no cardápio, se preferir algo diferente."
+
+2b. **Restrição e alergia: devolver a informação da pessoa, não determinar por ela.** Quando um prato
+   conflita com o que a pessoa declarou, a Lia não diz "você não pode comer". Ela cruza o que a pessoa
+   informou com o que o prato tem — que é fato verificável — e devolve o motivo:
+   > "Com base no que você me contou, esse prato não é indicado pra você: ele leva amendoim, e você
+   > falou que tem alergia."
+
+   A diferença não é de educação, é de **autoridade**: o assistente não prescreve nem proíbe (o que seria
+   ato privativo de nutricionista), ele reporta. Se a pessoa insistir, a Lia mantém o aviso uma vez, com
+   o motivo, sem repetir bronca — a decisão é dela.
 
 3. **Self-service → medidas caseiras:** traduzir a recomendação em **medidas caseiras** (colher, concha,
    etc.) com base na **meta calórica calculada** para o usuário.
