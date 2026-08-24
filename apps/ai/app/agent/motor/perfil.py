@@ -39,8 +39,23 @@ class PerfilDeDominio:
     resposta_fora_de_escopo: str
     resposta_erro_transiente: str
 
+    # Usada quando uma regra BLOQUEANTE reprova a resposta gerada. Precisa ser
+    # específica: a mensagem genérica de erro faria a pessoa achar que o
+    # sistema caiu, quando na verdade ele se recusou a dizer algo inseguro.
+    resposta_bloqueada: str = "Preciso conferir isso melhor antes de responder. Pode perguntar de novo?"
+
     # Traduz as condições do turno nas instruções que vão para o fim do contexto.
-    reminders: Callable[[Gatilhos], Sequence[Reminder]] = lambda _g: ()
+    # Recebe também a mensagem do usuário: alguns reminders dependem do ASSUNTO
+    # (ex.: menção a condição de saúde). O motor não interpreta o texto — só o
+    # repassa a quem sabe lê-lo, que é o domínio.
+    reminders: Callable[[Gatilhos, str], Sequence[Reminder]] = lambda _g, _m: ()
 
     # Regras de validação pós-resposta, como (id, funcao).
     regras: Sequence[tuple[str, Callable]] = ()
+
+    # Ajuste final da resposta, em CÓDIGO. Recebe (resposta, gatilhos, mensagem).
+    # Existe para o que não pode depender de o modelo lembrar: aviso legal,
+    # encaminhamento obrigatório, rodapé de conformidade. Pedir isso ao prompt
+    # deu 0 de 3 de aderência mesmo com reminder reinjetado — e exigência
+    # regulatória não admite 'quase sempre'.
+    pos_processar: Callable[[str, Gatilhos, str], str] = lambda resposta, _g, _m: resposta

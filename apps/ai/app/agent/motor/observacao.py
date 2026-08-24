@@ -137,6 +137,14 @@ class EstadoDoTurno:
     # prazo, comportamento de sempre.
     prazo: float | None = None
 
+    # Reminders ativos neste turno, para REINJEÇÃO. Eles entram no fim da
+    # mensagem do usuário, mas deixam de ser a última coisa do contexto assim
+    # que a primeira tool responde — e é depois disso que a resposta é gerada.
+    # Reanexá-los ao resultado das tools devolve a instrução à posição que
+    # funciona. Medido: a regra de encaminhar a profissional de saúde tinha 0
+    # de 3 de aderência só com a injeção inicial.
+    reminders: tuple[str, ...] = ()
+
     def prazo_esgotado(self) -> bool:
         return self.prazo is not None and time.monotonic() >= self.prazo
 
@@ -146,8 +154,8 @@ _estado: contextvars.ContextVar[EstadoDoTurno | None] = contextvars.ContextVar(
 )
 
 
-def iniciar_turno(prazo: float | None = None) -> contextvars.Token:
-    return _estado.set(EstadoDoTurno(prazo=prazo))
+def iniciar_turno(prazo: float | None = None, reminders: tuple[str, ...] = ()) -> contextvars.Token:
+    return _estado.set(EstadoDoTurno(prazo=prazo, reminders=tuple(reminders)))
 
 
 def encerrar_turno(token: contextvars.Token) -> None:
@@ -178,6 +186,28 @@ def _args_canonicos(args: tuple, kwargs: dict) -> str:
         return repr((args, sorted(kwargs.items())))
 
 
+def _reinjetar(resultado, reminders: tuple[str, ...]):
+    """Reanexa os reminders do turno ao resultado da tool.
+
+    Só em retorno que já é dict, e sem apagar nota que a própria tool colocou.
+    Mexer no formato de um retorno de lista confunde modelo pequeno, e o ganho
+    não compensa.
+    """
+    if not reminders or not isinstance(resultado, dict):
+        return resultado
+
+    # Nota da própria tool tem PRECEDÊNCIA. Ela conhece a situação concreta —
+    # inclusive o caso degenerado, em que o resultado veio vazio — enquanto o
+    # reminder é genérico e foi escrito para o caso normal. Empilhadas, as duas
+    # chegaram a se contradizer, e o modelo resolveu a contradição inventando
+    # dado. Empilhar também alonga a instrução, e instrução longa dilui: medimos
+    # a aderência da regra principal do domínio cair de 89% para 61% quando o
+    # texto cresceu.
+    if resultado.get(CHAVE_NOTA):
+        return resultado
+    return {**resultado, CHAVE_NOTA: "\n".join(reminders)}
+
+
 def observado(fn):
     """Registra a chamada e o retorno da tool no estado do turno."""
 
@@ -203,6 +233,6 @@ def observado(fn):
 
         resultado = fn(*args, **kwargs)
         estado.observacoes.registrar(chave, resultado)
-        return resultado
+        return _reinjetar(resultado, estado.reminders)
 
     return wrapper

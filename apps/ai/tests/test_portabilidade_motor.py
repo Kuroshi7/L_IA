@@ -80,8 +80,11 @@ PERFIL_OFICINA = PerfilDeDominio(
     esta_no_escopo=lambda texto, tem_historico: "manutencao" in texto.lower() or tem_historico,
     resposta_fora_de_escopo="Só falo de manutenção da frota.",
     resposta_erro_transiente="Sistema da oficina indisponível, tente de novo.",
-    reminders=lambda g: (REMINDER,) if g.primeira_interacao_do_dia else (),
+    resposta_bloqueada="Vou conferir a ordem antes de agendar. Pode pedir de novo?",
+    reminders=lambda g, _m="": (REMINDER,) if g.primeira_interacao_do_dia else (),
     regras=(("OF1-agendou-sem-listar", _regra_agendou_sem_listar),),
+    pos_processar=lambda r, _g, m: r + "\n\n(Ordem sujeita à disponibilidade de peça.)"
+    if "revisao" in m else r,
 )
 
 
@@ -92,6 +95,19 @@ def test_registry_seleciona_tools_do_outro_dominio():
     logado = type("C", (), {"tecnico_id": 3})()
     assert {s.nome for s in tools_do_turno(REGISTRO, anonimo)} == {"listar_ordens_abertas"}
     assert len({s.nome for s in tools_do_turno(REGISTRO, logado)}) == 2
+
+
+def test_dominio_estrangeiro_define_a_propria_mensagem_de_bloqueio():
+    # O motor bloqueia; a frase é do produto. Sem isso, um domínio de oficina
+    # responderia com texto de refeitório quando uma regra reprovasse.
+    assert "ordem" in PERFIL_OFICINA.resposta_bloqueada
+
+
+def test_pos_processamento_e_do_dominio():
+    # O motor chama; o que é acrescentado é regra do produto. Num refeitório é
+    # encaminhamento a nutricionista; numa oficina, ressalva de peça.
+    assert "peça" in PERFIL_OFICINA.pos_processar("Agendei.", Gatilhos(), "quero revisao")
+    assert PERFIL_OFICINA.pos_processar("Agendei.", Gatilhos(), "oi") == "Agendei."
 
 
 def test_reminder_do_outro_dominio_vai_para_o_fim():
@@ -139,6 +155,7 @@ def test_nenhum_campo_do_perfil_ficou_sem_consumidor():
     # Se um campo puder ser omitido por um domínio real sem nada quebrar, ele é
     # candidato a ser cortado — este teste é o lembrete de reavaliar.
     usados = {"nome", "system_prompt", "registro", "esta_no_escopo",
-              "resposta_fora_de_escopo", "resposta_erro_transiente", "reminders", "regras"}
+              "resposta_fora_de_escopo", "resposta_erro_transiente", "resposta_bloqueada",
+              "reminders", "regras", "pos_processar"}
     declarados = set(PerfilDeDominio.__dataclass_fields__)
     assert declarados == usados, f"campo sem consumidor neste teste: {declarados - usados}"

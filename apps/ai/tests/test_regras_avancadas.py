@@ -87,12 +87,16 @@ def test_r3_pega_kcal_que_a_listagem_nao_mostrou():
 # --- R4: incerteza precisa ser declarada -------------------------------------
 
 def test_r4_pega_total_incompleto_apresentado_como_final():
-    obs = _obs(CARDAPIO, avisos=["NÃO reconheci na base: xyzabc."])
+    from app.agent.dominio.refeitorio.tools import MARCA_INCERTEZA
+
+    obs = _obs(CARDAPIO, avisos=[f"{MARCA_INCERTEZA} NÃO reconheci na base: xyzabc."])
     assert "R4-incompleto-sem-ressalva" in _ids("No total foram 180 kcal. Ficou ótimo!", obs)
 
 
 def test_r4_aceita_resposta_que_ressalva():
-    obs = _obs(CARDAPIO, avisos=["NÃO reconheci na base: xyzabc."])
+    from app.agent.dominio.refeitorio.tools import MARCA_INCERTEZA
+
+    obs = _obs(CARDAPIO, avisos=[f"{MARCA_INCERTEZA} NÃO reconheci na base: xyzabc."])
     resposta = "Não reconheci 'xyzabc', então ele não entrou na conta. O resto deu 180 kcal."
     assert "R4-incompleto-sem-ressalva" not in _ids(resposta, obs)
 
@@ -119,7 +123,7 @@ def test_veredicto_nao_bloqueia_por_padrao():
 
 def test_todas_as_regras_do_perfil_tem_id_unico():
     ids = [rid for rid, _ in PERFIL.regras]
-    assert len(ids) == len(set(ids)) == 4
+    assert len(ids) == len(set(ids)) == 5
 
 
 # --- compressão ---------------------------------------------------------------
@@ -136,7 +140,7 @@ def test_repeticao_exata_devolve_marcador(monkeypatch):
     finally:
         encerrar_turno(token)
 
-    assert isinstance(primeira, list) and len(primeira) == 2
+    assert isinstance(primeira, dict) and primeira["total"] == 2
     assert segunda == TEXTO_JA_CONSULTADO
 
 
@@ -269,3 +273,18 @@ def test_r1_ainda_acusa_afirmacao_de_cardapio_sem_tool():
 
 def test_r1_acusa_verbo_de_recomendacao_sem_tool():
     assert "R1-sem-tool-de-catalogo" in _ids("Recomendo o frango grelhado hoje.", _obs(), tools=[])
+
+
+def test_r4_nao_dispara_com_instrucao_operacional():
+    # A listagem de cardápio passou a devolver `nota_do_sistema` com instrução
+    # ("liste os 4 pratos"). Sem a marca de incerteza, a R4 acusaria toda
+    # resposta de cardápio como "total incompleto sem ressalva".
+    obs = _obs(CARDAPIO, avisos=["São 4 pratos. LISTE OS 4 na sua resposta."])
+    assert "R4-incompleto-sem-ressalva" not in _ids("O cardápio de hoje tem 4 pratos.", obs)
+
+
+def test_r4_dispara_com_marca_de_incerteza():
+    from app.agent.dominio.refeitorio.tools import MARCA_INCERTEZA
+
+    obs = _obs(CARDAPIO, avisos=[f"{MARCA_INCERTEZA} NÃO reconheci na base: xyzabc."])
+    assert "R4-incompleto-sem-ressalva" in _ids("No total foram 180 kcal.", obs)

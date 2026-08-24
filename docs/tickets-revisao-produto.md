@@ -190,11 +190,27 @@
 - **Fix:** restringir a checagem à seção de recomendação da resposta.
 
 ### IA-15 · O eval de 10 casos varia demais para ser gate — 🟠 Alto · M
-- **Status:** 🟠 Aberto. Medido em 4 rodadas com Haiku.
+- **Status:** ✅ Corrigido em `feat/motor-agente-onyx`. 39 casos em 6 baterias, com repetições (`EVAL_REPETICOES`), asserções estruturais por padrão, detectores textuais testados offline contra ~40 paráfrases e juiz LLM calibrado (17/17, zero falso positivo). A distinção defeito × instabilidade apareceu de imediato e achou o mais grave: "alérgico não recebe o alérgeno" em 2/3. Linha de base em `docs/eval-linha-de-base.md`.
 - **Achado:** depois das correções de IA-10/11/14, as rodadas deram **20% → 60% → 80% → 80% → 60%**. O piso subiu muito, mas a variância entre execuções é de ~20 pontos, e os casos que falham mudam a cada rodada.
 - **Problema:** com 10 casos, cada um vale 10 pontos — uma única resposta instável move o resultado mais que uma regressão real de prompt. Um gate assim fica vermelho por ruído e é ignorado em duas semanas, que é justamente o que o limiar de 90% queria evitar.
 - **Causa:** duas somadas. (a) amostra pequena; (b) as asserções restantes que dependem de REDAÇÃO ("a resposta contém 'não reconheci'") reprovam paráfrases corretas — o mesmo defeito do IA-14, que já foi resolvido nos casos onde dava para checar estrutura.
 - **Fix:** subir para 30–50 casos (reduz a variância por caso) e trocar o que sobrou de checagem textual por checagem estrutural (tools chamadas, argumentos, itens citados) ou por um juiz LLM com rubrica. **Benefício:** só então o número vira gate confiável e o limiar de 90% faz sentido.
+
+### IA-16 · Restrição declarada só na conversa não tem rede estrutural — 🟠 Alto · M
+- **Status:** 🟠 Aberto.
+- **Achado:** a R5 e a anotação `conflita_com_perfil` derivam do PERFIL salvo. Quem diz "sou vegetariano" no chat, sem perfil, fica protegido apenas pelo prompt — e a bateria mediu 2/3 nesse caso.
+- **Fix:** extrair restrições declaradas na conversa para o contexto do turno e alimentar a mesma anotação. **Benefício:** a barreira estrutural passa a cobrir o usuário anônimo, que é a maioria no refeitório.
+
+### IA-17 · Condição de saúde: o corpo da resposta ainda prescreve — 🟠 Alto · M
+- **Status:** 🔶 Parcial em `feat/motor-agente-onyx`.
+- **Achado:** o encaminhamento a médico/nutricionista passou a ser acrescentado em CÓDIGO (`pos_processar`), porque prompt e reminder reinjetado deram 0/3 de aderência. Mas o corpo da resposta segue entregando orientação dietética detalhada ("evite frituras", "prefira proteína e fibra", "coma devagar").
+- **Problema:** recomendação nutricional individualizada é ato privativo de nutricionista (CFN). O disclaimer no rodapé reduz o risco, não elimina.
+- **Fix:** restringir a resposta a "qual prato do cardápio combina melhor e por quê", sem lista de condutas alimentares.
+
+### IA-18 · Modelo cita macro que não buscou — 🟡 Médio · P
+- **Status:** 🟡 Aberto. Detectado pela R3 na bateria `honestidade`.
+- **Achado:** pergunta sobre proteína → `comparar_pratos` devolve só o critério pedido → a resposta cita carboidrato, que nenhuma tool expôs.
+- **Fix:** `comparar_pratos` devolver o conjunto completo de macros, ou o prompt exigir nova consulta antes de citar outro nutriente.
 
 ---
 

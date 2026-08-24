@@ -293,9 +293,15 @@ ASSERCOES = {
 }
 
 
+# A validação bloqueou a resposta gerada e devolveu a mensagem segura. NÃO é
+# falha: o usuário foi protegido. É contabilizado à parte, porque bloqueio
+# frequente indica prompt fraco mesmo com a rede funcionando.
+BLOQUEIO = "ValidacaoBloqueou"
+
+
 def conferir(ctx: Contexto, esperado: dict) -> list[str]:
     """Aplica as asserções declaradas no caso. Devolve as falhas."""
-    if ctx.erro:
+    if ctx.erro and ctx.erro != BLOQUEIO:
         return [f"turno falhou: {ctx.erro}"]
 
     falhas = []

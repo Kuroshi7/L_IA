@@ -45,7 +45,13 @@ _CONTINUACAO = {"ok", "obrigado", "obrigada", "valeu", "sim", "nao", "claro",
                 "perfeito", "legal", "show", "blz", "beleza", "uhum", "isso",
                 "quero", "vamos", "bora", "qual", "tem", "tudo", "tambem",
                 "outro", "outra", "mais", "menos", "esse", "essa", "esses", "aquele",
-                "e", "hoje", "amanha"}
+                "e", "hoje", "amanha",
+                # Artigos e demonstrativos: "e o outro?", "e a salada?" são
+                # continuações legítimas e caíam no classificador (ou eram
+                # barradas). Com ≤4 palavras e histórico, não há espaço para
+                # instrução maliciosa aqui.
+                "o", "a", "os", "as", "um", "uma", "isso", "esta", "estao", "tem",
+                "qual", "quais", "quanto", "quantos", "como", "pode", "posso", "sim"}
 
 # Tipo amplo: pode ser ChatOllama ou ChatAnthropic. Importa lazy para não exigir
 # o pacote do provider que não está em uso. Config (provider/modelo/url) vem de

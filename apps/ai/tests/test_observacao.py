@@ -30,6 +30,7 @@ def turno(monkeypatch):
         return [dict(p) for p in PRATOS]
 
     monkeypatch.setattr(t.go_api, "get_pratos", fake_get_pratos)
+    monkeypatch.setattr(t.go_api, "get_perfil", lambda uid: {"nome": "Teste", "alergias": [], "restricoes": []})
     monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
 
     token = iniciar_turno()
@@ -63,7 +64,9 @@ def test_tools_funcionam_fora_de_turno(monkeypatch):
     monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": None})())
 
     assert observacoes_do_turno() is None
-    assert len(t.listar_pratos_do_dia.invoke({"dia": "hoje"})) == 2
+    # A listagem devolve {total, pratos, nota_do_sistema}: o `total` explícito é
+    # o que dá ao modelo um alvo verificável para a regra contratual.
+    assert t.listar_pratos_do_dia.invoke({"dia": "hoje"})["total"] == 2
 
 
 def test_observacoes_colhem_itens_e_valores(turno):
@@ -73,6 +76,20 @@ def test_observacoes_colhem_itens_e_valores(turno):
     assert "arroz integral" in obs.itens_conhecidos           # normalizado, sem acento
     assert 110.0 in obs.valores_expostos                       # kcal exposta ao modelo
     assert obs.nomes_chamados == ["filtrar_pratos"]
+
+
+def test_listagem_traz_total_e_instrucao(turno):
+    out = t.listar_pratos_do_dia.invoke({"dia": "hoje"})
+    assert out["total"] == len(out["pratos"]) == 2
+    assert "2" in out["nota_do_sistema"]
+
+
+def test_listagem_vazia_proibe_sugestao(monkeypatch):
+    monkeypatch.setattr(t.go_api, "get_pratos", lambda u, d: [])
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": None})())
+    out = t.listar_pratos_do_dia.invoke({"dia": "hoje"})
+    assert out["total"] == 0
+    assert "NÃO sugira" in out["nota_do_sistema"]
 
 
 def test_listagem_nao_expoe_numeros_que_nao_mostrou(turno):
@@ -87,7 +104,9 @@ def test_listagem_nao_expoe_numeros_que_nao_mostrou(turno):
 
 
 def test_id_nao_vira_valor_exposto(turno):
-    t.listar_pratos_do_dia.invoke({"dia": "hoje"})
+    # Via filtrar_pratos, que devolve lista pura — sem o `total` da listagem,
+    # que É um número legítimo mostrado ao modelo.
+    t.filtrar_pratos.invoke({"dia": "hoje"})
     obs = observacoes_do_turno()
     assert 1.0 not in obs.valores_expostos and 2.0 not in obs.valores_expostos
 

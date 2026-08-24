@@ -56,4 +56,40 @@ def prato_combina_preferencia(prato: dict, preferencia: str) -> bool:
 
 
 def resumir(prato: dict) -> dict:
-    return {"id": prato["id"], "nome": prato["nome"], "categoria": prato.get("categoria", "")}
+    """Versão enxuta para listagem. O aviso de conflito com o perfil SEMPRE
+    acompanha — é a única informação da listagem que pode evitar um acidente."""
+    resumo = {"id": prato["id"], "nome": prato["nome"], "categoria": prato.get("categoria", "")}
+    if prato.get("conflita_com_perfil"):
+        resumo["conflita_com_perfil"] = prato["conflita_com_perfil"]
+    return resumo
+
+
+def conflitos_com_perfil(prato: dict, perfil: dict | None) -> list[str]:
+    """Por que este prato é incompatível com o perfil desta pessoa.
+
+    Existe porque filtrar não bastou. `filtrar_pratos` já devolve só o que é
+    seguro, mas o modelo às vezes recomenda a partir da lista CRUA de
+    `listar_pratos_do_dia` — e a regra contratual obriga mostrar essa lista
+    completa. Medido: numa a cada três conversas a salada com amendoim era
+    recomendada a quem tem alergia a amendoim no perfil.
+
+    Esconder o prato não é opção (a regra contratual manda listar tudo). Então o
+    aviso vai junto do item, no mesmo dicionário que o modelo lê. Segurança
+    alimentar não pode depender de o modelo lembrar de chamar a tool certa.
+    """
+    if not perfil:
+        return []
+
+    motivos = []
+    alergias = [a for a in (perfil.get("alergias") or []) if a]
+    if not prato_seguro_para_alergias(prato, alergias):
+        alergenos = {normalizar(a) for a in prato.get("alergenos", [])}
+        culpadas = [a for a in alergias if normalizar(a).replace("alergico a ", "") in alergenos
+                    or any(normalizar(a).replace("alergico a ", "") in x for x in alergenos)]
+        motivos.append(f"ALERGIA: contém {', '.join(culpadas or alergias)}")
+
+    for restricao in (perfil.get("restricoes") or []):
+        if restricao and not prato_atende_restricao(prato, restricao):
+            motivos.append(f"RESTRIÇÃO: não atende '{restricao}'")
+
+    return motivos

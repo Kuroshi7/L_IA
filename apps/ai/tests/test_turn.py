@@ -83,7 +83,7 @@ def test_sem_prazo_o_comportamento_e_o_de_sempre(monkeypatch):
 
     token = iniciar_turno(prazo=None)
     try:
-        assert len(t.listar_pratos_do_dia.invoke({"dia": "hoje"})) == 1
+        assert t.listar_pratos_do_dia.invoke({"dia": "hoje"})["total"] == 1
     finally:
         encerrar_turno(token)
 
@@ -110,3 +110,81 @@ def test_texto_da_resposta_aceita_blocos_do_anthropic():
     blocos = [{"type": "text", "text": "olá"}, {"type": "tool_use"}, {"type": "text", "text": " tudo bem"}]
     assert texto_da_resposta(blocos) == "olá tudo bem"
     assert texto_da_resposta("simples") == "simples"
+
+
+# --- reminder por assunto (condição de saúde) --------------------------------
+
+def test_reminder_de_saude_dispara_pelo_assunto():
+    # A regra 6c está no system prompt e media 0/3 de aderência: no meio de um
+    # prompt longo ela se perde. Aqui ela chega colada ao ponto de geração.
+    r = reminders_do_turno(rem.Gatilhos(), "sou diabético, o que é melhor pra mim?")
+    assert any(x.nome == "condicao_de_saude" for x in r)
+
+
+def test_reminder_de_saude_nao_dispara_em_conversa_comum():
+    assert reminders_do_turno(rem.Gatilhos(), "o que tem hoje?") == ()
+
+
+def test_reminder_de_saude_reconhece_variacoes():
+    for texto in ["tenho pressao alta", "estou gravida", "meu colesterol ta alto",
+                  "sou hipertenso", "tenho problema renal"]:
+        assert reminders_do_turno(rem.Gatilhos(), texto), texto
+
+
+def test_reminders_acumulam():
+    r = reminders_do_turno(rem.Gatilhos(primeira_interacao_do_dia=True), "sou diabético")
+    assert {x.nome for x in r} == {"primeira_do_dia", "condicao_de_saude"}
+
+
+def test_invariante_vale_para_o_reminder_de_saude():
+    for r in reminders_do_turno(rem.Gatilhos(True), "sou diabético"):
+        assert r.regra_de_origem in PERFIL.system_prompt
+
+
+# --- reinjeção contínua do reminder -----------------------------------------
+
+def test_reminder_volta_no_resultado_da_tool(monkeypatch):
+    # O reminder entra no fim da mensagem do usuário, mas deixa de ser a última
+    # coisa do contexto assim que a tool responde — e é DEPOIS disso que a
+    # resposta é gerada. Sem reinjeção, a instrução se perde exatamente no
+    # momento em que ela precisa valer.
+    from app.agent.motor.observacao import CHAVE_NOTA
+
+    monkeypatch.setattr(t.go_api, "get_pratos", lambda u, d: [{"id": 1, "nome": "X", "categoria": "c"}])
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": None})())
+
+    token = iniciar_turno(reminders=("LEMBRETE DE TESTE",))
+    try:
+        out = t.listar_pratos_do_dia.invoke({"dia": "hoje"})
+    finally:
+        encerrar_turno(token)
+
+    # A nota da própria tool tem precedência: ela sabe da situação concreta.
+    assert "LISTE" in out[CHAVE_NOTA]
+    assert "LEMBRETE DE TESTE" not in out[CHAVE_NOTA]
+
+
+def test_reinjecao_nao_altera_retorno_de_lista(monkeypatch):
+    monkeypatch.setattr(t.go_api, "get_pratos", lambda u, d: [
+        {"id": 1, "nome": "X", "categoria": "c", "restricoes_atendidas": [], "alergenos": [], "ingredientes": []}])
+    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": None})())
+
+    token = iniciar_turno(reminders=("LEMBRETE",))
+    try:
+        out = t.filtrar_pratos.invoke({"dia": "hoje"})
+    finally:
+        encerrar_turno(token)
+    assert isinstance(out, list)
+
+
+def test_reinjecao_so_atua_onde_a_tool_nao_falou():
+    # Medido: empilhar reminder genérico sobre a nota concreta da tool derrubou
+    # a regra contratual de 89% para 61% (texto mais longo dilui) e chegou a
+    # produzir instruções contraditórias no cardápio vazio.
+    from app.agent.motor.observacao import _reinjetar, CHAVE_NOTA
+
+    com_nota = _reinjetar({"x": 1, CHAVE_NOTA: "instrução da tool"}, ("reminder",))
+    assert com_nota[CHAVE_NOTA] == "instrução da tool"
+
+    sem_nota = _reinjetar({"x": 1}, ("reminder",))
+    assert sem_nota[CHAVE_NOTA] == "reminder"

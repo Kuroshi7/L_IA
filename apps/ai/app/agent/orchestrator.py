@@ -17,7 +17,6 @@ from app.agent.context import RequestContext, reset_context, set_context
 from app.agent.dominio.refeitorio.perfil import PERFIL
 from app.agent.dominio.refeitorio.perfil import prewarm  # noqa: F401 — reexport p/ o worker
 from app.agent.dominio.refeitorio.tools import CACHE_APROXIMADOS, CACHE_NAO_RECONHECIDOS
-from app.agent.dominio.refeitorio.validators import verificar_resposta
 from app.agent.motor import turn
 from app.agent.motor.reminders import Gatilhos
 
@@ -59,21 +58,6 @@ def processar_mensagem(
         )
     finally:
         reset_context(token)
-
-    # Pós-validação. Log-only por padrão: as regras ainda não têm taxa de falso
-    # positivo medida, e trocar uma resposta provavelmente boa por uma mensagem
-    # de erro é pior que registrar a suspeita. `VALIDACAO_BLOQUEANTE` promove
-    # regra a regra quando o log mostrar que vale.
-    veredicto = verificar_resposta(
-        resultado.resposta,
-        tools_chamadas=resultado.tools_chamadas,
-        session_id=session_id,
-        observacoes=resultado.observacoes,
-    )
-    if veredicto.bloqueia:
-        log.error("REQ BLOCK | regras=%s | session=%s", veredicto.ids, session_id[:12])
-        return {"resposta": PERFIL.resposta_erro_transiente, "fora_de_escopo": False,
-                "erro_interno": "ValidacaoBloqueou"}
 
     log.info(
         "REQ END | total=%.2fs | llm_calls=%s | resp_chars=%d | erro=%s",

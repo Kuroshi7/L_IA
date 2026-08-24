@@ -4,9 +4,12 @@ Este é o único arquivo que o motor precisa para rodar este produto. Trocar de
 produto significa escrever outro perfil ao lado deste; nada em `motor/` muda.
 """
 
+import re
+
 from app.agent.dominio.refeitorio import prompts
 from app.agent.dominio.refeitorio import tools as _t
 from app.agent.dominio.refeitorio import regras as _regras
+from app.agent.dominio.refeitorio.filters import normalizar
 from app.agent.dominio.refeitorio.guardrail import is_in_scope
 from app.agent.motor import llm
 from app.agent.motor.perfil import PerfilDeDominio
@@ -52,10 +55,49 @@ REMINDER_CARDAPIO_COMPLETO = Reminder(
 )
 
 
-def reminders_do_turno(gatilhos: Gatilhos) -> tuple[Reminder, ...]:
+REMINDER_SAUDE = Reminder(
+    nome="condicao_de_saude",
+    texto=prompts.REMINDER_CONDICAO_DE_SAUDE,
+    regra_de_origem="CONDIÇÃO DE SAÚDE",
+)
+
+# Condições que exigem encaminhamento a profissional. Lista do domínio, não do
+# motor — outro produto teria outros gatilhos (ou nenhum).
+_CONDICAO_DE_SAUDE = re.compile(
+    r"\b(diabet|pressao alta|hipertens|colesterol|triglicer|renal|rim|"
+    r"gestante|gravid|amamenta|anemia|celiac|gastrite|refluxo|bariatric|"
+    r"quimioterapia|tireoide)",
+    re.IGNORECASE,
+)
+
+
+def reminders_do_turno(gatilhos: Gatilhos, mensagem: str = "") -> tuple[Reminder, ...]:
+    ativos = []
     if gatilhos.primeira_interacao_do_dia:
-        return (REMINDER_CARDAPIO_COMPLETO,)
-    return ()
+        ativos.append(REMINDER_CARDAPIO_COMPLETO)
+    if _CONDICAO_DE_SAUDE.search(normalizar(mensagem or "")):
+        ativos.append(REMINDER_SAUDE)
+    return tuple(ativos)
+
+
+# Já encaminhou? Aceita qualquer forma de dizer, para não duplicar a frase
+# quando o modelo acertar sozinho.
+_JA_ENCAMINHOU = re.compile(
+    r"\b(medico|nutricionista|profissional de saude|endocrino|especialista)\b"
+)
+
+
+def pos_processar(resposta: str, gatilhos: Gatilhos, mensagem: str) -> str:
+    """Garante o encaminhamento a profissional quando o assunto exige.
+
+    Em código, não no prompt: com reminder reinjetado a aderência ficou em 0 de
+    3 medições. Exigência de conformidade não pode depender de o modelo lembrar.
+    """
+    if not _CONDICAO_DE_SAUDE.search(normalizar(mensagem or "")):
+        return resposta
+    if _JA_ENCAMINHOU.search(normalizar(resposta)):
+        return resposta
+    return resposta.rstrip() + prompts.ENCAMINHAMENTO_PROFISSIONAL
 
 
 PERFIL = PerfilDeDominio(
@@ -65,8 +107,13 @@ PERFIL = PerfilDeDominio(
     esta_no_escopo=is_in_scope,
     resposta_fora_de_escopo=prompts.RESPOSTA_FORA_DE_ESCOPO,
     resposta_erro_transiente=RESPOSTA_ERRO_TRANSIENTE,
+    resposta_bloqueada=(
+        "Opa, quase te indiquei algo que não combina com o seu perfil 😅 "
+        "Deixa eu conferir direitinho — pode me pedir a recomendação de novo?"
+    ),
     reminders=reminders_do_turno,
     regras=_regras.construir(REGISTRO),
+    pos_processar=pos_processar,
 )
 
 

@@ -60,6 +60,27 @@ e versionamento em [SemVer](https://semver.org/lang/pt-BR/).
 - **`cardapio_da_semana` responde "amanhã" no domingo** (aceita `data_alvo`).
 - **Confiança "média" virou sinal**: `aproximados` no contrato e segunda linha na nota.
 
+### Fixed — achados das baterias de eval (2026-08-23)
+Com 39 casos × 3 repetições ficou possível separar defeito de variância. O que se
+consertou, e como:
+- **Segurança alimentar deixou de depender do prompt.** O conflito com o perfil
+  (alergia ou restrição) passa a ser calculado em código e anotado no PRÓPRIO prato
+  (`conflita_com_perfil`), porque a regra contratual obriga mostrar o cardápio completo
+  e o modelo às vezes escolhia da lista crua. Mais a regra **R5**, única bloqueante por
+  padrão: é 100% estrutural e a única cujo erro pode mandar alguém ao hospital.
+  Medido: "alérgico não recebe o alérgeno" foi de 2/3 para 3/3, com a rede ainda
+  bloqueando 1–2 tentativas do modelo por rodada.
+- **Encaminhamento a profissional garantido em código** (`pos_processar` no perfil):
+  com prompt e reminder reinjetado a aderência ficou em 0/3, e exigência de
+  conformidade não admite "quase sempre".
+- **A listagem devolve `total` e instrução** em vez de uma lista nua. O caso de 8 pratos
+  foi de 1/3 para 3/3 — um número explícito dá ao modelo um alvo verificável.
+- **Lista vazia devolve instrução, não `[]`**: "não sugira nem cite nenhum prato".
+- **Reinjeção contínua de reminders** no resultado das tools, com precedência para a nota
+  da própria tool — empilhar as duas alongava a instrução e derrubou uma bateria de 89%
+  para 61%.
+- Guardrail aceita continuações com artigo ("e o outro?"); R3 enxerga `mg`.
+
 ### Known Issues
 - **IA-09:** as 17 divergências e os 105 alimentos sem par na TACO aguardam revisão da
   nutricionista. O sistema é honesto sobre a incerteza; a base ainda não está certa.

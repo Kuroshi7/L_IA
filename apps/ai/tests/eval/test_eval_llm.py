@@ -94,12 +94,13 @@ def _conferir(caso, ctx, _dados=None) -> list[str]:
     return assercoes.conferir(ctx, esperado)
 
 
-def _executar_uma_vez(caso, monkeypatch) -> list[str]:
+def _executar_uma_vez(caso, monkeypatch) -> tuple[list[str], bool]:
     try:
         ctx, dados = _rodar(caso, monkeypatch)
-        return _conferir(caso, ctx, dados)
+        bloqueou = bool(ctx and ctx.erro == assercoes.BLOQUEIO)
+        return _conferir(caso, ctx, dados), bloqueou
     except Exception as e:  # um caso quebrado não invalida a rodada inteira
-        return [f"exceção: {type(e).__name__}: {e}"]
+        return [f"exceção: {type(e).__name__}: {e}"], False
 
 
 def test_eval_das_regras_de_negocio(monkeypatch, capsys):
@@ -114,8 +115,9 @@ def test_eval_das_regras_de_negocio(monkeypatch, capsys):
     por_bateria: dict[str, list[tuple]] = defaultdict(list)
     for caso in casos:
         rodadas = execucoes[caso["nome"]]
-        acertos = sum(1 for f in rodadas if not f)
-        por_bateria[caso["bateria"]].append((caso, acertos, rodadas))
+        acertos = sum(1 for f, _ in rodadas if not f)
+        bloqueios = sum(1 for _, b in rodadas if b)
+        por_bateria[caso["bateria"]].append((caso, acertos, rodadas, bloqueios))
 
     linhas = ["", "=" * 100,
               f"EVAL — {len(casos)} casos × {REPETICOES} repetição(ões) = {len(casos) * REPETICOES} execuções",
@@ -124,10 +126,10 @@ def test_eval_das_regras_de_negocio(monkeypatch, capsys):
     defeitos, instaveis = [], []
     for bateria in sorted(por_bateria):
         itens = por_bateria[bateria]
-        ok = sum(a for _, a, _ in itens)
+        ok = sum(a for _, a, _, _ in itens)
         tot = len(itens) * REPETICOES
         linhas.append(f"\n■ {bateria.upper():<16} {ok}/{tot} ({ok / tot:.0%})")
-        for caso, acertos, rodadas in sorted(itens, key=lambda x: x[1]):
+        for caso, acertos, rodadas, bloqueios in sorted(itens, key=lambda x: x[1]):
             if acertos == REPETICOES:
                 marca = "  ok  "
             elif acertos == 0:
@@ -136,18 +138,22 @@ def test_eval_das_regras_de_negocio(monkeypatch, capsys):
             else:
                 marca = "instav"
                 instaveis.append(caso)
-            linhas.append(f"  [{marca}] {acertos}/{REPETICOES}  {caso['nome']}")
+            aviso = f"  (rede bloqueou {bloqueios}x)" if bloqueios else ""
+            linhas.append(f"  [{marca}] {acertos}/{REPETICOES}  {caso['nome']}{aviso}")
             if acertos < REPETICOES:
-                motivos = {f for r in rodadas for f in r}
+                motivos = {f for r, _ in rodadas for f in r}
                 linhas += [f"            · {m}" for m in sorted(motivos)]
 
-    total_ok = sum(a for itens in por_bateria.values() for _, a, _ in itens)
+    total_ok = sum(a for itens in por_bateria.values() for _, a, _, _ in itens)
+    total_bloqueios = sum(b for itens in por_bateria.values() for _, _, _, b in itens)
     total = len(casos) * REPETICOES
     taxa = total_ok / total
 
     linhas += ["", "-" * 100,
                f"execuções: {total_ok}/{total} ({taxa:.0%}) | mínimo {TAXA_MINIMA:.0%}",
                f"defeitos (0/{REPETICOES}): {len(defeitos)}" + (f" → {[c['nome'] for c in defeitos]}" if defeitos else ""),
+               f"bloqueios pela rede de segurança: {total_bloqueios}"
+               + (" (resposta insegura não chegou ao usuário; prompt ainda tentou)" if total_bloqueios else ""),
                f"instáveis: {len(instaveis)}" + (f" → {[c['nome'] for c in instaveis]}" if instaveis else ""),
                ""]
     if REPETICOES == 1:

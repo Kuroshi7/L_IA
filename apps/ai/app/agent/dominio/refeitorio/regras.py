@@ -77,7 +77,9 @@ def _parece_nome_de_item(bruto: str, seguinte: str) -> bool:
         return False
     return True
 
-_NUMERO_COM_UNIDADE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kcal|g\b)", re.IGNORECASE)
+# mg entra porque perguntam sódio e cálcio — dados que a tool NÃO devolve, e
+# que o modelo estimava sem nenhum sinal de alarme.
+_NUMERO_COM_UNIDADE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kcal|mg|g)\b", re.IGNORECASE)
 
 # Palavras com que a resposta reconhece que não sabe. Se nenhuma aparecer quando
 # houve item ignorado, a Lia apresentou um total incompleto como final.
@@ -209,11 +211,74 @@ def _numero_nao_exposto(a: Achado) -> str | None:
     return f"números citados que nenhuma tool expôs: {fora}"
 
 
+# --- R5 ----------------------------------------------------------------------
+
+# Trechos em que a Lia assume uma escolha. Citar um prato ao LISTAR o cardápio
+# (obrigatório pela regra contratual) não é recomendá-lo.
+# "pode comer" ficou de FORA: a resposta correta a "posso comer X?" é justamente
+# "você NÃO pode comer X", e a marca fazia a R5 tratar o alerta como recomendação
+# — bloqueando o aviso de segurança que ela existe para garantir.
+_MARCA_ESCOLHA = re.compile(
+    r"\b(recomendo|recomendacao|recomendaria|sugiro|sugestao|indico|monte|montaria|"
+    r"vai bem|melhor opcao|minha escolha|fica com|escolha o|escolha a)\b"
+)
+
+
+def _formas_do_nome(nome: str) -> list[str]:
+    """Como o modelo pode ter escrito este prato.
+
+    Ele abrevia: "Salada de grão-de-bico com amendoim" vira "Salada de
+    grão-de-bico". Exigir o nome exato fazia a regra passar por cima justamente
+    do caso perigoso. Cortamos só qualificadores no fim — nunca até a primeira
+    palavra, senão "salada" casaria com "Salada verde".
+    """
+    base = normalizar(nome)
+    formas = [base]
+    for corte in (" com ", " ao ", " a ", " e "):
+        if corte in base:
+            prefixo = base.split(corte)[0].strip()
+            if len(prefixo.split()) >= 2:
+                formas.append(prefixo)
+    return formas
+
+
+def _recomendou_prato_conflitante(a: Achado) -> str | None:
+    """Recomendou algo que o perfil da pessoa proíbe.
+
+    A última barreira de segurança alimentar, e a única inteiramente estrutural:
+    o conflito vem anotado no próprio prato (`conflita_com_perfil`), calculado em
+    código a partir do perfil — não de o modelo ter lembrado da alergia.
+    """
+    obs = a.observacoes
+    if obs is None or not obs.itens_conhecidos:
+        return None
+
+    norm = normalizar(a.resposta)
+    m = _MARCA_ESCOLHA.search(norm)
+    if not m:
+        return None
+    trecho = norm[m.start():]
+
+    acusados = []
+    for nome, item in obs.itens_conhecidos.items():
+        motivos = item.get("conflita_com_perfil") if isinstance(item, dict) else None
+        if motivos and any(f in trecho for f in _formas_do_nome(nome)):
+            acusados.append(f"{item.get('nome', nome)} ({'; '.join(motivos)})")
+    if not acusados:
+        return None
+    return f"recomendou prato incompatível com o perfil: {acusados}"
+
+
 # --- R4 ----------------------------------------------------------------------
 
 def _total_incompleto_sem_ressalva(a: Achado) -> str | None:
+    from app.agent.dominio.refeitorio.tools import MARCA_INCERTEZA
+
     obs = a.observacoes
-    if obs is None or not obs.avisos:
+    # Só as notas de INCERTEZA contam. Toda tool pode devolver `nota_do_sistema`
+    # com instrução operacional; acusar por qualquer nota faria a regra disparar
+    # em toda listagem de cardápio.
+    if obs is None or not any(MARCA_INCERTEZA in v for v in obs.avisos):
         return None
     if not any(v in normalizar(a.resposta) for v in _RESSALVAS):
         return "houve item não reconhecido no turno e a resposta não ressalvou a incerteza"
@@ -227,4 +292,7 @@ def construir(registro):
         ("R2-prato-fora-do-cardapio", _prato_fora_do_cardapio),
         ("R3-numero-nao-exposto", _numero_nao_exposto),
         ("R4-incompleto-sem-ressalva", _total_incompleto_sem_ressalva),
+        # Estrutural e de segurança: é a candidata natural a ser a primeira regra
+        # promovida a bloqueante em `VALIDACAO_BLOQUEANTE`.
+        ("R5-prato-conflita-com-perfil", _recomendou_prato_conflitante),
     )

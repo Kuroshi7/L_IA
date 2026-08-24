@@ -29,6 +29,7 @@ from app.agent.motor.observacao import (
     observacoes_do_turno,
 )
 from app.agent.motor.registry import tools_do_turno
+from app.agent.motor.validacao import Veredicto, verificar
 
 log = logging.getLogger("chat")
 
@@ -46,6 +47,7 @@ class ResultadoDeTurno:
     # Cache do turno, devolvido junto: é onde o domínio deixa o que precisa
     # sobreviver ao fim do turno (o ContextVar é resetado na saída).
     cache: dict = field(default_factory=dict)
+    veredicto: Veredicto | None = None
 
 
 def historico_para_mensagens(historico) -> list[BaseMessage]:
@@ -94,10 +96,11 @@ def executar_turno(
 
     specs = tools_do_turno(perfil.registro, contexto)
     agente = obter_executor(perfil.nome, perfil.system_prompt, specs)
-    mensagens = montar_mensagens(historico, mensagem, perfil.reminders(gatilhos))
+    ativos = perfil.reminders(gatilhos, mensagem)
+    mensagens = montar_mensagens(historico, mensagem, ativos)
     callback = TimingCallback(session_id=session_id)
 
-    token = iniciar_turno(prazo=prazo)
+    token = iniciar_turno(prazo=prazo, reminders=tuple(r.texto for r in ativos))
     try:
         resultado = agente.invoke(
             {"messages": mensagens},
@@ -130,13 +133,29 @@ def executar_turno(
     else:
         final = resultado.get("messages", [])
         bruto = getattr(final[-1], "content", "") if final else ""
-        return ResultadoDeTurno(
+        saida = ResultadoDeTurno(
             resposta=texto_da_resposta(bruto).strip() or RESPOSTA_VAZIA,
             llm_calls=callback.llm_calls,
             tools_chamadas=callback.tools_chamadas,
             observacoes=observacoes_do_turno(),
             cache=cache_do_turno() or {},
         )
+
+        saida.resposta = perfil.pos_processar(saida.resposta, gatilhos, mensagem)
+
+        # A validação faz parte do turno, não da fachada: é a última coisa que
+        # acontece antes de a resposta existir, e quem chama o turno (inclusive o
+        # eval) precisa ver o mesmo comportamento que o usuário vê.
+        saida.veredicto = verificar(
+            perfil.regras, saida.resposta,
+            tools_chamadas=saida.tools_chamadas, observacoes=saida.observacoes,
+            session_id=session_id, bloqueantes=config.VALIDACAO_BLOQUEANTE,
+        )
+        if saida.veredicto.bloqueia:
+            log.error("REQ BLOCK | regras=%s | session=%s", saida.veredicto.ids, session_id[:12])
+            saida.resposta = perfil.resposta_bloqueada
+            saida.erro = "ValidacaoBloqueou"
+        return saida
     finally:
         encerrar_turno(token)
 

@@ -54,8 +54,14 @@ PREFETCH = int(os.getenv("WORKER_PREFETCH", "1"))
 # resposta provavelmente boa por uma mensagem de erro, e reparar exigiria mais
 # uma chamada de modelo dentro de um orçamento de 60s. Promover uma regra só
 # depois de medir a taxa de falso positivo nos logs `VALIDACAO | regra=`.
+# R5 nasce bloqueante, sozinha. É a única regra 100% estrutural (o conflito vem
+# anotado no prato, calculado em código a partir do perfil) e a única cujo erro
+# pode mandar alguém para o hospital. Nas demais, bloquear trocaria uma resposta
+# provavelmente boa por uma mensagem de erro — aqui, deixar passar é pior.
 VALIDACAO_BLOQUEANTE = frozenset(
-    r.strip() for r in os.getenv("VALIDACAO_BLOQUEANTE", "").split(",") if r.strip()
+    r.strip() for r in os.getenv(
+        "VALIDACAO_BLOQUEANTE", "R5-prato-conflita-com-perfil"
+    ).split(",") if r.strip()
 )
 
 # Repetição exata de tool (mesmo nome, mesmos argumentos) devolve um marcador em

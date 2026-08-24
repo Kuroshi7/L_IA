@@ -123,6 +123,12 @@ def _acumular(chave: str, termos) -> None:
             acumulado.append(termo)
 
 
+# Prefixo estável nas notas que falam de INCERTEZA. A R4 se ancora nele: sem
+# isso ela dispararia em qualquer `nota_do_sistema`, inclusive a instrução
+# operacional que a listagem de cardápio passou a carregar.
+MARCA_INCERTEZA = "INCERTEZA:"
+
+
 def _nota_de_incerteza(q: Qualidade) -> str:
     partes = []
     if q.ignorados:
@@ -134,10 +140,46 @@ def _nota_de_incerteza(q: Qualidade) -> str:
         )
     if q.imprecisos:
         partes.append(
-            "Interpretei por aproximação: " + "; ".join(sorted(set(q.imprecisos))) + ". "
-            "Confirme com o usuário antes de tratar esses números como certos."
+            "Interpretei por APROXIMAÇÃO: " + "; ".join(sorted(set(q.imprecisos))) + ". "
+            "Diga ao usuário, com a palavra \"aproximado\" ou \"estimativa\", que esses "
+            "números não são exatos, e confirme com ele antes de tratá-los como certos."
         )
-    return " ".join(partes)
+    return f"{MARCA_INCERTEZA} " + " ".join(partes) if partes else ""
+
+
+def _perfil_do_turno() -> dict | None:
+    """Perfil do usuário, uma leitura por turno. Silencioso em caso de erro:
+    perfil indisponível não pode derrubar o cardápio."""
+    ctx = current_context()
+    if not getattr(ctx, "usuario_id", None):
+        return None
+    cache = cache_do_turno()
+    if cache is not None and "perfil" in cache:
+        return cache["perfil"]
+    try:
+        perfil = go_api.get_perfil(ctx.usuario_id)
+    except Exception:
+        perfil = None
+    if cache is not None:
+        cache["perfil"] = perfil
+    return perfil
+
+
+def _anotar_conflitos(pratos: list[dict]) -> list[dict]:
+    """Marca cada prato incompatível com o perfil, sem removê-lo da lista.
+
+    A regra contratual obriga mostrar o cardápio COMPLETO, então esconder não é
+    opção — mas entregar a lista crua sem aviso deixava a segurança alimentar
+    na mão da memória do modelo.
+    """
+    perfil = _perfil_do_turno()
+    if not perfil:
+        return pratos
+    anotados = []
+    for p in pratos:
+        motivos = filters.conflitos_com_perfil(p, perfil)
+        anotados.append({**p, "conflita_com_perfil": motivos} if motivos else p)
+    return anotados
 
 
 def _pratos(dia: str) -> list[dict]:
@@ -155,23 +197,52 @@ def _pratos(dia: str) -> list[dict]:
         return go_api.get_pratos(ctx.unidade_id, dia)
     chave = ("pratos", ctx.unidade_id, dia)
     if chave not in cache:
-        cache[chave] = go_api.get_pratos(ctx.unidade_id, dia)
+        cache[chave] = _anotar_conflitos(go_api.get_pratos(ctx.unidade_id, dia))
     return cache[chave]
 
 
 @tool
 @observado
-def listar_pratos_do_dia(dia: str = "hoje") -> list[dict]:
+def listar_pratos_do_dia(dia: str = "hoje") -> dict:
     """Lista TODOS os pratos do cardápio do dia da unidade atual. `dia` aceita 'hoje'
-    ou data ISO '2026-05-28'. Retorna [{id, nome, categoria}, ...]. Use SEMPRE quando o
-    usuário pedir o cardápio — mostre a lista completa antes de recomendar."""
-    pratos = _pratos(dia)
-    return [filters.resumir(p) for p in pratos]
+    ou data ISO '2026-05-28'. Use SEMPRE quando o usuário pedir o cardápio — mostre a
+    lista completa antes de recomendar.
+
+    Retorna {total, pratos: [{id, nome, categoria, conflita_com_perfil?}], nota_do_sistema}.
+    `total` é quantos pratos existem: sua resposta precisa citar todos eles."""
+    pratos = [filters.resumir(p) for p in _pratos(dia)]
+
+    # `total` explícito e a nota logo abaixo existem porque o modelo resumia o
+    # cardápio quando ele crescia — com 8 pratos, chegava a omitir 5. O número
+    # dá a ele um alvo verificável, e a nota chega no fim do contexto (é o
+    # resultado da tool), que é onde instrução é obedecida.
+    if not pratos:
+        return {
+            "total": 0, "pratos": [],
+            "nota_do_sistema": (
+                f"Nenhum prato cadastrado para '{dia or 'hoje'}'. NÃO sugira nem cite "
+                "nenhum prato — nem de memória, nem 'o que costuma ter'. Diga que o "
+                "cardápio ainda não foi publicado e ofereça consultar outro dia."
+            ),
+        }
+
+    nota = (
+        f"São {len(pratos)} pratos. LISTE OS {len(pratos)} na sua resposta, com o nome "
+        "exato, ANTES de qualquer recomendação — é regra contratual, vale mesmo que o "
+        "usuário só tenha pedido uma sugestão."
+    )
+    conflitantes = [p["nome"] for p in pratos if p.get("conflita_com_perfil")]
+    if conflitantes:
+        nota += (
+            f" ATENÇÃO: {conflitantes} são incompatíveis com o perfil desta pessoa "
+            "(veja `conflita_com_perfil`). Liste-os no cardápio, mas NUNCA os recomende."
+        )
+    return {"total": len(pratos), "pratos": pratos, "nota_do_sistema": nota}
 
 
 @tool
 @observado
-def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str = "", dia: str = "hoje") -> list[dict]:
+def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str = "", dia: str = "hoje") -> list[dict] | str:
     """Filtra os pratos do dia (da unidade atual) que atendem TODAS as restrições, são
     seguros para TODAS as alergias e combinam com as preferências. Use ao recomendar.
 
@@ -190,6 +261,15 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
         if pref and not any(filters.prato_combina_preferencia(p, x) for x in pref):
             continue
         compativeis.append(p)
+
+    if not compativeis:
+        # Regra inviolável 4. Devolver [] deixava o modelo livre para "ajudar"
+        # inventando algo plausível; a instrução vai junto do resultado.
+        return (
+            "Nenhum prato do cardápio atende a esses critérios. NÃO sugira nada fora "
+            "do cardápio nem force um prato que não atende. Diga isso ao usuário e "
+            "pergunte se ele pode flexibilizar algum critério."
+        )
     return compativeis
 
 
@@ -322,10 +402,10 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
         resultado = {
             "previa": previa,
             "instrucao": (
-                "PRÉVIA — nada foi salvo. Mostre ao usuário os itens interpretados e as "
+                "PRÉVIA — NADA FOI SALVO AINDA. Diga isso ao usuário com estas palavras. Mostre os itens interpretados e as "
                 "calorias do que ele COMEU e, se houver, do que SOBROU no prato, e pergunte "
-                "se está correto. Só depois da confirmação dele, chame registrar_consumo de "
-                "novo com os MESMOS itens/sobras e confirmado=true."
+                "se está correto ANTES de salvar. Só depois de ele confirmar, chame registrar_consumo "
+                "de novo com os MESMOS itens/sobras e confirmado=true."
             ),
         }
         return anexar_ao_resultado(resultado, _nota_de_incerteza(q))
