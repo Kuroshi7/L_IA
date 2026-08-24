@@ -176,3 +176,64 @@ def test_fake_preserva_o_que_o_dataset_declara(monkeypatch):
     out = t.go_api.calcular_consumo([{"alimento": "arroz", "medida": "concha", "quantidade": 2}])
     assert out["itens_ignorados"] == ["escondidinho da vovo"]
     assert out["completo"] is False
+
+
+# --- juiz indisponível não é veredicto --------------------------------------
+
+def test_juiz_indisponivel_e_registrado_separado_do_veredicto(monkeypatch):
+    """Cota estourada devolve o mesmo False de "reprovado", e as duas coisas
+    têm leitura oposta. Sem esta separação, 50 requisições/dia esgotadas
+    leram como 53% de acurácia de um juiz que nunca respondeu."""
+    from tests.eval import juiz
+
+    juiz.limpar()
+
+    class Quebrado:
+        def invoke(self, _):
+            raise RuntimeError("Error code: 429 - free-models-per-day")
+
+    monkeypatch.setattr(juiz, "_modelo", lambda: Quebrado())
+    assert juiz.julgar("qualquer resposta", "qualquer critério") is False
+    assert len(juiz.INDISPONIVEIS) == 1
+    assert "429" in juiz.INDISPONIVEIS[0]
+    juiz.limpar()
+
+
+def test_juiz_nao_cacheia_indisponibilidade(monkeypatch):
+    # Guardar a falha no cache propagaria um 429 momentâneo para toda a rodada,
+    # e a tentativa seguinte leria o erro antigo em vez de perguntar de novo.
+    from tests.eval import juiz
+
+    juiz.limpar()
+    tentativas = []
+
+    class Instavel:
+        def invoke(self, _):
+            tentativas.append(1)
+            if len(tentativas) == 1:
+                raise RuntimeError("429")
+            return type("R", (), {"content": "SIM"})()
+
+    monkeypatch.setattr(juiz, "_modelo", lambda: Instavel())
+    assert juiz.julgar("r", "c") is False
+    assert juiz.julgar("r", "c") is True, "a segunda tentativa leu o 429 do cache"
+    juiz.limpar()
+
+
+def test_juiz_cacheia_veredicto_de_verdade(monkeypatch):
+    from tests.eval import juiz
+
+    juiz.limpar()
+    chamadas = []
+
+    class Ok:
+        def invoke(self, _):
+            chamadas.append(1)
+            return type("R", (), {"content": "NAO"})()
+
+    monkeypatch.setattr(juiz, "_modelo", lambda: Ok())
+    assert juiz.julgar("r", "c") is False
+    assert juiz.julgar("r", "c") is False
+    assert len(chamadas) == 1, "veredicto real deveria vir do cache"
+    assert juiz.INDISPONIVEIS == []
+    juiz.limpar()

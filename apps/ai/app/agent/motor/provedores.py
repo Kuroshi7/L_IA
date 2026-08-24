@@ -34,13 +34,18 @@ def _openai_compativel(base_url: str, chave: str, modelo: str, temperatura: floa
 
 
 def construir(temperatura: float, max_tokens: int, num_ctx: int | None = None,
-              provider: str | None = None):
+              provider: str | None = None, modelo: str | None = None):
     """Modelo do provider pedido, ou do configurado em `LLM_PROVIDER`.
 
     O parâmetro existe para quem precisa de um modelo INDEPENDENTE do que o
     agente usa — hoje, o juiz do eval: modelo julgando saída da própria
     família tende a erro correlacionado, e trocar o provider do agente não
     pode arrastar o juiz junto.
+
+    `modelo` existe pelo mesmo motivo, um nível abaixo: dá para ficar no mesmo
+    provider e ainda assim julgar com outro modelo. Num provider que serve
+    dezenas de famílias, é o que separa juiz de avaliado sem manter conta em
+    dois lugares.
 
     `num_ctx` só existe para o Ollama, que precisa da janela declarada no
     cliente; os demais a inferem do modelo.
@@ -55,9 +60,10 @@ def construir(temperatura: float, max_tokens: int, num_ctx: int | None = None,
                 "LLM_PROVIDER=anthropic mas ANTHROPIC_API_KEY não está definida. "
                 "Defina no .env ou troque LLM_PROVIDER."
             )
-        log.info("LLM provider=anthropic | model=%s", config.ANTHROPIC_MODEL)
+        nome = modelo or config.ANTHROPIC_MODEL
+        log.info("LLM provider=anthropic | model=%s", nome)
         return ChatAnthropic(
-            model=config.ANTHROPIC_MODEL,
+            model=nome,
             max_tokens=max_tokens,
             temperature=temperatura,
             timeout=config.LLM_TIMEOUT_SECONDS,
@@ -69,18 +75,29 @@ def construir(temperatura: float, max_tokens: int, num_ctx: int | None = None,
             raise RuntimeError(
                 "LLM_PROVIDER=openrouter mas OPENROUTER_API_KEY não está definida."
             )
-        log.info("LLM provider=openrouter | model=%s", config.OPENROUTER_MODEL)
+        nome = modelo or config.OPENROUTER_MODEL
+        if nome in ("openrouter/free", "openrouter/auto"):
+            # Roteador sorteia o modelo a cada chamada. Serve para produção
+            # (disponibilidade), atrapalha medição: duas rodadas da mesma
+            # bateria deixam de ser comparáveis, e a variação lida como
+            # regressão do produto é variação de quem respondeu.
+            log.warning(
+                "LLM provider=openrouter | model=%s é ROTEADOR — o modelo muda a cada "
+                "chamada. Para medir, fixe OPENROUTER_MODEL num modelo específico.", nome,
+            )
+        log.info("LLM provider=openrouter | model=%s", nome)
         return _openai_compativel(
             config.OPENROUTER_BASE_URL, config.OPENROUTER_API_KEY,
-            config.OPENROUTER_MODEL, temperatura, max_tokens,
+            nome, temperatura, max_tokens,
         )
 
     # default: ollama
     from langchain_ollama import ChatOllama
 
-    log.info("LLM provider=ollama | model=%s | base=%s", config.OLLAMA_MODEL, config.OLLAMA_BASE_URL)
+    nome = modelo or config.OLLAMA_MODEL
+    log.info("LLM provider=ollama | model=%s | base=%s", nome, config.OLLAMA_BASE_URL)
     return ChatOllama(
-        model=config.OLLAMA_MODEL,
+        model=nome,
         base_url=config.OLLAMA_BASE_URL,
         temperature=temperatura,
         keep_alive="30m",

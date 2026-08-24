@@ -31,7 +31,7 @@ from app.agent.context import RequestContext, reset_context, set_context
 from app.agent.dominio.refeitorio.perfil import PERFIL
 from app.agent.motor import turn
 from app.agent.motor.reminders import Gatilhos
-from tests.eval import assercoes, fakes
+from tests.eval import assercoes, fakes, juiz
 
 TAXA_MINIMA = float(os.getenv("EVAL_TAXA_MINIMA", "0.90"))
 REPETICOES = int(os.getenv("EVAL_REPETICOES", "1"))
@@ -156,6 +156,12 @@ def test_eval_das_regras_de_negocio(monkeypatch, capsys):
                + (" (resposta insegura não chegou ao usuário; prompt ainda tentou)" if total_bloqueios else ""),
                f"instáveis: {len(instaveis)}" + (f" → {[c['nome'] for c in instaveis]}" if instaveis else ""),
                ""]
+    if juiz.INDISPONIVEIS:
+        linhas.append(
+            f"ATENÇÃO: {len(juiz.INDISPONIVEIS)} julgamento(s) NÃO aconteceram (cota, rede ou "
+            f"modelo fora do ar). A taxa acima está subestimada e não serve de parâmetro. "
+            f"Primeiro motivo: {juiz.INDISPONIVEIS[0]}\n"
+        )
     if REPETICOES == 1:
         linhas.append("NOTA: com 1 repetição não dá para separar defeito de variância. "
                       "Use EVAL_REPETICOES=3 para o número valer como parâmetro.\n")
@@ -163,6 +169,10 @@ def test_eval_das_regras_de_negocio(monkeypatch, capsys):
     with capsys.disabled():
         print("\n".join(linhas))
 
+    assert not juiz.INDISPONIVEIS, (
+        f"{len(juiz.INDISPONIVEIS)} julgamento(s) não aconteceram — a rodada não mediu o "
+        f"produto, mediu a disponibilidade do juiz. Primeiro motivo: {juiz.INDISPONIVEIS[0]}"
+    )
     assert taxa >= TAXA_MINIMA, (
         f"taxa {taxa:.0%} abaixo do mínimo {TAXA_MINIMA:.0%} — "
         f"{len(defeitos)} defeito(s) e {len(instaveis)} instável(is); veja a tabela acima"

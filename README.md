@@ -90,8 +90,29 @@ docker compose run --rm ai-indexer   # (opcional) indexa os guias no pgvector p/
 - API Go: http://localhost:8080/health
 - RabbitMQ UI: http://localhost:15672 (guest/guest)
 
-Para usar Claude em vez do Ollama: `LLM_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` no `.env`
-(o RAG ainda usa embeddings; mantenha o Ollama com `nomic-embed-text` ou troque `EMBED_PROVIDER`).
+Provedor do modelo em `LLM_PROVIDER`: `ollama` (padrão), `anthropic` ou `openrouter`.
+Os três passam pelo mesmo `motor/provedores.py`; trocar é uma variável, não um refactor.
+(O RAG ainda usa embeddings; mantenha o Ollama com `nomic-embed-text` ou troque `EMBED_PROVIDER`.)
+
+**OpenRouter** (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`) fala o protocolo da OpenAI, então o mesmo
+caminho serve para vLLM, LiteLLM ou Together — só muda a URL. O default `openrouter/free` é um
+**roteador**: sorteia entre os modelos gratuitos a cada chamada. Bom para produção (disponibilidade),
+ruim para medir — duas rodadas da mesma bateria deixam de ser comparáveis, e variação de quem
+respondeu lê como regressão do produto. Para **avaliar**, fixe um modelo:
+
+```bash
+OPENROUTER_MODEL=google/gemma-4-31b-it:free    # o avaliado
+EVAL_JUIZ_PROVIDER=openrouter
+EVAL_JUIZ_MODELO=z-ai/glm-5.2:free             # o juiz, de outra família
+```
+
+O juiz precisa ser fixo **e** de família diferente do avaliado: modelo julgando saída da própria
+família erra de forma correlacionada. Isso vale mesmo com um provedor só — num provedor que serve
+dezenas de famílias, "mesmo provedor" deixou de significar "mesmo modelo".
+
+> **Cota do free tier:** 50 requisições/dia (1.000/dia com US$ 10 de crédito). Uma bateria de 10
+> casos × 3 repetições gasta ~120 requisições entre agente e juiz; a rodada completa de 6 baterias,
+> ~700. Ou seja: o free tier cobre desenvolvimento e demonstração, **não** cobre uma rodada de eval.
 
 Escalar concorrência de IA: `docker compose up -d --scale ai-worker=3`.
 

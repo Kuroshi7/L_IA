@@ -45,17 +45,33 @@ def _modelo():
     if _MODELO is None:
         from app.agent.motor import provedores
 
-        # EVAL_JUIZ_PROVIDER desacopla o juiz do agente. Sem isso, medir o
-        # agente em outro provider trocava o juiz junto — e um juiz não
+        # EVAL_JUIZ_PROVIDER/_MODELO desacoplam o juiz do agente. Sem isso,
+        # medir o agente em outro provider trocava o juiz junto — e um juiz não
         # calibrado, com falha fechada, reprova o que não consegue julgar.
+        # O _MODELO importa mesmo com um provider só: num provider que serve
+        # muitas famílias, "mesmo provider" não significa mais "mesmo modelo",
+        # e é o modelo que precisa ser fixo e diferente do avaliado.
         _MODELO = provedores.construir(
             temperatura=0, max_tokens=4,
             provider=os.getenv("EVAL_JUIZ_PROVIDER") or None,
+            modelo=os.getenv("EVAL_JUIZ_MODELO") or None,
         )
     return _MODELO
 
 
 _cache: dict[tuple[str, str], bool] = {}
+
+# Motivos pelos quais o juiz não conseguiu julgar. Separado do veredicto de
+# propósito: "reprovado" e "não consegui avaliar" são a mesma saída (False) e
+# leituras opostas. Sem esta lista, cota estourada lê como produto ruim — foi
+# o que aconteceu: 50 requisições/dia esgotadas, todo o lote em 429, e a
+# calibração reportou 53% de acurácia de um juiz que nunca respondeu.
+INDISPONIVEIS: list[str] = []
+
+
+def limpar() -> None:
+    _cache.clear()
+    INDISPONIVEIS.clear()
 
 
 def julgar(resposta: str, criterio: str) -> bool:
@@ -77,7 +93,11 @@ def julgar(resposta: str, criterio: str) -> bool:
         veredicto = bool(re.match(r"\s*sim\b", texto.strip(), re.IGNORECASE))
     except Exception as e:
         log.warning("juiz indisponível (%s: %s) — reprovando por segurança", type(e).__name__, e)
-        veredicto = False
+        INDISPONIVEIS.append(f"{type(e).__name__}: {str(e)[:160]}")
+        # Não entra no cache: guardar a indisponibilidade como veredicto
+        # propagaria uma falha momentânea por toda a rodada, e uma nova
+        # tentativa depois da cota voltar leria o 429 antigo.
+        return False
 
     _cache[chave] = veredicto
     return veredicto

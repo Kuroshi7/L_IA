@@ -26,7 +26,10 @@ TERMOS_DE_DOMINIO = [
     (r"nutri", "nutrição é domínio"),
     (r"\bkcal\b|caloria", "use 'valor' — unidade nutricional é domínio"),
     (r"unidade_id|\bunidades?\b", "escopo do domínio; o motor trata contexto como opaco"),
-    (r"\bLia\b|Lia[A-Z]", "persona do produto atual não pertence ao motor"),
+    # `(?-i:...)` porque a varredura roda em IGNORECASE: sem isso a segunda
+    # alternativa — que existe para pegar CamelCase tipo `LiaTimingCallback` —
+    # vira `lia[a-z]` e acusa "famílias", "aliados", "familiar".
+    (r"\bLia\b|(?-i:Lia[A-Z])", "persona do produto atual não pertence ao motor"),
     (r"restri[çc][ãa]o|restricao", "restrição alimentar é domínio"),
     (r"alergi", "alergia é domínio"),
 ]
@@ -66,3 +69,25 @@ def test_motor_nao_importa_o_dominio():
                 violacoes.append(f"{arquivo.name}:{n} — {linha.strip()}")
 
     assert not violacoes, "motor/ importando de dominio/:\n" + "\n".join(violacoes)
+
+
+def test_varredura_nao_acusa_palavra_comum():
+    """A varredura precisa doer só quando há violação de verdade.
+
+    Termo curto casado como substring transforma o guardião em ruído, e teste
+    que grita à toa é teste que alguém desliga. "famílias" chegou a reprovar um
+    comentário legítimo do motor.
+    """
+    inocentes = ["dezenas de famílias de modelos", "os aliados do processo",
+                 "contexto familiar", "avalia o resultado"]
+    for linha in inocentes:
+        for padrao, motivo in TERMOS_DE_DOMINIO:
+            assert not re.search(padrao, linha, re.IGNORECASE), \
+                f"falso positivo em {linha!r}: {motivo}"
+
+
+def test_varredura_ainda_pega_a_persona():
+    # E o contrário: afrouxar não pode cegar o teste para o caso real.
+    for linha in ["a Lia responde", "class LiaTimingCallback:", "resposta da LIA"]:
+        assert any(re.search(p, linha, re.IGNORECASE) for p, _ in TERMOS_DE_DOMINIO), \
+            f"violação real não detectada: {linha!r}"

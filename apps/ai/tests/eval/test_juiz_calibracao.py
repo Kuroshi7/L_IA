@@ -103,6 +103,11 @@ def test_calibracao_do_juiz(capsys):
     with capsys.disabled():
         print("\n".join(linhas))
 
+    assert not juiz.INDISPONIVEIS, (
+        f"{len(juiz.INDISPONIVEIS)} julgamento(s) não aconteceram — este número não é "
+        "acurácia, é ausência de medição. Primeiro motivo: "
+        f"{juiz.INDISPONIVEIS[0]}"
+    )
     assert not erros_permissivos, (
         f"{len(erros_permissivos)} falso(s) positivo(s): o juiz aprovou resposta ruim. "
         "Isso deixaria o eval verde com o produto errado — a rubrica precisa ficar mais estrita."
