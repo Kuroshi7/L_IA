@@ -100,7 +100,7 @@ para a lista curta que o modelo consulta para rotear, manteve os ganhos sem o da
 **Regra prática que sai daí:** instrução nova vai para a seção mais curta que couber, nunca
 para a regra que já está grande.
 
-### O caso que justificou tudo### O caso que justificou tudo
+### O caso que justificou tudo
 
 | Rodada | `alérgico não recebe o alérgeno` |
 |---|---|
@@ -228,3 +228,46 @@ E duas lições que só apareceram porque havia número:
 2. **Instrução longa dilui.** Acrescentar uma ressalva de duas linhas ao reminder da
    regra contratual derrubou a bateria de 89% para 61%. Foi revertido, e a nota da
    própria tool passou a ter precedência sobre o reminder genérico.
+
+### A compressão do prompt, medida — e o que ela não entregou
+
+As regras que ganhamos ao longo da branch tinham virado as maiores do prompt: a 6b
+sozinha com 748 caracteres, contra 84 da maior regra original. Cada uma trazia a
+justificativa junto do imperativo. Como a diluição já estava medida duas vezes acima,
+a hipótese era direta: devolver as regras à densidade original deveria recuperar
+aderência.
+
+| | SYSTEM_AGENT | bateria `consumo` |
+|---|---|---|
+| Antes | 8.446 caracteres | 70% |
+| Depois | 7.265 caracteres | 67% |
+
+**A hipótese não se pagou.** Três pontos percentuais para baixo, com 30 execuções, é
+ruído — não é queda nem ganho. A compressão fica pelo mérito de manutenção (a
+justificativa passou a morar em comentário, onde quem mantém lê), não por
+desempenho medido.
+
+Vale registrar porque o inverso seria fácil de vender: o prompt encolheu 14%, os
+números não pioraram, e daria para escrever isso como vitória. Não é.
+
+### Um defeito do eval que se disfarçava de defeito do produto
+
+O caso `sobra maior que o consumo é incoerência` media 0/3. A correção óbvia seria
+mais uma regra no prompt — e teria continuado medindo 0/3, porque o problema não
+estava lá.
+
+Comparar duas quantidades é aritmética, então saiu do prompt e virou código: o
+registro segue acontecendo, com ressalva pedindo confirmação. Mesmo assim o caso
+continuou 0/3.
+
+O motivo era o dado de teste. O `go_api` falso devolvia **o mesmo total para
+qualquer entrada**, então "1 colher de arroz" e "3 conchas de arroz" chegavam
+idênticos e a comparação nunca tinha o que disparar. O produto estava correto; o
+eval é que não conseguia observá-lo.
+
+É a falha mais cara que um harness pode ter, porque aponta para o lugar errado: leva
+a mexer no prompt para consertar o fake. O fake agora escala pela medida caseira
+informada, e dois testes offline garantem que ele responda à entrada e continue
+preservando o que o dataset declara (`itens_ignorados`, `completo`).
+
+Sem nova rodada paga depois da correção, o caso segue **não medido** com LLM real.
