@@ -212,6 +212,73 @@
 - **Achado:** pergunta sobre proteína → `comparar_pratos` devolve só o critério pedido → a resposta cita carboidrato, que nenhuma tool expôs.
 - **Fix:** `comparar_pratos` devolver o conjunto completo de macros, ou o prompt exigir nova consulta antes de citar outro nutriente.
 
+
+### IA-19 · Alimento do registro casa fora do cardápio — 🔴 Crítico · M
+- **Status:** 🔴 Aberto. Visto no teste de usabilidade de 24/08/2026.
+- **Achado:** usuário disse "2 conchas de arroz"; o cardápio do dia tinha **Arroz Integral**;
+  o registro resolveu para **arroz branco** (~328 kcal). O prato certo estava no contexto —
+  a Lia tinha acabado de listá-lo — e mesmo assim o casamento foi para outro item da base.
+- **Por que é crítico:** o valor entra em `consumos`, alimenta pontuação e o índice de
+  resto-ingesta. Erro silencioso, com aparência de acerto.
+- **Fix:** `registrar_consumo` deve preferir os itens do cardápio do dia antes de cair na
+  base geral. Hoje resolve contra a base inteira sem esse viés.
+- **Evidência:** [`evidencias/usabilidade-2026-08-24.md`](evidencias/usabilidade-2026-08-24.md), turno "confirma".
+
+### IA-20 · Mesmo prato com dois valores na mesma conversa — 🟠 Alto · M
+- **Status:** 🟠 Aberto. Visto no teste de usabilidade de 24/08/2026.
+- **Achado:** na recomendação, *Frango Grelhado — 165 kcal*; três turnos depois, no registro,
+  *1 filé de frango — ~121 kcal*. Mesmo prato, mesma conversa, números diferentes.
+- **Causa provável:** a recomendação lê o valor do **cardápio** e o registro recalcula pela
+  **porção caseira**, sem cruzar as duas fontes. Relacionado a IA-19 e a IA-09.
+- **Fix:** ao registrar item que está no cardápio do dia, usar a mesma procedência que a
+  recomendação usou — ou declarar por que os números diferem.
+- **Evidência:** turnos "declara alergia" e "confirma" na transcrição.
+
+### IA-21 · Confirmação em laço: o registro nunca acontece — 🟠 Alto · P
+- **Status:** 🟠 Aberto. Visto no teste de usabilidade de 24/08/2026.
+- **Achado:** o usuário escreveu *"isso mesmo, pode registrar"* e a resposta foi
+  *"Está correto? Se sim, é só me confirmar que eu salvo aqui"*. Ao fim das 6 mensagens,
+  **nada foi gravado** — nem consumo, nem pontos.
+- **Por que importa:** a pontuação é a moeda do produto. Um laço de confirmação transforma
+  o fluxo principal em conversa sem efeito, e o usuário não tem como perceber.
+- **Fix:** tratar confirmação explícita ("pode registrar", "isso mesmo", "confirmo") como
+  `confirmado=True` no turno seguinte à prévia, em vez de pedir de novo. Candidato a
+  barreira em código, não a regra de prompt — o modelo já tinha a prévia no contexto.
+- **Evidência:** turnos "registra consumo" e "confirma" na transcrição.
+
+### OPS-XX · nginx do front cacheia o IP da API para sempre — 🔴 Crítico · P
+- **Status:** 🔴 Aberto. Reproduzido em 24/08/2026.
+- **Achado:** `proxy_pass http://api:8080/` com hostname literal faz o nginx resolver o nome
+  **uma vez, no boot**, e guardar o IP. O container `web` subiu, gravou `172.21.0.5`, e o
+  Docker depois deu esse IP ao `ai-worker`. Todo o front passou a receber **502**, com a tela
+  dizendo *"Não foi possível carregar as unidades. O backend está rodando?"* — com o backend
+  rodando e saudável.
+- **Por que é crítico:** qualquer restart ou recriação da API reproduz isso em produção, e o
+  sintoma aponta para o lugar errado. Só um restart do nginx corrige.
+- **Fix:** `resolver 127.0.0.11 valid=10s;` e `proxy_pass` via variável, para forçar
+  re-resolução em runtime:
+  ```nginx
+  resolver 127.0.0.11 valid=10s ipv6=off;
+  set $upstream_api http://api:8080;
+  proxy_pass $upstream_api/;
+  ```
+- **Evidência:** `connect() failed (111: Connection refused) ... upstream: "http://172.21.0.5:8080/unidades"`,
+  com `docker inspect` mostrando 172.21.0.5 = `deploy-ai-worker-1` e a API em 172.21.0.6.
+
+### OPS-YY · compose não repassava os provedores de LLM novos — ✅ Corrigido
+- **Status:** ✅ Corrigido em 24/08/2026, no mesmo dia em que foi introduzido.
+- **Achado:** OpenRouter e `openai_compat` entraram no código sem entrar no
+  `docker-compose.yml`. Trocar `LLM_PROVIDER` no `.env` não tinha efeito nenhum dentro do
+  container: ele caía calado no default `ollama` e falhava com
+  `httpx.ConnectError: Temporary failure in name resolution`, que o usuário via como
+  *"tive um problema para consultar as informações agora"*.
+- **Agravante:** o `.env` que o compose lê é o de `deploy/`, não o da raiz. Configurar o da
+  raiz não produz erro — produz silêncio.
+- **Fix aplicado:** `OPENROUTER_*` e `LLM_BASE_URL`/`LLM_API_KEY`/`LLM_MODEL` repassados em
+  `ai-worker` e `ai-api`.
+- **Aberto ainda:** o worker deveria **recusar a subir** quando o provedor configurado não
+  está alcançável, em vez de responder erro transitório a cada mensagem.
+
 ---
 
 ## TG — Telegram

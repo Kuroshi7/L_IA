@@ -1,0 +1,134 @@
+{
+  "dialogo": [
+    {
+      "rotulo": "saudação",
+      "pergunta": "oi",
+      "resposta": "Olá! Seja muito bem-vindo ao nosso refeitório. 😊\n\nPara eu te ajudar a montar o prato ideal hoje, me conta uma coisa: tem algum alimento que você não come, não gosta ou que te faça mal (alguma alergia ou restrição)?",
+      "segundos": 1.9
+    },
+    {
+      "rotulo": "pede o cardápio",
+      "pergunta": "o que tem pra comer hoje?",
+      "resposta": "🍽️ Cardápio de hoje:\n\nArroz Integral (Acompanhamento)\nFeijão Carioca (Acompanhamento)\nFrango Grelhado (Proteína)\nSalada Verde (Salada)\n\nSe quiser, me conta se você tem alguma preferência ou restrição alimentar que eu te ajudo a montar o prato ideal! 😊",
+      "segundos": 1.7
+    },
+    {
+      "rotulo": "declara alergia",
+      "pergunta": "sou alérgico a amendoim, o que você me indica?",
+      "resposta": "Fique tranquilo! Verifiquei aqui e nenhum dos pratos de hoje leva amendoim, então todos são seguros para você. 😊\n\nPara uma refeição equilibrada que te dê energia e sustente bem, eu indico:\n\n🍽️ Frango Grelhado — É a nossa proteína do dia, ótima para manter a saciedade.\n\nNutrição: 165 kcal | 31g proteína | 0g carbo\nPorção sugerida: 1 filé médio\n\n🍽️ Arroz Integral — Ajuda a segurar a fome por mais tempo.\n\nNutrição: 110 kcal | 3g proteína | 23g carbo\nPorção sugerida: 3 colheres de sopa\n\n🍽️ Feijão Carioca — Completa bem o prato e é nutritivo.\n\nNutrição: 95 kcal | 6g proteína | 17g carbo\nPorção sugerida: 1 concha\n\nPara deixar o prato mais leve, você pode completar com a Salada Verde (use o pegador à vontade!).\n\nLembrando que essas são sugestões, mas você pode montar do seu jeito! Depois de comer, me conta o que colocou no prato para a gente registrar seus pontos? 🍽️",
+      "segundos": 2
+    },
+    {
+      "rotulo": "registra consumo",
+      "pergunta": "comi 2 conchas de arroz e um filé de frango",
+      "resposta": "Antes de eu registrar tudo para você ganhar seus pontos, me conta: sobrou alguma coisa no prato ou você comeu tudo? 😊",
+      "segundos": 0.6
+    },
+    {
+      "rotulo": "confirma",
+      "pergunta": "isso mesmo, pode registrar",
+      "resposta": "Entendi! Fiz uma estimativa do que você comeu, mas como a medida de \"concha\" varia, os valores são aproximados:\n\n2 conchas de arroz (estimado como arroz branco): ~328 kcal\n1 filé de frango: ~121 kcal\n\nTotal aproximado: 449 kcal\n\nEstá correto? Se sim, é só me confirmar que eu salvo aqui e calculo seus pontos! 😊\n\no valor de arroz é aproximado",
+      "segundos": 2.2
+    },
+    {
+      "rotulo": "fora de escopo",
+      "pergunta": "qual a capital da Franca?",
+      "resposta": "Sou a Lia, especialista nas refeições do cardápio 🍽️. Posso te ajudar a escolher um prato considerando suas preferências e restrições alimentares. O que você gostaria de saber sobre o cardápio?\n\nFORA DE ESCOPO",
+      "segundos": 0.7
+    }
+  ],
+  "checagens": [
+    {
+      "e": "admin monta cardápio de hoje (Segunda-feira 24/08)",
+      "ok": true,
+      "d": "Arroz Integral, Feijão Carioca, Frango Grelhado, Salada Verde"
+    },
+    {
+      "e": "chat responde: saudação",
+      "ok": true,
+      "d": "1.9s"
+    },
+    {
+      "e": "chat responde: pede o cardápio",
+      "ok": true,
+      "d": "1.7s"
+    },
+    {
+      "e": "chat responde: declara alergia",
+      "ok": true,
+      "d": "2.0s"
+    },
+    {
+      "e": "chat responde: registra consumo",
+      "ok": true,
+      "d": "0.6s"
+    },
+    {
+      "e": "chat responde: confirma",
+      "ok": true,
+      "d": "2.2s"
+    },
+    {
+      "e": "chat responde: fora de escopo",
+      "ok": true,
+      "d": "0.7s"
+    }
+  ],
+  "http": [
+    {
+      "status": 200,
+      "body": {
+        "session_id": "4a661ee5-ae5d-4dc0-af6b-591be53fe68a",
+        "resposta": "Olá! Seja muito bem-vindo ao nosso refeitório. 😊\n\nPara eu te ajudar a montar o prato ideal hoje, me conta uma coisa: tem algum alimento que você não come, não gosta ou que te faça mal (alguma alergia ou restrição)?",
+        "fora_de_escopo": false
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "session_id": "4a661ee5-ae5d-4dc0-af6b-591be53fe68a",
+        "resposta": "🍽️ Cardápio de hoje:\n- **Arroz Integral** (Acompanhamento)\n- **Feijão Carioca** (Acompanhamento)\n- **Frango Grelhado** (Proteína)\n- **Salada Verde** (Salada)\n\nSe quiser, me conta se você tem alguma preferência ou restrição alimentar que eu te ajudo a montar o prato ideal! 😊",
+        "fora_de_escopo": false
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "session_id": "4a661ee5-ae5d-4dc0-af6b-591be53fe68a",
+        "resposta": "Fique tranquilo! Verifiquei aqui e nenhum dos pratos de hoje leva amendoim, então todos são seguros para você. 😊\n\nPara uma refeição equilibrada que te dê energia e sustente bem, eu indico:\n\n🍽️ **Frango Grelhado** — É a nossa proteína do dia, ótima para manter a saciedade.\n- Nutrição: 165 kcal | 31g proteína | 0g carbo\n- Porção sugerida: 1 filé médio\n\n🍽️ **Arroz Integral** — Ajuda a segurar a fome por mais tempo.\n- Nutrição: 110 kcal | 3g proteína | 23g carbo\n- Porção sugerida: 3 colheres de sopa\n\n🍽️ **Feijão Carioca** — Completa bem o prato e é nutritivo.\n- Nutrição: 95 kcal | 6g proteína | 17g carbo\n- Porção sugerida: 1 concha\n\nPara deixar o prato mais leve, você pode completar com a **Salada Verde** (use o pegador à vontade!). \n\nLembrando que essas são sugestões, mas você pode montar do seu jeito! Depois de comer, me conta o que colocou no prato para a gente registrar seus pontos? 🍽️",
+        "fora_de_escopo": false
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "session_id": "4a661ee5-ae5d-4dc0-af6b-591be53fe68a",
+        "resposta": "Antes de eu registrar tudo para você ganhar seus pontos, me conta: sobrou alguma coisa no prato ou você comeu tudo? 😊",
+        "fora_de_escopo": false
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "session_id": "4a661ee5-ae5d-4dc0-af6b-591be53fe68a",
+        "resposta": "Entendi! Fiz uma estimativa do que você comeu, mas como a medida de \"concha\" varia, os valores são aproximados:\n\n- **2 conchas de arroz** (estimado como arroz branco): ~328 kcal\n- **1 filé de frango**: ~121 kcal\n\n**Total aproximado: 449 kcal**\n\nEstá correto? Se sim, é só me confirmar que eu salvo aqui e calculo seus pontos! 😊",
+        "fora_de_escopo": false,
+        "confianca": {
+          "nivel": "aproximada",
+          "aproximados": [
+            "arroz"
+          ]
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "session_id": "4a661ee5-ae5d-4dc0-af6b-591be53fe68a",
+        "resposta": "Sou a Lia, especialista nas refeições do cardápio 🍽️. Posso te ajudar a escolher um prato considerando suas preferências e restrições alimentares. O que você gostaria de saber sobre o cardápio?",
+        "fora_de_escopo": true
+      }
+    }
+  ],
+  "errosDeJs": []
+}

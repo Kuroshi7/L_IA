@@ -97,6 +97,16 @@ services:
       EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+      # OpenRouter e qualquer endpoint que fale o protocolo da OpenAI (Hugging
+      # Face, Together, Groq, vLLM). Sem repassar aqui, trocar LLM_PROVIDER no
+      # .env não tinha efeito nenhum dentro do container — o código sabia dos
+      # provedores e o deploy não.
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
       WORKER_PREFETCH: ${WORKER_PREFETCH:-1}
       LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-45}
       CHAT_TIMEOUT_SECONDS: ${CHAT_TIMEOUT_SECONDS:-60}
@@ -125,6 +135,13 @@ services:
       EMBED_PROVIDER: ${EMBED_PROVIDER:-ollama}
       EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
     depends_on:
