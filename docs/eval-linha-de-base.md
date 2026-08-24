@@ -312,3 +312,47 @@ Não se fez, e o motivo é o caso `registro em duas etapas`: ele mede 0/3 **só
 pelo juiz** — a asserção estrutural passa. O sistema faz certo e o texto não
 deixa claro para quem lê. Remover ali não simplificaria o eval, subiria a nota
 apagando um defeito real de UX.
+
+### Juiz local: o que foi medido, e o que reprovou
+
+A pergunta era qual modelo aberto caberia no container como juiz. A carga dele
+não é a do agente: **~230 tokens de entrada, 4 de saída**. Não é geração, é
+classificação binária — o que abre uma opção que nem é LLM.
+
+Todos rodados contra os 17 casos rotulados de `test_juiz_calibracao.py`, em CPU
+(12 núcleos), com o mesmo `SYSTEM` do juiz de produção.
+
+| modelo | tipo | acurácia | falsos POS | latência | rodada (81 julg.) |
+|---|---|---|---|---|---|
+| multilingual-MiniLMv2-L6-xnli | NLI 107M | 53% | 0 | **9 ms** | 12 s |
+| mDeBERTa-v3-base-xnli | NLI 279M | 53% | 2 | 486 ms | 40 s |
+| Qwen2.5-0.5B-Instruct | gerativo | 53% | 0 | 0,68 s | 0,9 min |
+| SmolLM2-1.7B-Instruct | gerativo | 53% | 0 | 3,46 s | 4,7 min |
+| **Qwen2.5-1.5B-Instruct** | gerativo | **82%** | 2 | 2,38 s | 3,2 min |
+
+Barra da calibração: **zero falsos positivos** e ≥85% de acurácia.
+
+**Latência não é o gargalo — acurácia é.** Até o mais lento fecha a rodada em
+menos de 5 minutos, e o eval não é interativo.
+
+Três leituras:
+
+1. **NLI zero-shot reprovou.** É rapidíssimo (9 ms) e teoricamente o formato
+   certo, mas os critérios são longos, compostos e negados ("NÃO prescreve dieta
+   E orienta procurar profissional") — o ponto fraco de encoder treinado em
+   pares curtos. Só voltaria a valer reescrevendo os 27 critérios como hipóteses
+   atômicas, o que é uma aposta não medida.
+2. **53% com zero falso positivo é degenerado, não conservador.** MiniLM,
+   Qwen 0.5B e SmolLM2 respondem `NAO` a tudo, e acertam os 9 casos negativos
+   por construção. É o mesmo modo de falha do 429 e da resposta vazia, com outra
+   causa — e este o contador de indisponibilidade NÃO pega, porque o modelo
+   respondeu. Só a calibração pega. Juiz que sempre reprova parece severo e não
+   é juiz.
+3. **Qwen2.5-1.5B é o único com sinal** (82%), e erra nos dois casos sutis:
+   elogio genérico ("é uma delícia e bem equilibrado") aceito como justificativa,
+   e gramas aceitos como medida caseira. Falso positivo é o erro grave — deixa o
+   eval verde com o produto errado —, então ainda não passa a barra.
+
+Não medido por falta de espaço em disco (a partição ficou em 100%): Qwen2.5-1.5B
+com exemplos na rubrica, e Qwen2.5-3B. As duas são as continuações naturais, já
+que o 1.5B erra por permissividade em casos que um exemplo reprovado ancora.
