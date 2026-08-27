@@ -214,7 +214,7 @@
 
 
 ### IA-19 · Alimento do registro casa fora do cardápio — 🔴 Crítico · M
-- **Status:** 🔴 Aberto. Visto no teste de usabilidade de 24/08/2026.
+- **Status:** ✅ Corrigido em 24/08/2026.
 - **Achado:** usuário disse "2 conchas de arroz"; o cardápio do dia tinha **Arroz Integral**;
   o registro resolveu para **arroz branco** (~328 kcal). O prato certo estava no contexto —
   a Lia tinha acabado de listá-lo — e mesmo assim o casamento foi para outro item da base.
@@ -225,7 +225,7 @@
 - **Evidência:** [`evidencias/usabilidade-2026-08-24.md`](evidencias/usabilidade-2026-08-24.md), turno "confirma".
 
 ### IA-20 · Mesmo prato com dois valores na mesma conversa — 🟠 Alto · M
-- **Status:** 🟠 Aberto. Visto no teste de usabilidade de 24/08/2026.
+- **Status:** ✅ Corrigido em 24/08/2026.
 - **Achado:** na recomendação, *Frango Grelhado — 165 kcal*; três turnos depois, no registro,
   *1 filé de frango — ~121 kcal*. Mesmo prato, mesma conversa, números diferentes.
 - **Causa provável:** a recomendação lê o valor do **cardápio** e o registro recalcula pela
@@ -235,7 +235,7 @@
 - **Evidência:** turnos "declara alergia" e "confirma" na transcrição.
 
 ### IA-21 · Confirmação em laço: o registro nunca acontece — 🟠 Alto · P
-- **Status:** 🟠 Aberto. Visto no teste de usabilidade de 24/08/2026.
+- **Status:** ✅ Corrigido em 24/08/2026.
 - **Achado:** o usuário escreveu *"isso mesmo, pode registrar"* e a resposta foi
   *"Está correto? Se sim, é só me confirmar que eu salvo aqui"*. Ao fim das 6 mensagens,
   **nada foi gravado** — nem consumo, nem pontos.
@@ -247,7 +247,7 @@
 - **Evidência:** turnos "registra consumo" e "confirma" na transcrição.
 
 ### OPS-XX · nginx do front cacheia o IP da API para sempre — 🔴 Crítico · P
-- **Status:** 🔴 Aberto. Reproduzido em 24/08/2026.
+- **Status:** ✅ Corrigido em 24/08/2026.
 - **Achado:** `proxy_pass http://api:8080/` com hostname literal faz o nginx resolver o nome
   **uma vez, no boot**, e guardar o IP. O container `web` subiu, gravou `172.21.0.5`, e o
   Docker depois deu esse IP ao `ai-worker`. Todo o front passou a receber **502**, com a tela

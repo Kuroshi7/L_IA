@@ -130,6 +130,41 @@ def _acumular(chave: str, termos) -> None:
 MARCA_INCERTEZA = "INCERTEZA:"
 
 
+def _divergencia_de_procedencia(consumido: dict) -> str:
+    """IA-20: o mesmo prato saindo com dois valores na mesma conversa.
+
+    A recomendação mostra o kcal que a nutricionista declarou para o prato; o
+    registro calcula pela medida caseira que a pessoa informou. Divergir é
+    legítimo — "1 filé" não é a porção padrão do cardápio —, mas apresentar os
+    dois números sem explicar faz a pessoa achar que o sistema erra.
+
+    Comparação aritmética, não julgamento do modelo: mesma razão de _incoerencia.
+    O limiar de 25% deixa passar arredondamento e pega diferença que a pessoa nota.
+    """
+    avisos = []
+    for item in consumido.get("itens") or []:
+        declarada = item.get("kcal_declarada_cardapio")
+        calculada = float(item.get("kcal") or 0)
+        if not declarada or calculada <= 0:
+            continue
+        declarada = float(declarada)
+        if abs(calculada - declarada) / declarada <= 0.25:
+            continue
+        avisos.append(
+            f"{item.get('alimento_resolvido') or item.get('entrada', {}).get('alimento')}: "
+            f"{calculada:.0f} kcal pela medida informada, contra {declarada:.0f} kcal da "
+            "porção padrão do cardápio"
+        )
+    if not avisos:
+        return ""
+    return (
+        "PROCEDÊNCIA DIFERENTE — " + "; ".join(avisos) + ". "
+        "Se você já citou o valor do cardápio nesta conversa, diga que este é o cálculo da "
+        "porção que a pessoa informou, e por isso difere. NÃO apresente os dois números como "
+        "se um deles estivesse errado."
+    )
+
+
 def _incoerencia(consumido: dict, resto: dict) -> str:
     """Sobra maior que o consumo é impossível, e é aritmética — não opinião.
 
@@ -424,7 +459,9 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
 
         q = _qualidade(consumido, resto)
         _registrar_qualidade(q)
-        notas = [n for n in (_incoerencia(consumido, resto), _nota_de_incerteza(q)) if n]
+        notas = [n for n in (_incoerencia(consumido, resto),
+                             _divergencia_de_procedencia(consumido),
+                             _nota_de_incerteza(q)) if n]
         resultado = {
             "previa": previa,
             "instrucao": (

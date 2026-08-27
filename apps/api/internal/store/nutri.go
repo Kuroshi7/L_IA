@@ -137,16 +137,19 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 		var score float64
 		var err error
 
-		if id, nomeDoPrato, ok := resolverPeloCardapio(it.Alimento, doCardapio); ok {
-			alimento, err = s.alimentoPorID(ctx, id)
+		if prato, ok := resolverPeloCardapio(it.Alimento, doCardapio); ok {
+			alimento, err = s.alimentoPorID(ctx, prato.NutriAlimentoID)
 			// Casou com o prato que a unidade serviu hoje: é a melhor evidência
 			// que existe sobre o que a pessoa comeu.
 			score = 1.0
 			if err == nil {
-				res.Obs = "resolvido pelo cardápio do dia: " + nomeDoPrato
+				res.Obs = "resolvido pelo cardápio do dia: " + prato.Nome
+				res.Procedencia = "cardapio"
+				res.KcalDeclaradaCardapio = prato.Calorias
 			}
 		} else {
 			alimento, score, err = s.ResolverAlimento(ctx, it.Alimento)
+			res.Procedencia = "base_geral"
 		}
 
 		if errors.Is(err, ErrNotFound) {
@@ -213,13 +216,14 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 type ItemDoCardapio struct {
 	Nome            string
 	NutriAlimentoID int64
+	Calorias        *float64 // o que a nutricionista declarou para o prato
 }
 
 // itensDoCardapio devolve os pratos daquele dia que têm referência nutricional.
 // Sem referência o item não serve para resolver consumo — cai no caminho geral.
 func (s *Store) itensDoCardapio(ctx context.Context, unidadeID int64, data string) ([]ItemDoCardapio, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT a.nome, a.nutri_alimento_id
+		`SELECT a.nome, a.nutri_alimento_id, a.calorias
 		   FROM cardapio_dias d
 		   JOIN cardapio_itens ci ON ci.cardapio_dia_id = d.id
 		   JOIN alimentos a       ON a.id = ci.alimento_id
@@ -236,7 +240,7 @@ func (s *Store) itensDoCardapio(ctx context.Context, unidadeID int64, data strin
 	var itens []ItemDoCardapio
 	for rows.Next() {
 		var it ItemDoCardapio
-		if err := rows.Scan(&it.Nome, &it.NutriAlimentoID); err != nil {
+		if err := rows.Scan(&it.Nome, &it.NutriAlimentoID, &it.Calorias); err != nil {
 			return nil, err
 		}
 		itens = append(itens, it)
@@ -254,10 +258,10 @@ func (s *Store) itensDoCardapio(ctx context.Context, unidadeID int64, data strin
 // Deliberadamente conservador: casa por igualdade ou por palavra inteira contida
 // no nome do prato. Similaridade difusa aqui trocaria um erro conhecido por
 // outro imprevisível — se não houver certeza, o caminho geral assume.
-func resolverPeloCardapio(q string, itens []ItemDoCardapio) (int64, string, bool) {
+func resolverPeloCardapio(q string, itens []ItemDoCardapio) (*ItemDoCardapio, bool) {
 	alvo := domain.Normalizar(q)
 	if alvo == "" {
-		return 0, "", false
+		return nil, false
 	}
 
 	var exato, parcial *ItemDoCardapio
@@ -272,12 +276,12 @@ func resolverPeloCardapio(q string, itens []ItemDoCardapio) (int64, string, bool
 		}
 	}
 	if exato != nil {
-		return exato.NutriAlimentoID, exato.Nome, true
+		return exato, true
 	}
 	if parcial != nil {
-		return parcial.NutriAlimentoID, parcial.Nome, true
+		return parcial, true
 	}
-	return 0, "", false
+	return nil, false
 }
 
 // contemPalavra diz se `alvo` aparece como palavra inteira em `nome`.

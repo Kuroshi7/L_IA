@@ -34,9 +34,13 @@ func TestResolverPeloCardapio(t *testing.T) {
 
 	for _, c := range casos {
 		t.Run(c.nome, func(t *testing.T) {
-			id, prato, ok := resolverPeloCardapio(c.consulta, cardapioDoDia)
+			prato, ok := resolverPeloCardapio(c.consulta, cardapioDoDia)
 			if ok != c.querOK {
-				t.Fatalf("%q: casou=%v, esperado %v (prato=%q)", c.consulta, ok, c.querOK, prato)
+				t.Fatalf("%q: casou=%v, esperado %v", c.consulta, ok, c.querOK)
+			}
+			var id int64
+			if prato != nil {
+				id = prato.NutriAlimentoID
 			}
 			if id != c.querID {
 				t.Fatalf("%q: id=%d, esperado %d", c.consulta, id, c.querID)
@@ -48,7 +52,7 @@ func TestResolverPeloCardapio(t *testing.T) {
 func TestCardapioVazioNaoCasaNada(t *testing.T) {
 	// Sem cardápio publicado, a resolução tem de devolver "não sei" para o
 	// caminho geral assumir — nunca inventar um casamento.
-	if _, _, ok := resolverPeloCardapio("arroz", nil); ok {
+	if _, ok := resolverPeloCardapio("arroz", nil); ok {
 		t.Fatal("casou com cardápio vazio")
 	}
 }
@@ -60,8 +64,9 @@ func TestPrecedenciaEntreExatoEParcial(t *testing.T) {
 		{Nome: "Arroz Integral", NutriAlimentoID: 11},
 		{Nome: "Arroz", NutriAlimentoID: 99},
 	}
-	if id, _, _ := resolverPeloCardapio("arroz", cardapio); id != 99 {
-		t.Fatalf("id=%d, esperado 99 (o exato)", id)
+	prato, _ := resolverPeloCardapio("arroz", cardapio)
+	if prato == nil || prato.NutriAlimentoID != 99 {
+		t.Fatalf("prato=%+v, esperado o exato (99)", prato)
 	}
 }
 
@@ -79,5 +84,18 @@ func TestEscopoInvalidoDesligaAPrecedencia(t *testing.T) {
 	}
 	if !(EscopoCardapio{UnidadeID: 1, Data: "2026-08-24"}).valido() {
 		t.Fatal("escopo completo deveria ser válido")
+	}
+}
+
+func TestProcedenciaCarregaOValorDeclarado(t *testing.T) {
+	// IA-20: a recomendação mostra o kcal que a nutricionista declarou; o
+	// registro calcula pela medida caseira. Divergir é legítimo — "1 filé" não
+	// é a porção padrão — mas os dois números precisam sair com procedência,
+	// senão a mesma refeição aparece com dois valores e nada explica por quê.
+	kcal := 165.0
+	cardapio := []ItemDoCardapio{{Nome: "Frango Grelhado", NutriAlimentoID: 13, Calorias: &kcal}}
+	prato, ok := resolverPeloCardapio("frango", cardapio)
+	if !ok || prato.Calorias == nil || *prato.Calorias != 165.0 {
+		t.Fatalf("prato=%+v: valor declarado não veio junto", prato)
 	}
 }

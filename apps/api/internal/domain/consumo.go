@@ -55,6 +55,17 @@ type ConsumoItemResultado struct {
 	GorduraG          float64            `json:"gordura_g"`
 	Confianca         string             `json:"confianca"` // alta | media | baixa
 	Obs               string             `json:"obs,omitempty"`
+
+	// De onde veio o número: "cardapio" (o prato servido hoje) ou "base_geral"
+	// (similaridade contra a TACO). Sem isto, a mesma refeição podia sair com
+	// dois valores na mesma conversa e nada dizia por quê.
+	Procedencia string `json:"procedencia,omitempty"`
+
+	// Kcal que a nutricionista declarou para o prato no cardápio, quando existe.
+	// É o número que a RECOMENDAÇÃO mostra; o Kcal acima vem da medida caseira
+	// informada. Divergir é legítimo — "1 filé" não é a porção padrão —, mas
+	// precisa ser dito, não escondido.
+	KcalDeclaradaCardapio *float64 `json:"kcal_declarada_cardapio,omitempty"`
 }
 
 // ConsumoTotais agrega o consumo de uma refeição.
