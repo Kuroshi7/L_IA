@@ -15,7 +15,8 @@
 | 1. Fechar a porta (1–2 sem) | SEG-01..05, SEG-07..10 |
 | 2. Confiabilidade da IA (1–2 sem) | IA-01..08, TG-01..02 |
 | 3. Operação (1 sem) | OPS-01..07, API-01..08 |
-| 4. Produto mínimo de venda (2–3 sem) | WEB-01..12, LGPD-01..05, PROD-01..02 |
+| 4. Produto mínimo de venda (2–3 sem) | WEB-01..13, LGPD-01..05, PROD-01..04 |
+| 5. Calibração do agente (27/08) | IA-22..24, IA-26 ✅ · IA-25 🔶 · **IA-27, IA-28, IA-21 abertos** |
 
 ---
 
@@ -105,7 +106,7 @@
 ## IA — Confiabilidade e custo
 
 ### IA-01 · LLM sem timeout/retry/fallback + head-of-line blocking — 🔴 Crítico · M
-- **Status:** ✅ Corrigido em `fix/ia-confiabilidade` (timeout+retry no client, TTL/timestamp na fila, 2 réplicas default). Fallback de provedor ficou de fora — reavaliar se necessário.
+- **Status:** 🔶 Parcial. Timeout/retry no client já existiam. Em `02c4528` fechou o buraco do **prazo do turno**: ele só era checado dentro do decorator das tools, então um turno que não chamasse tool nunca era verificado. Novo `motor/prazo.py` (middleware `wrap_model_call`) recusa começar chamada de modelo que o prazo não paga mais. **Continua aberto:** `CHAT_TIMEOUT_SECONDS=180` no `deploy/.env` permite três minutos de espera — com Haiku a mediana medida é 4,2s, então o orçamento está uma ordem de grandeza acima do necessário.
 - **Achado:** nem `ChatOllama` nem `ChatAnthropic` recebem timeout; sem retry/fallback entre provedores; sem cancelamento quando o Go desiste (60s); worker com `prefetch=1` e 1 réplica no compose.
 - **Problema:** um turno lento trava a fila para todos (o worker segue processando resposta que ninguém vai ler); na fila do almoço, 1 conversa concorrente é o gargalo dominante do produto; erro de LLM vira 502 genérico.
 - **Fix:** timeout no client LLM alinhado ao `CHAT_TIMEOUT_SECONDS`, retry com backoff, fallback de provedor opcional, e escalar `ai-worker` (o `--scale` já documentado virar default ≥3). **Benefício:** o produto para de falhar exatamente no horário de pico, que é quando ele existe.
@@ -235,7 +236,7 @@
 - **Evidência:** turnos "declara alergia" e "confirma" na transcrição.
 
 ### IA-21 · Confirmação em laço: o registro nunca acontece — 🟠 Alto · P
-- **Status:** ✅ Corrigido em 24/08/2026.
+- **Status:** 🔴 **Reproduzido em 27/08 e continua vivo — pior do que o registrado.** Bateria de 3 conversas: a conversa de registro fez 3 turnos e **nenhuma tool foi chamada**; `SELECT count(*) FROM consumos WHERE created_at > now() - interval '30 minutes'` = **0**. O usuário disse o que comeu, disse que sobrou arroz, e perguntou os pontos; a Lia exigiu a medida exata da sobra ("meia concha? uma colher?") e recusou até responder sobre pontos antes de obtê-la. É o ciclo que alimenta gamificação **e** o painel de desperdício: sem ele o dashboard do admin abre vazio. Ver **IA-25**.
 - **Achado:** o usuário escreveu *"isso mesmo, pode registrar"* e a resposta foi
   *"Está correto? Se sim, é só me confirmar que eu salvo aqui"*. Ao fim das 6 mensagens,
   **nada foi gravado** — nem consumo, nem pontos.
@@ -352,6 +353,7 @@
 - **Fix:** CTA pós-almoço ("registrar minha refeição") com fluxo guiado (chips de alimentos do cardápio do dia + medidas), mantendo o texto livre como atalho. **Benefício:** taxa de registro sobe → dashboard do admin tem dado → renovação.
 
 ### WEB-03 · Restrições/alergias em texto livre — 🟠 Alto · M
+- **Status:** 🔶 Parcial em `afa364a`. Os três campos "separados por vírgula" viraram entrada por etiquetas (`src/ui/CampoTags.tsx`), com sugestões. **A causa não foi resolvida:** as sugestões são exemplos, não vocabulário fechado — o casamento é contra o que o gestor cadastrou em `restricoes_atendidas`, que varia por unidade. Ver **IA-22**, que mede o tamanho real do problema.
 - **Achado:** três campos "separados por vírgula" no cadastro (`Cadastro.tsx:335`).
 - **Problema:** "não posso comer leite" nunca vai bater com o matching determinístico de `restricoes_atendidas` — a personalização, o coração do produto, falha silenciosamente para o leigo.
 - **Fix:** chips/checkboxes com vocabulário controlado (o mesmo usado no cadastro de alimentos), com campo livre opcional. **Benefício:** o filtro determinístico passa a funcionar de verdade.
@@ -362,6 +364,7 @@
 - **Fix:** endpoint de histórico da sessão + hidratação no mount. **Benefício:** continuidade percebida = confiança.
 
 ### WEB-05 · Mobile quebrado em pontos-chave + sem PWA — 🟠 Alto · M
+- **Status:** ✅ Corrigido em `feat/motor-agente-onyx` (`afa364a`). `100dvh`, `env(safe-area-inset-*)` com `viewport-fit=cover`, `theme-color`, alvos de 40px, inputs de 16px (abaixo disso o Safari dá zoom ao focar), favicon SVG. Header com 5 links `nowrap` deixou de existir: virou lateral fixa no desktop e gaveta no celular. Falta só `manifest.json` para instalar como PWA.
 - **Achado:** header com 5 ações `nowrap` sem `flex-wrap` corta em 390px (`styles.css:146`); `height:100vh` no chat (Safari iOS cobre o composer; sem `dvh`/safe-area); admin desktop-only sem aviso; **não existe `public/`** — sem favicon/manifest.
 - **Problema:** o uso real é no celular na fila do refeitório; botões cortados e composer coberto são falha de missão crítica.
 - **Fix:** `flex-wrap`+menu overflow no header, `100dvh`+safe-area, media queries no admin (ou aviso), favicon+manifest PWA. **Benefício:** o produto funciona onde é usado.
@@ -372,6 +375,7 @@
 - **Fix:** guard de rota + interceptador de 401 com redirect + logout. **Benefício:** fluxo de admin com começo, meio e fim.
 
 ### WEB-07 · Camada de API duplicada e frágil — 🟡 Médio · M
+- **Status:** 🔶 Parcial em `afa364a`. `adminFetch` e `adminRequest` eram quase idênticas e só uma preservava o status HTTP, então metade das telas de gestão não distinguia "token errado" de "servidor fora"; agora é uma função só e todo erro chega como `ApiError`. **Continua aberto:** `fetch` sem timeout/AbortController e sem cancelamento no unmount.
 - **Achado:** `adminFetch` e `adminRequest` quase idênticos e inconsistentes (`api.ts:78,199`); detecção de 404 por `err.message.includes("(404)")` (`Cadastro.tsx:79`); `fetch` sem timeout/AbortController; sem cancelamento no unmount.
 - **Problema:** string-matching de erro quebra silenciosamente; requisições penduradas e `setState` pós-unmount.
 - **Fix:** unificar num client único com `ApiError` tipado (status), timeout e abort. **Benefício:** base sólida para toda feature futura do front.
@@ -382,16 +386,19 @@
 - **Fix:** desabilitar controles durante o save (consultar o flag) ou fila de mutações. **Benefício:** dado do cardápio confiável.
 
 ### WEB-09 · Mensagens de erro com texto de desenvolvedor — 🟡 Médio · P
+- **Status:** ✅ Corrigido em `afa364a`. `src/lib/mensagens.ts` traduz `ApiError` por status; toda tela passou a mandar o detalhe técnico para `console.error`. "O backend está rodando?" e "Rode o seed do backend" não existem mais.
 - **Achado:** "O backend está rodando?", "Rode o seed do backend" (`UnidadeSelector.tsx:15,51`); erros de admin exibem corpo cru da resposta HTTP.
 - **Problema:** texto de dev na tela do cliente final mina a percepção de produto pronto.
 - **Fix:** mensagens humanas + retry; detalhes técnicos só no console. **Benefício:** polish barato com efeito direto na confiança.
 
 ### WEB-10 · Acessibilidade e affordances — 🟡 Médio · M
+- **Status:** ✅ Corrigido em `afa364a`. `:focus-visible` global, `aria-label` em todo botão de ícone, `role="log"`/`aria-live` na conversa, `aria-pressed` nos alternadores. Os emoji-ícone (`➤ ★ × 🏆 ⭐ 🙂`) viraram `src/ui/Icone.tsx` (SVG de traço único). Emoji só dentro do texto que a Lia escreve. Falta o diálogo de confirmação próprio — `window.confirm` ainda é usado em UnidadesAdmin e CardapioEditor.
 - **Achado:** 3 atributos ARIA no app inteiro; sem `:focus-visible` em botões; ícones em emoji (`➤`, `★`, `×`) que variam por SO; `window.confirm` nativo; sem skeleton loading.
 - **Problema:** navegação por teclado invisível; aparência inconsistente entre dispositivos denuncia protótipo.
 - **Fix:** focus states, `aria-label` nos botões de ícone, SVGs no lugar de emoji, confirm dialog próprio. **Benefício:** acabamento de produto (e conformidade básica).
 
 ### WEB-11 · Marca e cores hardcoded (sem white-label) — 🟡 Médio · M/G
+- **Status:** ✅ Corrigido em `afa364a`. `src/brand.ts` concentra nome do assistente, produto e paleta; `aplicarTema()` sobrescreve os tokens CSS em runtime. Nenhum componente escreve "Lia" nem `#hex`. Falta o endpoint que serve tema por unidade — o seam está aberto do lado do front.
 - **Achado:** "Lia" e a paleta estão fixos em `styles.css` e nos JSX; nada é por tenant.
 - **Problema:** o segundo cliente exige fork ou refactor — exatamente o anti-padrão que a OPOLZ quer evitar.
 - **Fix:** tokens de tema + nome do assistente vindos de config por unidade/tenant (o CSS já usa custom properties — meio caminho andado). **Benefício:** clonar para o cliente 2 vira configuração, não código.
@@ -402,6 +409,198 @@
 - **Fix:** CI com typecheck+build+lint; 1 teste E2E do caminho crítico (escolher unidade → perguntar → registrar → ver pontos). **Benefício:** rede de segurança mínima para evoluir rápido.
 
 ---
+
+---
+
+## Sessão de 2026-08-27 — o que foi consertado e o que ela ensinou
+
+> Origem: uma conversa real de um usuário, tratada como **baseline de interação**. Ele pediu
+> recomendação com restrição por exclusão e meta numérica, e a Lia falhou duas vezes seguidas
+> dizendo ao CLIENTE que "o sistema está muito rigoroso" e "parece que não está funcionando".
+> Investigando os logs achamos quatro defeitos independentes — e um quinto, mais grave, que
+> ninguém tinha visto. Corrigidos em `02c4528` (17 agentes; suíte 546 testes, zero falha).
+>
+> **Como reproduzir qualquer coisa daqui.** A suíte não gasta API: `pytest.ini` tem
+> `addopts = -m "not llm"` e os dois arquivos de `tests/eval/` carregam `pytestmark =
+> pytest.mark.llm`. Rodar:
+> ```
+> cd deploy && docker compose build -q ai-worker && docker compose run --rm --no-deps -T \
+>   --entrypoint sh ai-worker -c 'pip install -q pytest >/dev/null 2>&1 && \
+>   python -m pytest tests -q --ignore=tests/eval'
+> ```
+> Nesta máquina o `docker` é snap e o CLI às vezes precisa de pty — se a saída vier vazia com
+> rc=1, envolva em `script -qec '<comando>' /dev/null`. O snap também só faz bind-mount de
+> caminhos dentro de `$HOME`: montar `/tmp` monta vazio, sem erro.
+
+### IA-22 · Alergia não olhava os ingredientes — 🔴 Crítico · M — ✅ Corrigido
+- **Status:** ✅ Corrigido em `02c4528` (`app/agent/dominio/refeitorio/filters.py`).
+- **Achado:** `prato_seguro_para_alergias` montava o conjunto de alérgenos só a partir do campo
+  `alergenos` e **nunca lia `ingredientes`**. Medido no banco: **21 dos 29 alimentos têm
+  `alergenos` vazio (72%)**, e para esses a função devolvia `True` incondicionalmente.
+  Evidência direta, rodando o filtro contra o cardápio real:
+  ```
+  prato_seguro_para_alergias({"alergenos": [], "ingredientes": ["carne bovina","cebola","óleo"]},
+                             ["carne bovina"])  ->  True     # Bife Acebolado, id 133
+  ```
+  Alérgico a alho recebia "Arroz Branco" (`ingredientes: arroz, alho, óleo`) como seguro.
+- **Problema:** derrubava as **duas** barreiras de uma vez, porque `filtrar_pratos` (tools.py) e
+  `conflitos_com_perfil` (filters.py) chamam a mesma função — nem o filtro excluía, nem o aviso
+  que viaja junto do item na listagem era emitido. É a falha mais cara que este produto tem.
+- **Fix aplicado:** cruza `alergenos` **e** `ingredientes`, por **palavra inteira** — substring
+  faria `"sal"` barrar `"salmão"`. Canoniza plural e acento nos dois lados da comparação
+  (noz/nozes, camarão/camarões, amendoim/amendoins, pão/pães). A assimetria está escrita no
+  código: falso positivo custa uma opção a menos, falso negativo custa uma reação alérgica.
+  Nova `culpados_por_alergia` devolve o par (termo declarado, termo do prato), para a mensagem
+  citar a causa real em vez de chutar.
+- **Nota de projeto:** entrou uma tabela `_GRUPOS` pequena (`frutos do mar` → camarão, lula…)
+  porque `Perfil.tsx` oferece esse chip num clique sob a promessa de que a Lia nunca sugere
+  nada da lista — e a expressão não aparece em ficha nenhuma. **É tabela de língua, não
+  taxonomia de alimento**, e vale só para alergia (barreira em código). Restrição/preferência
+  aberta continua sendo julgamento do modelo sobre os ingredientes, por decisão de produto.
+- **Regressão:** `tests/test_alergia_ingredientes.py`, `tests/test_alergia_plural_e_grupo.py`.
+
+### IA-23 · `filtrar_pratos` mentia com confiança — 🔴 Crítico · M — ✅ Corrigido
+- **Status:** ✅ Corrigido em `02c4528` (`tools.py`).
+- **Achado:** a tool tem **dois vocabulários** e não avisava qual é qual. `restricoes` é
+  **fechado** (só casa com o que o catálogo declarou em `restricoes_atendidas`, casamento
+  positivo: sem declaração ⇒ `False`); `preferencias` é **aberto** (busca em `ingredientes`).
+  O modelo mandou uma exclusão aberta no campo fechado. Medido contra o cardápio real:
+  ```
+  restricoes='sem carne vermelha'  -> VAZIO          (garantido, para qualquer cardápio)
+  preferencias='carne bovina'      -> ['Bife Acebolado']   (o ingrediente É localizável)
+  ```
+  Vocabulário real da unidade 1: `sem lactose(22) · sem gluten(20) · vegetariano(18) ·
+  vegano(15) · low carb(2) · proteico(1)`. "sem carne vermelha" não existe e não tem equivalência.
+- **Problema:** a tool devolvia `"Nenhum prato do cardápio atende a esses critérios. NÃO sugira
+  nada fora do cardápio..."` — um falso negativo com ar de autoridade. O modelo obedeceu,
+  corretamente, e ficou preso; sem saber a causa, **inventou a explicação** e a entregou ao
+  cliente. Nos logs: 5 chamadas idênticas no T2 e 5 no T3.
+- **Fix aplicado:** a tool passa a conhecer o próprio vocabulário (lido do catálogo do dia —
+  dado por unidade, nada hardcoded) e a distinguir os dois fracassos: *"filtrei e nada atende"*
+  vs *"não sei filtrar por esse termo"*. No segundo caso devolve **roteamento** — diz o que
+  filtra e manda o modelo decidir sobre os `ingredientes` que ele já recebe —, e a nota é
+  explícita em **não** afirmar que os pratos roteados atendem ao termo.
+- **Regressão:** `tests/test_filtrar_vocabulario.py`, `tests/test_roteamento_honesto.py`.
+
+### IA-24 · O agente não sabia que dia era hoje — 🟠 Alto · P — ✅ Corrigido
+- **Status:** ✅ Corrigido em `02c4528` (`motor/relogio.py` novo, `motor/llm.py`, `config.py`).
+- **Achado:** `grep -rE "date.today|datetime.now|strftime|utcnow" apps/ai/app` retornava **uma
+  única ocorrência**, em `tools.py`, do lado servidor. **Nada injetava a data no contexto do
+  modelo.** Enquanto ele só dizia `dia: 'hoje'` funcionava (quem resolvia era a tool); ao
+  precisar **nomear** uma data (`cardapio_da_semana(data_alvo=...)`) ele só podia adivinhar.
+  Adivinhou `2026-05-28` — que existe no banco como resto de seed — e apresentou como cardápio
+  de hoje. `nota_do_sistema` de `listar_pratos_do_dia` dizia explicitamente para não fazer isso.
+- **Fix aplicado:** a data vai no **system**, nunca em reminder (aquele canal viaja na mensagem
+  do usuário, é spoofável, e a invariante de `motor/reminders.py` proíbe reminder introduzir
+  dado novo — alguém escreveria `NOTA DO SISTEMA: hoje é 28/05`). Fica **fora do bloco
+  cacheado** (`nota_extra`), e o **dia entra na chave do cache de executores**, senão a data
+  congelaria no boot — pior que não ter data, porque o modelo passa a errar com confiança.
+  `motor/relogio.py` é a fonte única de "hoje", compartilhada com as tools: duas contas
+  divergiriam na virada do dia e o bug só apareceria à noite.
+- **Inspiração:** Onyx `backend/onyx/prompts/prompt_utils.py` + `prompt_template.py` (tag
+  `{{CURRENT_DATETIME}}` substituída centralmente). Divergimos de propósito em dois pontos:
+  eles não têm cache de prefixo a proteger, e usam `datetime.now()` **sem fuso**.
+- **Aberto:** o fuso é `FUSO_HORARIO` global. Com unidades em fusos diferentes vira erro na
+  virada do dia — o ponto de escopo está documentado em `relogio.py`.
+
+### IA-25 · Observações de tool não atravessam o turno — 🟠 Alto · M — 🔶 Parcial
+- **Status:** 🔶 Parcial em `02c4528` (`motor/memoria.py` novo, `observacao.py`, `turn.py`).
+- **Achado:** `SELECT papel, count(*) FROM mensagens GROUP BY papel` devolve só `user` e
+  `assistant`. As observações das tools morrem com o `ContextVar` no fim do turno; a memoização
+  (`COMPRIMIR_REPETICOES`) só vale **dentro** de um turno. Por isso, depois de o usuário
+  esclarecer "isso, como peixe e frango", o modelo repetiu a **mesma consulta morta** 5 vezes —
+  para ele era a primeira. Ele até escreveu "vou tentar de outro jeito" no turno anterior, sem
+  mecanismo que carregasse "esse caminho é beco sem saída".
+- **Fix aplicado:** consultas que deram em nada atravessam o turno, de forma enxuta (não o
+  retorno inteiro, que incharia contexto e custo). O texto que carrega isso **não** autoriza
+  afrouxar critério — os argumentos de `filtrar_pratos` **são** a barreira em código.
+- **Aberto:** só o Python guarda isso; nada é persistido. Reinício de worker esquece.
+- **Regressão:** `tests/test_observacoes_entre_turnos.py`, `tests/test_becos_nao_engolem_o_vivo.py`.
+
+### IA-26 · Preflight reprovava modelo bom na partida — 🔴 Crítico · P — ✅ Corrigido
+- **Status:** ✅ Corrigido em `02c4528` (`motor/preflight.py`, `workers/chat_worker.py`).
+- **Achado:** `chat_worker` construía a sonda com `max_tokens=16`. Na Anthropic a chamada de
+  tool volta como **bloco estruturado** e o nome da tool + o JSON dos argumentos são tokens de
+  **saída**: com teto de 16 a resposta truncava antes de o bloco fechar, `tool_calls` vinha
+  vazio e a sonda concluía *"o provedor respondeu, mas o modelo NÃO chamou a tool"* — **sobre um
+  modelo que chama**. Medido:
+  ```
+  max_tokens=16  -> reprova     max_tokens=64 -> passa     max_tokens=256 -> passa
+  ```
+- **Problema:** reprovaria **qualquer** modelo Anthropic bom, e a mensagem de erro acusava o
+  modelo em vez da sonda. Custou uma sessão inteira de diagnóstico no provedor errado.
+- **Fix aplicado:** o teto virou `preflight.MAX_TOKENS_SONDA = 256`, declarado por quem conhece
+  o próprio custo; o worker usa a constante em vez de um número solto. A sonda avisa no log
+  quando recebe teto abaixo do que precisa, em vez de reprovar em silêncio.
+- **Regressão:** `tests/test_preflight.py` — inclui um teste que falha se alguém voltar a
+  escrever número literal no worker.
+
+### IA-27 · R3 mede certo e não bloqueia — 🟠 Alto · P — 🔴 Aberto
+- **Achado:** na bateria de 27/08 a **R3 disparou nos dois turnos que importavam**, e acertou:
+  ```
+  R3 | números citados que nenhuma tool expôs: [22.0, 40.0]
+  R3 | números citados que nenhuma tool expôs: [20.0, 0.0, 1.0, 13.0, 36.0, 1.0, 0.0, 2.0, 22.0, 23.0]
+  ```
+  A resposta entregue dizia *"Tilápia: 1 posta média (100g) = ~150 kcal | ~20g proteína"*.
+  A tabela diz **98 kcal e 22,9g** (`alimentos.id=134`, ancorado na referência #5 Peixe Cozido).
+  A Lia também sugeriu **pão francês**, que não está no cardápio. No mesmo turno chamou
+  `detalhar_prato(prato_id=1)` — id 1 é **Frango Grelhado**, não a Tilápia (134).
+- **Problema:** `VALIDACAO_BLOQUEANTE` tem só `R5-prato-conflita-com-perfil`, então a R3 vira
+  log e a resposta inventada chega ao usuário. Num produto que se define por **não chutar
+  número**, é a promessa central quebrada no turno em que a pessoa mais precisa do número —
+  o que ela vai usar no balcão.
+- **Fix:** promover **só a R3** a bloqueante. O IA-11 recomenda esperar por falso positivo alto,
+  mas foi a **R2** que errou duas vezes na bateria (`'nutricao aproximada'` e `'nao temos frango
+  nem peixe'` acusados como prato fora do cardápio), não a R3. Medir R2 e R3 separadamente antes
+  de decidir por ambas. Junto: `consultar_medidas_caseiras` foi chamada com `{}` vazio e deve
+  recusar; e o prompt precisa amarrar `prato_id` ao prato citado.
+
+### IA-28 · `Alvo` não distingue meta de TETO — 🟠 Alto · M — 🔴 Aberto
+- **Achado:** em `porcionamento.py`, `ler_meta("quero no maximo 500 kcal")` produz um alvo a
+  **atingir**: `montar` devolve 510 kcal com `atingiu: True`. "No máximo 30g de carboidrato"
+  devolve 32,3g.
+- **Problema:** num produto de nutrição, meta calórica e de carboidrato costumam ser **teto**,
+  não piso. Entregar 510 quando a pessoa pediu no máximo 500 é errar na direção que importa.
+- **Fix:** campo de natureza em `Alvo` (piso/teto/faixa), parâmetro na tool e mudança de
+  semântica em `montar`/`nota_para_o_modelo`. É desenho de produto. O módulo **ainda não está
+  ligado a tool nenhuma** (`grep -rn "montar_prato" apps/ai` não retorna nada fora de teste),
+  então dá para resolver antes de expor.
+
+### WEB-13 · Não há área de login, só um bloco escondido no perfil — 🟠 Alto · P
+- **Achado:** o fluxo existe (`Perfil.tsx`, bloco "Já tenho cadastro" → `POST /usuarios/login`),
+  mas a lateral oferece só **"Criar meu perfil"** para quem está anônimo. Quem já tem cadastro
+  não encontra a porta.
+- **Problema:** o usuário perde o histórico e a pontuação por não achar onde entrar; parece que
+  o produto não tem login.
+- **Fix:** entrada explícita de "Entrar" na lateral e uma rota própria. **Depende de SEG-01**
+  para virar autenticação de verdade — hoje o "login" confere a credencial e **joga o resultado
+  fora** (`handleLoginUsuario` termina em `writeJSON(usuarioComPerfil(u))`, sem emitir nada), e
+  o front passa a mandar `usuario_id` cru do `localStorage`.
+
+### PROD-03 · Usuário anônimo tratado como erro, não como caso de primeira classe — 🟠 Alto · M
+- **Achado:** `meus_pontos()` responde *"Usuário não identificado nesta sessão — para acumular
+  pontos é preciso criar um perfil"*, e `meu_perfil` depende de `usuario_id`. Na bateria de
+  27/08 as três conversas foram anônimas e a meta dita no prompt ("22g de proteína, 40g de
+  carboidrato") não tinha onde morar.
+- **Problema:** perfil salvo deve **melhorar** a recomendação, nunca **habilitar**. Exigir
+  cadastro para o produto funcionar é pedir compromisso antes de entregar valor.
+- **Fix:** espelhar o Onyx. Em `backend/onyx/auth/anonymous_user.py` o anônimo **não é `None`**:
+  é um `UserInfo` completo com `account_type=ANONYMOUS` e um `UserPersonalization`
+  (`name`, `memories`, `user_preferences`) vindo de um KV. Personalização desacoplada de
+  identidade faz o caminho anônimo ser **o mesmo código** do logado, e o cadastro vira upgrade.
+  Aqui provavelmente mora na sessão do Postgres, que já é escopada e já expira — **precisa
+  casar com IA-25** para não virarem dois mecanismos para a mesma coisa.
+
+### PROD-04 · A conversa não conduz quem não sabe pedir — 🟡 Médio · M
+- **Achado:** bateria de 27/08, persona "seu João" (leigo, frases curtas). No `"oi"` a Lia pediu
+  restrições **antes de mostrar qualquer coisa** — quem chegou com fome leva um formulário. E o
+  `"pode ser isso mesmo"` quebrou: ela ofereceu escolher entre "pedir o Bife" e "calcular a
+  porção", e emendou *"sobrou algo no prato?"*, misturando recomendação com registro de consumo.
+- **Problema:** é a persona majoritária do refeitório. Ela desiste na segunda pergunta.
+- **Fix:** mostrar o cardápio primeiro e perguntar restrição depois (ou junto), e separar no
+  prompt o estado "recomendando" do estado "registrando" — hoje eles se misturam numa
+  confirmação ambígua.
+
 
 ## OPS — Deploy e operação
 
