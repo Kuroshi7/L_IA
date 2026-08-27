@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { adminListarUnidades, adminListarUsuarios } from "../../lib/api";
+import AppShell from "../../shell/AppShell";
+import { Aviso, Cabecalho, Pagina, Silhueta, Vazio } from "../../ui/Pagina";
+import { mensagemAdmin } from "../../lib/mensagens";
 import type { AdminUsuario, Unidade } from "../../types";
 
 const csv = (a: string[] | null | undefined) => {
@@ -24,87 +26,81 @@ export default function UsuariosAdmin() {
     setErro(null);
     adminListarUsuarios(filtroUnidade ? Number(filtroUnidade) : undefined)
       .then(setUsuarios)
-      .catch((e: Error) => setErro(e.message))
+      .catch((e: Error) => { console.error("falha ao listar usuários", e); setErro(mensagemAdmin(e)); })
       .finally(() => setCarregando(false));
   }, [filtroUnidade]);
 
   return (
-    <div className="app">
-      <div className="chat-card admin-card">
-        <header className="chat-header">
-          <div className="brand">
-            <div className="avatar avatar-lia"><span className="avatar-letter">L</span></div>
-            <div className="brand-text">
-              <h1 className="brand-name">Usuários</h1>
-              <span className="status status-on"><span className="status-dot" />perfis e gamificação</span>
+    <AppShell area="gestor" titulo="Usuários">
+      <Pagina>
+        <Cabecalho
+          titulo="Usuários"
+          apoio="Quem criou perfil e como vem usando. Pontos e sequência vêm dos registros de refeição feitos na conversa."
+          acoes={
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="filtro-unidade">Unidade</label>
+              <select
+                id="filtro-unidade"
+                className="selecao"
+                style={{ width: "auto", minWidth: 200 }}
+                value={filtroUnidade}
+                onChange={(e) => setFiltroUnidade(e.target.value)}
+              >
+                <option value="">Todas</option>
+                {unidades.map((u) => (
+                  <option key={u.id} value={u.id}>{u.nome}</option>
+                ))}
+              </select>
             </div>
-          </div>
-          <div className="header-actions">
-            <Link className="btn-ghost" to="/admin/unidades">Unidades</Link>
-            <Link className="btn-ghost" to="/admin">Admin</Link>
-          </div>
-        </header>
+          }
+        />
 
-        <main className="messages admin-body">
-          {erro && <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erro}</p>}
+        {erro && <Aviso tom="erro" titulo="Não deu certo">{erro}</Aviso>}
 
-          <div className="semana-toolbar">
-            <label className="field-label" htmlFor="filtro-unidade">Filtrar por unidade</label>
-            <select
-              id="filtro-unidade"
-              className="select-input"
-              style={{ maxWidth: 260 }}
-              value={filtroUnidade}
-              onChange={(e) => setFiltroUnidade(e.target.value)}
-            >
-              <option value="">Todas as unidades</option>
-              {unidades.map((u) => (
-                <option key={u.id} value={u.id}>{u.nome}</option>
-              ))}
-            </select>
-            <span className="toolbar-spacer" />
-            {!carregando && <span className="composer-hint" style={{ margin: 0 }}>{usuarios.length} usuário(s)</span>}
-          </div>
+        {carregando && <Silhueta linhas={4} altura={44} />}
 
-          {carregando && <p className="msg-p">Carregando usuários…</p>}
-          {!carregando && !erro && usuarios.length === 0 && (
-            <p className="msg-p">Nenhum usuário encontrado{filtroUnidade ? " nesta unidade" : ""}.</p>
-          )}
+        {!carregando && !erro && usuarios.length === 0 && (
+          <Vazio titulo={`Nenhum usuário${filtroUnidade ? " nesta unidade" : ""}`}>
+            Os perfis aparecem aqui assim que as pessoas se cadastram pelo chat.
+          </Vazio>
+        )}
 
-          {usuarios.length > 0 && (
-            <div className="table-wrap">
-              <table className="admin-table">
+        {usuarios.length > 0 && (
+          <>
+            <p className="campo-ajuda">
+              {usuarios.length} {usuarios.length === 1 ? "pessoa" : "pessoas"}
+            </p>
+            <div className="tabela-caixa">
+              <table className="tabela">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Nome</th>
                     <th>Restrições</th>
                     <th>Alergias</th>
                     <th className="celula-num">Pontos</th>
                     <th className="celula-num">Nível</th>
-                    <th className="celula-num">Streak</th>
+                    <th className="celula-num">Sequência</th>
                     <th className="celula-num">Registros</th>
                   </tr>
                 </thead>
                 <tbody>
                   {usuarios.map((u) => (
                     <tr key={u.id}>
-                      <td className="celula-mono">{u.id}</td>
                       <td>{u.nome}</td>
                       <td>{csv(u.restricoes)}</td>
                       <td>{csv(u.alergias)}</td>
                       <td className="celula-num">{u.pontos.toLocaleString("pt-BR")}</td>
                       <td className="celula-num">{u.nivel}</td>
-                      <td className="celula-num">{u.streak_dias > 0 ? `${u.streak_dias} dia(s)` : "—"}</td>
+                      <td className="celula-num">{u.streak_dias > 0 ? `${u.streak_dias} d` : "—"}</td>
                       <td className="celula-num">{u.registros_consumo}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
-        </main>
-      </div>
-    </div>
+          </>
+        )}
+      </Pagina>
+    </AppShell>
   );
 }

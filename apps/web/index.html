@@ -2,11 +2,40 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Menu-AI — Lia</title>
+    <!--
+      viewport-fit=cover libera as áreas seguras (notch, barra de gestos) para o
+      CSS via env(safe-area-inset-*). Sem isso, instalado como PWA, o compositor
+      fica embaixo da barra de gestos do iPhone.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Assistente do refeitório: cardápio do dia, recomendações que respeitam suas restrições e registro do que você comeu." />
+    <meta name="theme-color" content="#f4f0e8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Lia · Menu-AI</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+
+    <script>
+      // Aplica o tema antes da primeira pintura. Sem isto, quem usa tema escuro
+      // leva um flash branco na cara a cada abertura — o defeito mais visível
+      // que um app instalado pode ter.
+      (function () {
+        try {
+          var salvo = localStorage.getItem("menuai_tema");
+          var escuro =
+            salvo === "escuro" ||
+            (salvo !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.setAttribute("data-tema", escuro ? "escuro" : "claro");
+          if (escuro) {
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#151310");
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-tema", "claro");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

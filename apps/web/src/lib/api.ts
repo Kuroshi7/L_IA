@@ -29,6 +29,58 @@ export async function listarUnidades(): Promise<Unidade[]> {
   return data.unidades ?? [];
 }
 
+/**
+ * Unidades com cache de processo.
+ *
+ * A lateral mostra o nome da unidade atual em toda tela; sem cache, cada
+ * navegação repetiria o mesmo GET. A lista muda raramente (é o gestor que
+ * cadastra), então uma promessa memoizada resolve — e `esquecerUnidades()`
+ * limpa quando o admin mexe no cadastro.
+ *
+ * Multi-tenant: hoje o escopo do cache é a própria instalação (BASE_URL aponta
+ * para um cliente). Quando a mesma origem servir vários tenants, esta variável
+ * vira um Map com o tenant na chave — senão uma loja vê a lista da outra.
+ */
+let cacheUnidades: Promise<Unidade[]> | null = null;
+
+export function listarUnidadesCache(): Promise<Unidade[]> {
+  if (!cacheUnidades) {
+    cacheUnidades = listarUnidades().catch((err) => {
+      cacheUnidades = null; // erro não vira cache: a próxima tela tenta de novo
+      throw err;
+    });
+  }
+  return cacheUnidades;
+}
+
+export function esquecerUnidades(): void {
+  cacheUnidades = null;
+}
+
+// ---- Unidade escolhida ------------------------------------------------------
+// Guardada para o app abrir direto na conversa, como um aplicativo faria, em vez
+// de perguntar "qual unidade?" toda vez que a pessoa entra.
+
+const UNIDADE_ID_KEY = "menuai_unidade_id";
+
+export function getUnidadeSalva(): number | null {
+  try {
+    const bruto = localStorage.getItem(UNIDADE_ID_KEY);
+    const id = Number(bruto);
+    return bruto && Number.isFinite(id) && id > 0 ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setUnidadeSalva(id: number): void {
+  try {
+    localStorage.setItem(UNIDADE_ID_KEY, String(id));
+  } catch {
+    /* sem persistência (aba anônima): a sessão atual continua funcionando */
+  }
+}
+
 export async function getCardapio(unidadeId: number): Promise<Prato[]> {
   const data = await getJSON<{ pratos: Prato[] | null }>(`/unidades/${unidadeId}/cardapio`);
   return data.pratos ?? [];
@@ -80,20 +132,16 @@ export function setAdminToken(token: string): void {
   localStorage.setItem(ADMIN_TOKEN_KEY, token.trim());
 }
 
-async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Token": getAdminToken(),
-      ...(init?.headers || {}),
-    },
-  });
-  if (r.status === 401) throw new Error("Não autorizado — verifique o token de admin.");
-  if (!r.ok) throw new Error((await r.text()) || `${init?.method ?? "GET"} ${path} falhou (${r.status})`);
-  if (r.status === 204) return undefined as T;
-  return r.json() as Promise<T>;
-}
+/**
+ * Chamadas de gestão.
+ *
+ * Havia duas funções quase idênticas aqui (`adminFetch` e `adminRequest`), e a
+ * diferença — só uma preservava o status HTTP — era invisível em quem chamava.
+ * Resultado: metade das telas de admin não conseguia distinguir "token errado"
+ * de "servidor fora", e mostrava a mesma frase genérica para as duas. Agora é
+ * uma função só, e todo erro chega como `ApiError` com status.
+ */
+const adminFetch = <T,>(path: string, init?: RequestInit): Promise<T> => adminRequest<T>(path, init);
 
 export const adminListarAlimentos = (unidadeId: number) =>
   adminFetch<{ alimentos: Alimento[] | null }>(`/admin/unidades/${unidadeId}/alimentos`).then(

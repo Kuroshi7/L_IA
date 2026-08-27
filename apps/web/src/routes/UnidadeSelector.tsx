@@ -1,58 +1,76 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { listarUnidades } from "../lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { esquecerUnidades, listarUnidadesCache, setUnidadeSalva } from "../lib/api";
+import { marca } from "../brand";
+import AppShell from "../shell/AppShell";
+import { Aviso, Cabecalho, Pagina, Silhueta, Vazio } from "../ui/Pagina";
+import Icone from "../ui/Icone";
 import type { Unidade } from "../types";
 
 export default function UnidadeSelector() {
-  const [unidades, setUnidades] = useState<Unidade[]>([]);
-  const [erro, setErro] = useState<string | null>(null);
-  const [carregando, setCarregando] = useState(true);
+  const [unidades, setUnidades] = useState<Unidade[] | null>(null);
+  const [falhou, setFalhou] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    listarUnidades()
-      .then((u) => setUnidades(u))
-      .catch(() => setErro("Não foi possível carregar as unidades. O backend está rodando?"))
-      .finally(() => setCarregando(false));
+  const carregar = useCallback(() => {
+    setFalhou(false);
+    listarUnidadesCache()
+      .then(setUnidades)
+      .catch((err) => { console.error("falha ao listar unidades", err); setFalhou(true); });
   }, []);
 
+  useEffect(carregar, [carregar]);
+
+  function escolher(u: Unidade) {
+    // Guardar aqui é o que faz a próxima visita abrir direto na conversa.
+    setUnidadeSalva(u.id);
+    navigate(`/u/${u.id}/chat`);
+  }
+
+  const ativas = unidades?.filter((u) => u.ativo) ?? [];
+
   return (
-    <div className="app">
-      <div className="chat-card selector-card">
-        <header className="chat-header">
-          <div className="brand">
-            <div className="avatar avatar-lia"><span className="avatar-letter">L</span></div>
-            <div className="brand-text">
-              <h1 className="brand-name">Lia</h1>
-              <span className="status status-on"><span className="status-dot" />escolha sua unidade</span>
-            </div>
-          </div>
-          <div className="header-actions">
-            <Link className="btn-ghost" to="/cadastro">Cadastro</Link>
-            <Link className="btn-ghost" to="/admin">Admin</Link>
-          </div>
-        </header>
+    <AppShell titulo="Escolher unidade">
+      <Pagina>
+        <Cabecalho
+          titulo="Onde você vai comer?"
+          apoio={`A ${marca.assistente} responde sobre o cardápio da unidade escolhida. Dá para trocar depois, pelo menu.`}
+        />
 
-        <main className="messages selector-body">
-          <p className="suggestions-title">De qual unidade você quer ver o cardápio?</p>
+        {falhou && (
+          <Aviso
+            tom="erro"
+            titulo="Não consegui carregar as unidades"
+            acao={
+              <button className="btn btn--contorno btn--mini" onClick={() => { esquecerUnidades(); carregar(); }}>
+                Tentar de novo
+              </button>
+            }
+          >
+            Verifique sua conexão e tente de novo.
+          </Aviso>
+        )}
 
-          {carregando && <p className="msg-p">Carregando unidades…</p>}
-          {erro && <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erro}</p>}
+        {!unidades && !falhou && <Silhueta linhas={3} altura={78} />}
 
+        {unidades && ativas.length === 0 && (
+          <Vazio titulo="Nenhuma unidade disponível">
+            Nenhum refeitório foi liberado ainda. Fale com o responsável pela sua unidade.
+          </Vazio>
+        )}
+
+        {ativas.length > 0 && (
           <div className="unidade-grid">
-            {unidades.map((u) => (
-              <button key={u.id} className="unidade-card" onClick={() => navigate(`/u/${u.id}/chat`)}>
+            {ativas.map((u) => (
+              <button key={u.id} className="unidade-card" onClick={() => escolher(u)}>
+                <Icone nome="unidade" />
                 <span className="unidade-nome">{u.nome}</span>
                 <span className="unidade-slug">{u.slug}</span>
               </button>
             ))}
           </div>
-
-          {!carregando && !erro && unidades.length === 0 && (
-            <p className="msg-p">Nenhuma unidade cadastrada ainda. Rode o seed do backend.</p>
-          )}
-        </main>
-      </div>
-    </div>
+        )}
+      </Pagina>
+    </AppShell>
   );
 }

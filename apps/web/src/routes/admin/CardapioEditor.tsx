@@ -7,7 +7,11 @@ import {
   adminListarUnidades,
   adminSetCardapioItens,
 } from "../../lib/api";
-import { addDaysISO, mondayISO, parseISO, rotuloCurto } from "../../lib/datas";
+import { addDaysISO, fmtISO, mondayISO, parseISO, rotuloCurto } from "../../lib/datas";
+import AppShell from "../../shell/AppShell";
+import { Aviso, Cabecalho, Pagina, Silhueta } from "../../ui/Pagina";
+import { mensagemAdmin } from "../../lib/mensagens";
+import Icone from "../../ui/Icone";
 import type { Alimento, CardapioDia, CardapioItemInput, CardapioSemana, Unidade } from "../../types";
 
 function itensDe(dia: CardapioDia): CardapioItemInput[] {
@@ -38,7 +42,7 @@ export default function CardapioEditor() {
         setSemana(sem);
         setCatalogo(cat);
       })
-      .catch((e: Error) => setErro(e.message))
+      .catch((e: Error) => { console.error("falha ao carregar semana", e); setErro(mensagemAdmin(e)); })
       .finally(() => setCarregando(false));
   }, [unidadeId, inicio]);
 
@@ -60,7 +64,7 @@ export default function CardapioEditor() {
           return { ...prev, dias };
         });
       })
-      .catch((e: Error) => setErro(e.message))
+      .catch((e: Error) => { console.error("falha ao salvar", e); setErro(mensagemAdmin(e)); })
       .finally(() => setSalvando(false));
   }
 
@@ -101,7 +105,7 @@ export default function CardapioEditor() {
     setErro(null);
     adminCopiarSemana(unidadeId, inicio, destino)
       .then(() => setInicio(destino))
-      .catch((e: Error) => setErro(e.message))
+      .catch((e: Error) => { console.error("falha ao salvar", e); setErro(mensagemAdmin(e)); })
       .finally(() => setSalvando(false));
   }
 
@@ -123,143 +127,176 @@ export default function CardapioEditor() {
     if (id && id !== unidadeId) navigate(`/admin/u/${id}/cardapio`);
   }
 
+  const hoje = fmtISO(new Date());
+
   return (
-    <div className="app">
-      <div className="chat-card admin-card">
-        <header className="chat-header">
-          <div className="brand">
-            <div className="avatar avatar-lia"><span className="avatar-letter">L</span></div>
-            <div className="brand-text">
-              <h1 className="brand-name">Cardápio da semana</h1>
-              <span className="status status-on">
-                <span className="status-dot" />
-                {salvando ? "salvando…" : `semana de ${rotuloCurto(inicio)}`}
-              </span>
-            </div>
-          </div>
-          <div className="header-actions">
-            {unidades.length > 0 && (
-              <select
-                className="select-input"
-                value={unidadeId}
-                onChange={(e) => trocarUnidade(Number(e.target.value))}
-                title="Trocar unidade"
-                aria-label="Unidade"
-              >
-                {unidades.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nome}{u.ativo ? "" : " (inativa)"}
-                  </option>
-                ))}
-              </select>
-            )}
-            <Link className="btn-ghost" to={`/admin/u/${unidadeId}/alimentos`}>Alimentos</Link>
-            <Link className="btn-ghost" to="/admin">Admin</Link>
-          </div>
-        </header>
+    <AppShell
+      area="gestor"
+      unidadeId={unidadeId}
+      titulo="Cardápio da semana"
+      acoes={
+        unidades.length > 1 ? (
+          <select
+            className="selecao"
+            style={{ width: "auto", maxWidth: 200 }}
+            value={unidadeId}
+            onChange={(e) => trocarUnidade(Number(e.target.value))}
+            aria-label="Trocar de unidade"
+          >
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>{u.nome}{u.ativo ? "" : " (inativa)"}</option>
+            ))}
+          </select>
+        ) : undefined
+      }
+    >
+      <Pagina>
+        <Cabecalho
+          titulo={`Semana de ${rotuloCurto(inicio)}`}
+          apoio="O que estiver aqui é o que a Lia oferece ao cliente naquele dia. A estrela marca a proteína do dia — uma por dia."
+          acoes={
+            <>
+              <button className="btn btn--fantasma btn--mini" onClick={() => setInicio(addDaysISO(inicio, -7))}>
+                <Icone nome="esquerda" tam={16} /> Anterior
+              </button>
+              <button className="btn btn--contorno btn--mini" onClick={() => setInicio(mondayISO(new Date()))}>
+                Esta semana
+              </button>
+              <button className="btn btn--fantasma btn--mini" onClick={() => setInicio(addDaysISO(inicio, 7))}>
+                Próxima <Icone nome="direita" tam={16} />
+              </button>
+            </>
+          }
+        />
 
-        <main className="messages admin-body">
-          <div className="semana-toolbar">
-            <button className="btn-ghost" onClick={() => setInicio(addDaysISO(inicio, -7))}>← Semana anterior</button>
-            <button className="btn-ghost" onClick={() => setInicio(mondayISO(new Date()))}>Semana atual</button>
-            <button className="btn-ghost" onClick={() => setInicio(addDaysISO(inicio, 7))}>Próxima semana →</button>
-            <label className="field-label" htmlFor="ir-para-data">Ir para data</label>
-            <input
-              id="ir-para-data"
-              className="text-input toolbar-date"
-              type="date"
-              value={inicio}
-              onChange={(e) => irParaData(e.target.value)}
-            />
-            <span className="toolbar-spacer" />
-            <button className="btn-primary" disabled={salvando} onClick={copiarProximaSemana}>
-              Copiar p/ próxima semana
+        <section className="bloco">
+          <div className="barra-ferramentas">
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="ir-para-data">Ir para a semana de</label>
+              <input
+                id="ir-para-data"
+                className="entrada"
+                style={{ width: "auto" }}
+                type="date"
+                value={inicio}
+                onChange={(e) => irParaData(e.target.value)}
+              />
+            </div>
+
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="copia-destino">Copiar esta semana para</label>
+              <input
+                id="copia-destino"
+                className="entrada"
+                style={{ width: "auto" }}
+                type="date"
+                value={copiaDestino}
+                onChange={(e) => setCopiaDestino(e.target.value)}
+              />
+            </div>
+            <button className="btn btn--contorno" disabled={salvando || !copiaDestino} onClick={copiarParaDestino}>
+              Copiar
+            </button>
+
+            <span className="barra-ferramentas__espaco" />
+
+            <button className="btn btn--primario" disabled={salvando} onClick={copiarProximaSemana}>
+              Repetir na próxima semana
             </button>
           </div>
 
-          <div className="semana-toolbar">
-            <label className="field-label" htmlFor="copia-destino">Copiar esta semana para</label>
-            <input
-              id="copia-destino"
-              className="text-input toolbar-date"
-              type="date"
-              value={copiaDestino}
-              onChange={(e) => setCopiaDestino(e.target.value)}
-            />
-            <button className="btn-ghost" disabled={salvando || !copiaDestino} onClick={copiarParaDestino}>
-              Copiar para semana escolhida
-            </button>
-            {copiaDestino && (
-              <span className="dia-data">
-                destino: semana de {rotuloCurto(mondayISO(parseISO(copiaDestino)))}
-              </span>
-            )}
-          </div>
-
-          {erro && <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erro}</p>}
-          {carregando && <p className="msg-p">Carregando semana…</p>}
-
-          {semana && (
-            <div className="semana-grid">
-              {semana.dias.map((dia, idx) => {
-                const presentes = new Set(dia.pratos.map((p) => p.id));
-                const disponiveis = catalogo.filter((a) => a.ativo && !presentes.has(a.id));
-                return (
-                  <div className="dia-col" key={dia.data}>
-                    <div className="dia-head">
-                      <strong>{dia.dia_semana}</strong>
-                      <span className="dia-data">{rotuloCurto(dia.data)}</span>
-                    </div>
-
-                    <div className="dia-itens">
-                      {dia.pratos.length === 0 && <p className="dia-vazio">Sem itens</p>}
-                      {dia.pratos.map((p) => (
-                        <div className={`item-row${p.ativo ? "" : " item-inativo"}`} key={p.id}>
-                          <button
-                            className={`star${p.is_proteina_do_dia ? " star-on" : ""}`}
-                            title="Proteína do dia (1 por dia)"
-                            onClick={() => alternarProteina(idx, p.id)}
-                          >
-                            ★
-                          </button>
-                          <span className="item-nome">
-                            {p.nome}
-                            {!p.ativo && <em className="item-tag"> inativo</em>}
-                          </span>
-                          <button className="item-remove" title="Remover" onClick={() => remover(idx, p.id)}>×</button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <select
-                      className="select-input dia-add"
-                      value=""
-                      disabled={salvando || disponiveis.length === 0}
-                      onChange={(e) => adicionar(idx, Number(e.target.value))}
-                    >
-                      <option value="">
-                        {disponiveis.length === 0 ? "— catálogo vazio —" : "+ adicionar alimento"}
-                      </option>
-                      {disponiveis.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.categoria ? `${a.categoria} · ` : ""}{a.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {semana && catalogo.length === 0 && (
-            <p className="msg-p">
-              Catálogo vazio. Cadastre alimentos em{" "}
-              <Link to={`/admin/u/${unidadeId}/alimentos`}>Alimentos</Link> antes de montar o cardápio.
+          {copiaDestino && (
+            <p className="campo-ajuda">
+              Destino: semana de {rotuloCurto(mondayISO(parseISO(copiaDestino)))} — os itens já cadastrados nesses dias
+              serão substituídos.
             </p>
           )}
-        </main>
-      </div>
-    </div>
+        </section>
+
+        {erro && <Aviso tom="erro" titulo="Não deu certo">{erro}</Aviso>}
+
+        {carregando && <Silhueta linhas={2} altura={140} />}
+
+        {semana && catalogo.length === 0 && (
+          <Aviso
+            tom="atencao"
+            titulo="O catálogo desta unidade está vazio"
+            acao={
+              <Link className="btn btn--contorno btn--mini" to={`/admin/u/${unidadeId}/alimentos`}>
+                Cadastrar alimentos
+              </Link>
+            }
+          >
+            Sem alimentos cadastrados não há o que colocar no cardápio.
+          </Aviso>
+        )}
+
+        {semana && (
+          <div className="semana">
+            {semana.dias.map((dia, idx) => {
+              const presentes = new Set(dia.pratos.map((p) => p.id));
+              const disponiveis = catalogo.filter((a) => a.ativo && !presentes.has(a.id));
+              return (
+                <section className={`dia${dia.data === hoje ? " dia--hoje" : ""}`} key={dia.data}>
+                  <header className="dia__cabecalho">
+                    <span className="dia__nome">{dia.dia_semana}</span>
+                    <span className="dia__data">
+                      {rotuloCurto(dia.data)}{dia.data === hoje ? " · hoje" : ""}
+                    </span>
+                  </header>
+
+                  <div className="dia__itens">
+                    {dia.pratos.length === 0 && <p className="dia__vazio">Nada servido</p>}
+                    {dia.pratos.map((p) => (
+                      <div className={`item${p.ativo ? "" : " item--inativo"}`} key={p.id}>
+                        <button
+                          className={`estrela${p.is_proteina_do_dia ? " estrela--ligada" : ""}`}
+                          title="Proteína do dia — uma por dia"
+                          aria-label={`${p.is_proteina_do_dia ? "Desmarcar" : "Marcar"} ${p.nome} como proteína do dia`}
+                          aria-pressed={p.is_proteina_do_dia}
+                          disabled={salvando}
+                          onClick={() => alternarProteina(idx, p.id)}
+                        >
+                          <Icone nome="estrela" tam={15} />
+                        </button>
+                        <span className="item__nome">
+                          {p.nome}
+                          {!p.ativo && <em className="item__tag"> inativo</em>}
+                        </span>
+                        <button
+                          className="remove"
+                          aria-label={`Tirar ${p.nome} do cardápio`}
+                          disabled={salvando}
+                          onClick={() => remover(idx, p.id)}
+                        >
+                          <Icone nome="remover" tam={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <select
+                    className="selecao"
+                    value=""
+                    aria-label={`Adicionar alimento em ${dia.dia_semana}`}
+                    disabled={salvando || disponiveis.length === 0}
+                    onChange={(e) => adicionar(idx, Number(e.target.value))}
+                  >
+                    <option value="">
+                      {disponiveis.length === 0 ? "nada disponível" : "adicionar alimento…"}
+                    </option>
+                    {disponiveis.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.categoria ? `${a.categoria} · ` : ""}{a.nome}
+                      </option>
+                    ))}
+                  </select>
+                </section>
+              );
+            })}
+          </div>
+        )}
+      </Pagina>
+    </AppShell>
   );
 }

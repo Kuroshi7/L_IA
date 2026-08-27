@@ -1,0 +1,165 @@
+/* ============================================================================
+   TOKENS — a única fonte de verdade visual do produto.
+   ----------------------------------------------------------------------------
+   Nenhum componente escreve cor literal. Tudo aqui, em custom properties, por
+   dois motivos:
+
+   1. Tema claro/escuro sem duplicar folha de estilo.
+   2. White-label por tenant (WEB-11). Como são propriedades do :root, o tema de
+      uma unidade/tenant pode chegar como DADO (ex.: GET /unidades/:id/tema) e
+      ser aplicado em runtime com element.style.setProperty — sem build novo,
+      sem fork de CSS. Ver `src/brand.ts` (aplicarTema).
+
+   Nomes em português porque o resto do código é em português; trocar de idioma
+   no meio é o tipo de inconsistência que vira dúvida em code review.
+   ========================================================================= */
+
+:root {
+  /* ---- Marca (o que muda por tenant) ---------------------------------- */
+  --marca: #2f6b4a;          /* verde-mata: refeitório, comida de verdade */
+  --marca-forte: #235139;
+  --marca-suave: #e7f0ea;
+  --marca-contraste: #ffffff;
+
+  --acento: #c07038;         /* terracota: usado com parcimônia, só onde precisa puxar o olho */
+  --acento-texto: #99551f;   /* variante legível para texto miúdo sobre fundo claro */
+  --acento-suave: #f7ead9;
+
+  /* ---- Superfícies ----------------------------------------------------- */
+  --fundo: #faf8f4;          /* papel quente, não branco de framework */
+  --fundo-sutil: #f2eee6;
+  --fundo-elevado: #ffffff;
+  --barra: #f4f0e8;          /* lateral: um degrau mais escura que a conversa */
+  --bolha-usuario: #eae4d8;
+
+  /* ---- Traços ---------------------------------------------------------- */
+  --linha: #e7e1d5;
+  --linha-forte: #d3cbba;
+
+  /* ---- Texto ----------------------------------------------------------- */
+  --texto: #1c1a17;
+  --texto-medio: #6d675b;
+  --texto-fraco: #98907f;
+
+  /* ---- Semânticos ------------------------------------------------------ */
+  --ok: #2f6b4a;
+  --ok-suave: #e7f0ea;
+  --atencao: #a56c22;
+  --atencao-suave: #fbf1dd;
+  --perigo: #b34a33;
+  --perigo-suave: #fae9e4;
+
+  /* Classificação de desperdício (dashboard) */
+  --st-otimo: #2f6b4a;
+  --st-bom: #5c9a6f;
+  --st-atencao: #a56c22;
+  --st-critico: #b34a33;
+
+  /* ---- Tipografia ------------------------------------------------------ */
+  --fonte-texto: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --fonte-titulo: "Playfair Display", Georgia, "Times New Roman", serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Escala: 16px é o corpo. Abaixo disso o iOS dá zoom no input e o texto de
+     uma resposta longa da Lia vira parede. O front antigo usava 14.5px — era
+     parte da sensação de "tela miniaturizada". */
+  --t-xs: 0.6875rem;   /* 11px  — rótulos de tabela, caption */
+  --t-sm: 0.8125rem;   /* 13px  — metadados, hints */
+  --t-md: 0.875rem;    /* 14px  — UI densa (admin) */
+  --t-base: 1rem;      /* 16px  — conversa */
+  --t-lg: 1.125rem;    /* 18px */
+  --t-xl: 1.5rem;      /* 24px  — título de página */
+  --t-2xl: 2rem;       /* 32px  — saudação da tela inicial */
+
+  /* ---- Espaço ---------------------------------------------------------- */
+  --e-1: 4px;  --e-2: 8px;  --e-3: 12px; --e-4: 16px;
+  --e-5: 20px; --e-6: 24px; --e-8: 32px; --e-10: 40px; --e-12: 56px;
+
+  /* Largura da coluna de leitura. ~72 caracteres: o mesmo critério de um livro,
+     e o que ChatGPT/Claude usam. Resposta da Lia tem bloco de nutrição — abaixo
+     disso quebra feio, acima disso cansa. */
+  --coluna: 46rem;
+  --lateral: 268px;
+
+  /* ---- Formas ---------------------------------------------------------- */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-full: 999px;
+
+  /* ---- Profundidade ---------------------------------------------------- */
+  --sombra-1: 0 1px 2px rgba(32, 26, 16, 0.06);
+  --sombra-2: 0 6px 20px -8px rgba(32, 26, 16, 0.16);
+  --sombra-3: 0 20px 44px -16px rgba(32, 26, 16, 0.24);
+
+  /* ---- Movimento ------------------------------------------------------- */
+  --rapido: 120ms cubic-bezier(0.2, 0, 0.2, 1);
+  --normal: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+  --entrada: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- Camadas --------------------------------------------------------- */
+  --z-sticky: 10;
+  --z-drawer: 40;
+  --z-toast: 60;
+
+  /* ---- Área segura (notch / barra de gestos do iOS e Android) ----------- */
+  --seguro-topo: env(safe-area-inset-top, 0px);
+  --seguro-base: env(safe-area-inset-bottom, 0px);
+  --seguro-esq: env(safe-area-inset-left, 0px);
+  --seguro-dir: env(safe-area-inset-right, 0px);
+
+  color-scheme: light;
+}
+
+/* ============================================================================
+   TEMA ESCURO
+   ----------------------------------------------------------------------------
+   Não é o claro invertido: é a mesma marca em carvão quente. Verde e terracota
+   sobem de luminosidade para manter o texto acima de 4.5:1 de contraste.
+
+   O tema mora num único seletor ([data-tema="escuro"]) em vez de duplicar tudo
+   dentro de um prefers-color-scheme. Quem resolve "seguir o sistema" é o JS
+   (src/shell/tema.ts), que escreve o atributo e reage à troca do SO. Custo: um
+   script inline no index.html para não piscar branco antes do bundle carregar.
+   Ganho: um lugar só para editar cor, e o usuário pode escolher um tema
+   diferente do sistema — que é o comportamento de app que a gente quer no PWA.
+   ========================================================================= */
+
+:root[data-tema="escuro"] {
+  --marca: #74bd93;
+  --marca-forte: #93d0ad;
+  --marca-suave: #1d2c24;
+  --marca-contraste: #10231a;
+
+  --acento: #e0975c;
+  --acento-texto: #e8ab77;
+  --acento-suave: #2d2118;
+
+  --fundo: #1a1815;
+  --fundo-sutil: #221f1a;
+  --fundo-elevado: #232019;
+  --barra: #151310;
+  --bolha-usuario: #2b2720;
+
+  --linha: #322d25;
+  --linha-forte: #453e33;
+
+  --texto: #f2eee6;
+  --texto-medio: #a9a294;
+  --texto-fraco: #7d7668;
+
+  --ok: #74bd93;
+  --ok-suave: #1d2c24;
+  --atencao: #d3a05a;
+  --atencao-suave: #2c2418;
+  --perigo: #dd8b74;
+  --perigo-suave: #2e1e19;
+
+  --st-otimo: #74bd93;
+  --st-bom: #93c9a6;
+  --st-atencao: #d3a05a;
+  --st-critico: #dd8b74;
+
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sombra-2: 0 6px 20px -8px rgba(0, 0, 0, 0.6);
+  --sombra-3: 0 20px 44px -16px rgba(0, 0, 0, 0.7);
+
+  color-scheme: dark;
+}

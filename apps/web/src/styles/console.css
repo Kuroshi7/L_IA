@@ -1,0 +1,459 @@
+/* ============================================================================
+   PÁGINAS — tudo que não é a conversa: perfil, ranking, escolha de unidade e
+   o console do gestor.
+   ----------------------------------------------------------------------------
+   Mesmo shell, densidade diferente. A conversa é uma coluna de leitura; aqui é
+   uma superfície de trabalho: largura total, tabelas, formulários em grade.
+   O gestor está sentado num desktop com uma planilha aberta do lado — a tela
+   dele não pode ter a mesma respiração da tela de quem está na fila.
+   ========================================================================= */
+
+.pagina {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: calc(var(--e-10) + var(--seguro-base));
+}
+
+.pagina__interno {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--e-5) var(--e-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+.pagina__interno--estreito { max-width: 780px; }
+
+/* ---- Cabeçalho de página ------------------------------------------------
+   Título em serifa e subtítulo explicando o que a tela resolve. A assimetria
+   (título grande, linha de apoio pequena e deslocada) é o que separa isto de
+   um dashboard de template. */
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--e-4);
+  border-bottom: 1px solid var(--linha);
+}
+.cabecalho__texto { min-width: 0; }
+.cabecalho__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: var(--texto);
+}
+.cabecalho__apoio { margin-top: var(--e-1); font-size: var(--t-md); color: var(--texto-medio); max-width: 56ch; }
+.cabecalho__acoes { display: flex; align-items: center; gap: var(--e-2); flex-wrap: wrap; }
+
+/* ---- Bloco / seção ------------------------------------------------------ */
+
+.bloco {
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--r-lg);
+  padding: var(--e-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+.bloco--plano { background: transparent; border: none; padding: 0; }
+
+.bloco__titulo {
+  font-size: var(--t-md);
+  font-weight: 650;
+  color: var(--texto);
+}
+.bloco__apoio { font-size: var(--t-sm); color: var(--texto-medio); margin-top: 2px; }
+
+.secao-rotulo {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.barra-ferramentas {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+.barra-ferramentas__espaco { flex: 1; }
+
+/* ---- Vazio -------------------------------------------------------------- */
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-10) var(--e-5);
+  text-align: center;
+  border: 1px dashed var(--linha-forte);
+  border-radius: var(--r-lg);
+  color: var(--texto-medio);
+}
+.vazio__titulo { font-size: var(--t-lg); font-weight: 600; color: var(--texto); }
+.vazio__texto { font-size: var(--t-md); max-width: 44ch; }
+
+/* ============================================================================
+   GRADE DE FORMULÁRIO
+   ========================================================================= */
+
+.form-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--e-3) var(--e-4); }
+.campo-2 { grid-column: span 2; }
+.campo-3 { grid-column: span 3; }
+.campo-4 { grid-column: 1 / -1; }
+.form-acoes { display: flex; gap: var(--e-3); align-items: center; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+  .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campo-3 { grid-column: span 2; }
+}
+@media (max-width: 520px) {
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .campo-2, .campo-3 { grid-column: span 1; }
+}
+
+/* ============================================================================
+   CARTÕES DE UNIDADE
+   ========================================================================= */
+
+.unidade-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(264px, 1fr)); gap: var(--e-3); }
+
+.unidade-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  padding: var(--e-4);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--r-lg);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--rapido), transform var(--rapido), box-shadow var(--rapido);
+  text-decoration: none;
+  color: inherit;
+}
+.unidade-card:hover {
+  border-color: var(--marca);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-2);
+  text-decoration: none;
+}
+.unidade-nome { font-size: var(--t-lg); font-weight: 600; color: var(--texto); }
+.unidade-slug { font-size: var(--t-sm); color: var(--texto-fraco); font-family: var(--fonte-mono); }
+.unidade-card__acoes { display: flex; gap: var(--e-2); margin-top: var(--e-3); flex-wrap: wrap; }
+
+/* ============================================================================
+   MOSAICO DE NÚMEROS
+   ========================================================================= */
+
+.mosaico { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--e-3); }
+
+.numero {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--e-4);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-left: 3px solid var(--linha-forte);
+  border-radius: var(--r-md);
+}
+.numero__rotulo { font-size: var(--t-sm); font-weight: 550; color: var(--texto-medio); }
+.numero__valor {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+}
+.numero__apoio { font-size: var(--t-sm); color: var(--texto-fraco); }
+
+.numero--otimo   { border-left-color: var(--st-otimo); }
+.numero--bom     { border-left-color: var(--st-bom); }
+.numero--atencao { border-left-color: var(--st-atencao); }
+.numero--critico { border-left-color: var(--st-critico); }
+.numero--otimo   .numero__valor, .numero--otimo   .numero__apoio { color: var(--st-otimo); }
+.numero--bom     .numero__valor, .numero--bom     .numero__apoio { color: var(--st-bom); }
+.numero--atencao .numero__valor, .numero--atencao .numero__apoio { color: var(--st-atencao); }
+.numero--critico .numero__valor, .numero--critico .numero__apoio { color: var(--st-critico); }
+
+/* ============================================================================
+   TABELAS
+   ========================================================================= */
+
+.tabela-caixa {
+  overflow-x: auto;
+  border: 1px solid var(--linha);
+  border-radius: var(--r-lg);
+  background: var(--fundo-elevado);
+}
+
+.tabela { width: 100%; border-collapse: collapse; font-size: var(--t-md); }
+.tabela th {
+  position: sticky;
+  top: 0;
+  text-align: left;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-medio);
+  background: var(--fundo-sutil);
+  padding: var(--e-3) var(--e-4);
+  border-bottom: 1px solid var(--linha);
+  white-space: nowrap;
+}
+.tabela td { padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--linha); vertical-align: middle; }
+.tabela tbody tr:last-child td { border-bottom: none; }
+.tabela tbody tr:hover td { background: var(--fundo-sutil); }
+.celula-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th.celula-num { text-align: right; }
+.celula-mono { font-family: var(--fonte-mono); font-size: var(--t-sm); color: var(--texto-medio); }
+.celula-acoes { text-align: right; white-space: nowrap; }
+.celula-acoes > * + * { margin-left: var(--e-2); }
+.linha-inativa td { opacity: 0.5; }
+
+/* ============================================================================
+   CATÁLOGO DE ALIMENTOS
+   ========================================================================= */
+
+.cat-lista { display: flex; flex-direction: column; gap: var(--e-2); }
+.cat-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--r-md);
+}
+.cat-inativo { opacity: 0.55; }
+.cat-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cat-nome { font-weight: 600; color: var(--texto); }
+.cat-cat { font-weight: 400; color: var(--texto-fraco); }
+.cat-macros { font-size: var(--t-sm); color: var(--texto-medio); font-variant-numeric: tabular-nums; }
+.cat-acoes { display: flex; gap: var(--e-2); flex-shrink: 0; }
+
+/* Porções (medidas caseiras) */
+.porcoes { display: flex; flex-direction: column; gap: var(--e-2); }
+.porcao-linha { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 0.7fr 0.7fr 0.7fr auto; gap: var(--e-2); align-items: center; }
+.porcao-linha .entrada { min-height: 34px; padding: var(--e-1) var(--e-2); font-size: var(--t-sm); }
+.porcao-cabecalho { font-size: var(--t-xs); color: var(--texto-fraco); text-transform: uppercase; letter-spacing: 0.05em; }
+@media (max-width: 900px) {
+  .porcao-linha { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .porcao-cabecalho { display: none; }
+}
+
+.busca-resultados { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: 34px;
+  padding: 0 var(--e-3);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r-full);
+  font-size: var(--t-sm);
+  color: var(--texto-medio);
+  cursor: pointer;
+  transition: border-color var(--rapido), background var(--rapido), color var(--rapido);
+}
+.pilula:hover { border-color: var(--marca); color: var(--texto); }
+.pilula--ativa { background: var(--marca-suave); border-color: var(--marca); color: var(--marca-forte); font-weight: 600; }
+
+/* ============================================================================
+   GRADE DA SEMANA (cardápio)
+   ========================================================================= */
+
+/* 150px é o mínimo que deixa os sete dias numa fileira só num desktop comum.
+   Com 180px a semana quebrava em 5 + 2, e "a semana" deixava de ser lida de um
+   golpe de olho — que é a única razão de existir uma grade aqui. */
+.semana { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--e-3); }
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-3);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--r-md);
+}
+/* O dia de hoje é o único que o gestor procura ao abrir a tela. */
+.dia--hoje { border-color: var(--marca); box-shadow: 0 0 0 1px var(--marca); }
+.dia__cabecalho { display: flex; flex-direction: column; line-height: 1.25; }
+.dia__nome { font-size: var(--t-md); font-weight: 650; color: var(--texto); }
+.dia__data { font-size: var(--t-xs); color: var(--texto-fraco); font-variant-numeric: tabular-nums; }
+.dia__itens { display: flex; flex-direction: column; gap: var(--e-1); min-height: 36px; }
+.dia__vazio { font-size: var(--t-sm); color: var(--texto-fraco); }
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--e-1);
+  padding: var(--e-1) var(--e-2);
+  background: var(--fundo-sutil);
+  border-radius: var(--r-sm);
+  font-size: var(--t-sm);
+}
+.item--inativo { opacity: 0.5; }
+.item__nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item__tag { font-size: var(--t-xs); color: var(--texto-fraco); }
+
+.estrela {
+  display: grid; place-items: center;
+  width: 26px; height: 26px;
+  border: none; background: none;
+  border-radius: var(--r-sm);
+  color: var(--linha-forte);
+  cursor: pointer;
+  transition: color var(--rapido), background var(--rapido);
+}
+.estrela:hover { background: var(--fundo-elevado); color: var(--acento); }
+.estrela--ligada { color: var(--acento); }
+
+.remove {
+  display: grid; place-items: center;
+  width: 26px; height: 26px;
+  border: none; background: none;
+  border-radius: var(--r-sm);
+  color: var(--texto-fraco);
+  cursor: pointer;
+  transition: color var(--rapido), background var(--rapido);
+}
+.remove:hover { background: var(--perigo-suave); color: var(--perigo); }
+
+/* ============================================================================
+   RANKING
+   ========================================================================= */
+
+.rank { display: flex; flex-direction: column; gap: var(--e-2); }
+.rank__linha {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--r-md);
+}
+/* Pódio sem medalha de emoji: o número cresce e ganha a serifa da marca. */
+.rank__linha--podio .rank__pos { font-family: var(--fonte-titulo); font-size: 1.4rem; color: var(--acento-texto); }
+.rank__linha--eu { border-color: var(--marca); background: var(--marca-suave); }
+.rank__pos {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: var(--t-md);
+  font-weight: 650;
+  color: var(--texto-fraco);
+  font-variant-numeric: tabular-nums;
+}
+.rank__nome { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank__eu { font-weight: 400; color: var(--texto-medio); }
+.rank__nivel { font-size: var(--t-sm); color: var(--texto-medio); white-space: nowrap; }
+.rank__pontos { font-weight: 650; color: var(--texto); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ============================================================================
+   GRÁFICO DE BARRAS (desperdício)
+   ========================================================================= */
+
+.barras { display: flex; align-items: flex-end; gap: 3px; }
+.barras__col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--e-1); min-width: 0; }
+.barras__trilho { height: 150px; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.barras__barra {
+  width: 100%;
+  max-width: 26px;
+  min-height: 2px;
+  background: var(--marca);
+  /* Ponta arredondada só em cima: a base fica ancorada na linha de zero, que é
+     o que o olho usa para comparar alturas. */
+  border-radius: 4px 4px 0 0;
+  transition: background var(--rapido);
+}
+/* Realce de hover é interação, não codificação: escurece a MESMA cor, em vez de
+   trocar por outra — a cor pertence à série, não ao estado do mouse. */
+.barras__col:hover .barras__barra { background: var(--marca-forte); }
+.barras__valor { font-size: var(--t-xs); font-weight: 600; color: var(--texto-medio); font-variant-numeric: tabular-nums; }
+.barras__rotulo { font-size: 10px; color: var(--texto-fraco); white-space: nowrap; }
+
+/* ============================================================================
+   AJUSTES DE TELA PEQUENA
+   ========================================================================= */
+
+@media (max-width: 720px) {
+  .pagina__interno { padding: var(--e-4) var(--e-3); gap: var(--e-4); }
+  .bloco { padding: var(--e-4); }
+  .cabecalho { align-items: flex-start; flex-direction: column; gap: var(--e-3); }
+  .cat-linha { flex-direction: column; align-items: stretch; gap: var(--e-3); }
+  .cat-acoes { justify-content: flex-end; }
+  .rank__linha { gap: var(--e-3); padding: var(--e-3); }
+  .rank__nivel { display: none; }
+}
+
+/* ============================================================================
+   ETIQUETAS DE ENTRADA (restrições, alergias, preferências)
+   ========================================================================= */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-1);
+  min-height: 40px;
+  padding: var(--e-1) var(--e-2);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r-md);
+  cursor: text;
+  transition: border-color var(--rapido), box-shadow var(--rapido);
+}
+.tags:focus-within { border-color: var(--marca); box-shadow: 0 0 0 3px var(--marca-suave); }
+
+.tags__campo {
+  flex: 1;
+  min-width: 8rem;
+  min-height: 30px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--t-md);
+}
+.tags__campo::placeholder { color: var(--texto-fraco); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  padding: 3px var(--e-1) 3px var(--e-2);
+  background: var(--marca-suave);
+  color: var(--marca-forte);
+  border-radius: var(--r-sm);
+  font-size: var(--t-sm);
+  font-weight: 550;
+}
+.tag__x {
+  display: grid; place-items: center;
+  width: 18px; height: 18px;
+  border: none; background: none;
+  border-radius: 4px;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.tag__x:hover { opacity: 1; background: rgba(0, 0, 0, 0.08); }
+
+.tags-sugestoes { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+.tags-sugestoes .pilula { min-height: 28px; font-size: var(--t-sm); }

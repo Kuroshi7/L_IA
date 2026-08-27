@@ -1,0 +1,430 @@
+/* ============================================================================
+   CHAT — a tela do produto.
+   ----------------------------------------------------------------------------
+   Decisões que valem explicar, porque são o oposto do que existia antes:
+
+   1. Sem cartão. A conversa ocupa a viewport inteira. O "cartão de 820px
+      centralizado com sombra" é o que fazia a tela parecer uma miniatura de si
+      mesma — e desperdiçava 40% da tela num desktop.
+
+   2. Sem balão do lado da Lia. Resposta de assistente é texto de leitura, não
+      recado de WhatsApp: as respostas dela têm listas, blocos de nutrição e 15
+      linhas. Balão + 78% de largura + fonte 14.5px era ilegível. Agora é texto
+      na coluna, largura de leitura, 16px. Só a fala do usuário tem balão —
+      porque aí o balão faz o trabalho de dizer "isto foi você".
+
+   3. Um vazio que convida. Sem conversa, saudação e compositor sobem para o
+      centro óptico da tela (é o que ChatGPT, Gemini e Claude fazem). Ao enviar,
+      o compositor desce e ancora embaixo. O nó do DOM é o mesmo — só o layout
+      muda —, então o foco do teclado e o texto digitado sobrevivem à transição.
+   ========================================================================= */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.chat__fluxo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: var(--e-4) 0 var(--e-2);
+}
+
+.chat__doca {
+  flex-shrink: 0;
+  padding: var(--e-3) var(--e-4) calc(var(--e-3) + var(--seguro-base));
+  background: linear-gradient(to top, var(--fundo) 62%, transparent);
+}
+
+/* Estado vazio: fluxo e doca se encontram no meio da tela. */
+.chat--vazio .chat__fluxo { flex: 0 0 auto; margin-top: auto; overflow: visible; }
+.chat--vazio .chat__doca { margin-bottom: auto; background: none; }
+
+/* Coluna de leitura — a mesma medida para mensagem, compositor e sugestões,
+   para tudo alinhar num eixo só. */
+.coluna { width: 100%; max-width: var(--coluna); margin: 0 auto; padding: 0 var(--e-4); }
+
+/* ============================================================================
+   ABERTURA (estado vazio)
+   ========================================================================= */
+
+.abertura { padding: var(--e-6) 0 var(--e-5); }
+
+.abertura__saudacao {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-2xl);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--texto);
+  /* Desalinhado de propósito em relação ao bloco de texto: o olho pousa aqui
+     primeiro. */
+  text-wrap: balance;
+}
+.abertura__saudacao em {
+  font-style: italic;
+  color: var(--marca);
+}
+.abertura__convite {
+  margin-top: var(--e-3);
+  font-size: var(--t-lg);
+  line-height: 1.5;
+  color: var(--texto-medio);
+  max-width: 34rem;
+}
+
+/* ============================================================================
+   MENSAGENS
+   ========================================================================= */
+
+.msgs { display: flex; flex-direction: column; gap: var(--e-6); padding-bottom: var(--e-4); }
+
+.msg { animation: msg-entra var(--entrada) both; }
+@keyframes msg-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Fala do usuário: balão à direita, discreto ------------------------- */
+
+.msg--usuario { display: flex; justify-content: flex-end; }
+.msg--usuario .msg__corpo {
+  max-width: 85%;
+  padding: var(--e-3) var(--e-4);
+  background: var(--bolha-usuario);
+  border-radius: var(--r-xl);
+  border-bottom-right-radius: var(--r-sm);
+  color: var(--texto);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Fala da Lia: texto na coluna, sem caixa ---------------------------- */
+
+.msg--lia { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: var(--e-3); }
+.msg--lia .msg__corpo { min-width: 0; padding-top: 2px; }
+
+/* Mensagens seguidas da Lia não repetem o selo — repetir vira ruído. */
+.msg--lia.msg--continua .msg__selo { visibility: hidden; }
+
+.msg__selo {
+  display: grid;
+  place-items: center;
+  width: 30px; height: 30px;
+  border-radius: 10px;
+  border-top-left-radius: 3px;
+  background: var(--marca);
+  color: var(--marca-contraste);
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ---- Rodapé de ações (copiar) ------------------------------------------
+   Visível ao passar o mouse, ao focar por teclado, e sempre no toque —
+   onde hover não existe. */
+.msg__acoes {
+  display: flex;
+  gap: var(--e-1);
+  margin-top: var(--e-2);
+  opacity: 0;
+  transition: opacity var(--rapido);
+}
+.msg:hover .msg__acoes,
+.msg:focus-within .msg__acoes { opacity: 1; }
+@media (pointer: coarse) { .msg__acoes { opacity: 1; } }
+
+.msg-acao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  height: 28px;
+  padding: 0 var(--e-2);
+  border: none;
+  background: transparent;
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  font-weight: 550;
+  color: var(--texto-fraco);
+  cursor: pointer;
+  transition: background var(--rapido), color var(--rapido);
+}
+.msg-acao:hover { background: var(--fundo-sutil); color: var(--texto-medio); }
+
+/* ============================================================================
+   TEXTO FORMATADO DA RESPOSTA
+   A Lia responde com listas e blocos de nutrição — o ritmo vertical importa
+   mais aqui do que em qualquer outro lugar do app.
+   ========================================================================= */
+
+.fmt { font-size: var(--t-base); line-height: 1.65; overflow-wrap: anywhere; }
+.fmt > *:first-child { margin-top: 0; }
+.fmt > *:last-child { margin-bottom: 0; }
+.fmt p { margin: 0 0 var(--e-3); }
+.fmt strong { font-weight: 650; color: var(--texto); }
+.fmt em { font-style: italic; }
+
+.fmt ul, .fmt ol { margin: 0 0 var(--e-3); padding-left: var(--e-5); display: flex; flex-direction: column; gap: var(--e-1); }
+.fmt ul { list-style: none; padding-left: var(--e-4); }
+.fmt ul > li { position: relative; padding-left: var(--e-3); }
+.fmt ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.7em;
+  width: 5px; height: 5px;
+  border-radius: 1px;
+  background: var(--acento);
+}
+.fmt ol { list-style: decimal; }
+.fmt ol > li::marker { color: var(--texto-fraco); font-variant-numeric: tabular-nums; }
+
+.msg--usuario .fmt p { margin-bottom: 0; }
+
+/* ============================================================================
+   SINAIS DA RESPOSTA
+   ========================================================================= */
+
+/* Fora de escopo: a Lia recusou o assunto. Um filete, não um alarme —
+   o usuário não errou, só perguntou fora do cardápio. */
+.msg--fora .msg__corpo {
+  border-left: 2px solid var(--linha-forte);
+  padding-left: var(--e-4);
+  margin-left: calc(var(--e-1) * -1);
+  color: var(--texto-medio);
+}
+.msg__fora-nota {
+  display: block;
+  margin-top: var(--e-2);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+/* ---- Nota de incerteza ---------------------------------------------------
+   Preservada do desenho anterior, e o motivo continua valendo: a Lia nunca
+   inventa número. Quando a base não reconhece um termo, o item fica fora da
+   conta e a interface diz isso.
+
+     não reconhecido → NÃO entrou na conta; o total está incompleto.
+     aproximado      → entrou, mas a base não garante o número.
+
+   Não é aviso de erro — é honestidade. Amarelo de alerta puniria a pessoa por
+   ter escrito "macarronada" em vez de "macarrão". Marginália: filete terracota,
+   texto miúdo, minúsculo, colado embaixo da fala. */
+.nota-incerteza {
+  margin-top: var(--e-3);
+  padding-left: var(--e-3);
+  border-left: 2px solid var(--acento);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--texto-medio);
+}
+.nota-linha { margin: 0; }
+.nota-linha + .nota-linha { margin-top: 2px; }
+.nota-termo { color: var(--acento-texto); font-weight: 550; }
+.nota-termo::before { content: "\201C"; }
+.nota-termo::after { content: "\201D"; }
+
+/* ============================================================================
+   DIGITANDO
+   ========================================================================= */
+
+.digitando { display: inline-flex; align-items: center; gap: 5px; height: 26px; }
+.digitando span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--texto-fraco);
+  animation: pulsa 1.3s ease-in-out infinite;
+}
+.digitando span:nth-child(2) { animation-delay: 0.16s; }
+.digitando span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes pulsa {
+  0%, 70%, 100% { opacity: 0.3; transform: translateY(0); }
+  35% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* ============================================================================
+   COMPOSITOR
+   ========================================================================= */
+
+.compositor {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e-2);
+  padding: var(--e-2) var(--e-2) var(--e-2) var(--e-4);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sombra-2);
+  transition: border-color var(--rapido), box-shadow var(--rapido);
+}
+.compositor:focus-within {
+  border-color: var(--marca);
+  box-shadow: var(--sombra-2), 0 0 0 3px var(--marca-suave);
+}
+
+.compositor textarea {
+  flex: 1;
+  min-height: 26px;
+  max-height: 200px;
+  padding: var(--e-2) 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--t-base);
+  line-height: 1.5;
+  color: var(--texto);
+  resize: none;
+  overflow-y: auto;
+}
+.compositor textarea::placeholder { color: var(--texto-fraco); }
+
+.compositor__enviar {
+  display: grid;
+  place-items: center;
+  width: 38px; height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--marca);
+  color: var(--marca-contraste);
+  cursor: pointer;
+  transition: background var(--rapido), opacity var(--rapido), transform var(--rapido);
+}
+.compositor__enviar:hover:not(:disabled) { background: var(--marca-forte); }
+.compositor__enviar:active:not(:disabled) { transform: scale(0.94); }
+.compositor__enviar:disabled { background: var(--fundo-sutil); color: var(--texto-fraco); cursor: not-allowed; }
+
+.compositor-dica {
+  margin: var(--e-2) auto 0;
+  max-width: var(--coluna);
+  padding: 0 var(--e-4);
+  font-size: var(--t-xs);
+  color: var(--texto-fraco);
+  text-align: center;
+}
+
+/* ============================================================================
+   SUGESTÕES
+   Sem emoji de ícone: cada sugestão é uma frase que o usuário realmente diria,
+   com um verbo à esquerda que categoriza. Quatro em duas colunas no desktop,
+   uma coluna no celular.
+   ========================================================================= */
+
+.sugestoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-2);
+  margin-top: var(--e-4);
+}
+.sugestao {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--r-lg);
+  font-size: var(--t-md);
+  line-height: 1.4;
+  color: var(--texto-medio);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--rapido), color var(--rapido), transform var(--rapido);
+}
+.sugestao:hover {
+  border-color: var(--marca);
+  color: var(--texto);
+  transform: translateY(-1px);
+}
+.sugestao__icone { flex-shrink: 0; color: var(--acento); margin-top: 1px; }
+
+@media (max-width: 720px) {
+  .sugestoes { grid-template-columns: minmax(0, 1fr); }
+  /* No celular, três sugestões bastam — a quarta empurra o compositor para
+     fora do alcance do polegar. */
+  .sugestao:nth-child(n + 4) { display: none; }
+}
+
+/* ============================================================================
+   FLUTUANTES
+   ========================================================================= */
+
+/* "Descer": só aparece quando o usuário subiu para reler. Sem ele, uma
+   resposta longa da Lia rouba a leitura no meio. */
+.btn-descer {
+  position: absolute;
+  left: 50%;
+  bottom: var(--e-3);
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r-full);
+  background: var(--fundo-elevado);
+  color: var(--texto-medio);
+  box-shadow: var(--sombra-2);
+  cursor: pointer;
+  z-index: var(--z-sticky);
+  animation: aparecer var(--rapido) both;
+}
+.btn-descer:hover { color: var(--texto); border-color: var(--texto-fraco); }
+
+/* Aviso de pontos ganhos. Fica ancorado no topo da conversa e some sozinho. */
+.brinde {
+  position: absolute;
+  top: var(--e-3);
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  padding: var(--e-2) var(--e-4);
+  border-radius: var(--r-full);
+  background: var(--acento-suave);
+  border: 1px solid var(--acento);
+  color: var(--acento-texto);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--sombra-2);
+  z-index: var(--z-toast);
+  animation: brinde-entra var(--entrada) both;
+}
+.brinde--nivel { background: var(--marca-suave); border-color: var(--marca); color: var(--marca-forte); }
+@keyframes brinde-entra {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ============================================================================
+   AJUSTES DE TELA PEQUENA
+   ========================================================================= */
+
+@media (max-width: 720px) {
+  /* No celular a doca não sobe para o meio: o polegar alcança a base da tela, e
+     um compositor que muda de altura quando o teclado abre é o defeito que mais
+     denuncia "site" num app. A saudação encosta nela, vinda de cima. */
+  .chat--vazio .chat__doca { margin-bottom: 0; }
+
+  /* Sem o selo na lateral esquerda: 42px de largura valem mais para o texto.
+     Quem falou fica claro pelo alinhamento e pelo balão do usuário. */
+  .msg--lia { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .msg--lia .msg__selo { display: none; }
+  .msgs { gap: var(--e-5); }
+  .coluna { padding: 0 var(--e-3); }
+  .chat__doca { padding-left: var(--e-2); padding-right: var(--e-2); }
+  .abertura__saudacao { font-size: 1.65rem; }
+  .abertura__convite { font-size: var(--t-base); }
+  .msg--usuario .msg__corpo { max-width: 92%; }
+}

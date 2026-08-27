@@ -1,0 +1,249 @@
+/* ============================================================================
+   BASE — reset enxuto, tipografia e primitivos compartilhados.
+   ========================================================================= */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--fonte-texto);
+  font-size: var(--t-base);
+  line-height: 1.55;
+  color: var(--texto);
+  background: var(--fundo);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+  /* O app controla o próprio scroll: a página nunca rola atrás do teclado. */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+h1, h2, h3, h4, p, figure { margin: 0; }
+
+a { color: var(--marca-forte); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* Foco visível de verdade — o front antigo não tinha nenhum estado de foco
+   (WEB-10). Navegar por teclado era navegar às cegas. */
+:focus-visible {
+  outline: 2px solid var(--marca);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+::selection { background: var(--marca-suave); color: var(--marca-forte); }
+
+/* Barras de rolagem no tom do tema, não o cinza padrão do SO. */
+* { scrollbar-width: thin; scrollbar-color: var(--linha-forte) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--linha-forte);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-full);
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--texto-fraco); background-clip: content-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Só para leitor de tela (rótulo de ícone, contexto de tabela). */
+.vis-oculto {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================================
+   BOTÕES
+   Três pesos, um comportamento só. Alvo mínimo de 40px porque o uso real é
+   polegar, em pé, na fila do refeitório.
+   ========================================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 40px;
+  padding: 0 var(--e-4);
+  border: 1px solid transparent;
+  border-radius: var(--r-full);
+  font-size: var(--t-md);
+  font-weight: 550;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--rapido), border-color var(--rapido), color var(--rapido), transform var(--rapido);
+  text-decoration: none;
+}
+.btn:hover { text-decoration: none; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn--primario { background: var(--marca); color: var(--marca-contraste); }
+.btn--primario:hover:not(:disabled) { background: var(--marca-forte); }
+
+.btn--contorno {
+  background: transparent;
+  border-color: var(--linha-forte);
+  color: var(--texto);
+}
+.btn--contorno:hover:not(:disabled) { background: var(--fundo-sutil); border-color: var(--texto-fraco); }
+
+.btn--fantasma { background: transparent; color: var(--texto-medio); }
+.btn--fantasma:hover:not(:disabled) { background: var(--fundo-sutil); color: var(--texto); }
+
+.btn--perigo { color: var(--perigo); }
+.btn--perigo:hover:not(:disabled) { background: var(--perigo-suave); }
+
+.btn--mini { min-height: 32px; padding: 0 var(--e-3); font-size: var(--t-sm); }
+.btn--bloco { width: 100%; }
+
+/* Botão só de ícone: quadrado, rótulo acessível via aria-label. */
+.btn-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-md);
+  color: var(--texto-medio);
+  cursor: pointer;
+  transition: background var(--rapido), color var(--rapido);
+}
+.btn-icone:hover:not(:disabled) { background: var(--fundo-sutil); color: var(--texto); }
+.btn-icone:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ============================================================================
+   FORMULÁRIOS
+   ========================================================================= */
+
+.campo { display: flex; flex-direction: column; gap: var(--e-1); min-width: 0; }
+
+.campo-rotulo { font-size: var(--t-sm); font-weight: 550; color: var(--texto-medio); }
+.campo-ajuda { font-size: var(--t-sm); color: var(--texto-fraco); }
+.campo-erro { font-size: var(--t-sm); color: var(--perigo); }
+
+.entrada,
+.selecao {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--e-2) var(--e-3);
+  /* 16px em tela de toque: abaixo disso o Safari dá zoom ao focar e a tela
+     "pula". No desktop pode encolher sem prejuízo. */
+  font-size: var(--t-base);
+  color: var(--texto);
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r-md);
+  outline: none;
+  transition: border-color var(--rapido), box-shadow var(--rapido);
+}
+@media (pointer: fine) {
+  .entrada, .selecao { font-size: var(--t-md); }
+}
+.entrada:focus, .selecao:focus {
+  border-color: var(--marca);
+  box-shadow: 0 0 0 3px var(--marca-suave);
+}
+.entrada::placeholder { color: var(--texto-fraco); }
+.entrada:disabled, .selecao:disabled { background: var(--fundo-sutil); cursor: not-allowed; }
+
+.selecao {
+  appearance: none;
+  padding-right: var(--e-8);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%236d675b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5 8 10.5 12 6.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--e-3) center;
+  background-size: 16px;
+}
+:root[data-tema="escuro"] .selecao {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23a9a294' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5 8 10.5 12 6.5'/%3E%3C/svg%3E");
+}
+
+.marcador { display: inline-flex; align-items: center; gap: var(--e-2); font-size: var(--t-md); cursor: pointer; }
+.marcador input { accent-color: var(--marca); width: 16px; height: 16px; }
+
+/* ============================================================================
+   AVISOS — texto humano, não despejo de erro HTTP (WEB-09).
+   ========================================================================= */
+
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--linha);
+  border-left: 3px solid var(--texto-fraco);
+  border-radius: var(--r-md);
+  background: var(--fundo-elevado);
+  font-size: var(--t-md);
+  color: var(--texto-medio);
+}
+.aviso strong { color: var(--texto); font-weight: 550; display: block; }
+.aviso--erro { border-left-color: var(--perigo); background: var(--perigo-suave); color: var(--texto); }
+.aviso--atencao { border-left-color: var(--atencao); background: var(--atencao-suave); color: var(--texto); }
+.aviso--ok { border-left-color: var(--ok); background: var(--ok-suave); color: var(--texto); }
+.aviso__icone { flex-shrink: 0; margin-top: 2px; color: currentColor; }
+.aviso__corpo { min-width: 0; }
+.aviso__acao { margin-left: auto; flex-shrink: 0; }
+
+/* ============================================================================
+   ESQUELETO — silhueta em vez de "Carregando…": a tela não pisca de vazia
+   para cheia.
+   ========================================================================= */
+
+.esqueleto {
+  background: linear-gradient(90deg, var(--fundo-sutil) 25%, var(--linha) 37%, var(--fundo-sutil) 63%);
+  background-size: 400% 100%;
+  border-radius: var(--r-sm);
+  animation: esqueleto 1.4s ease infinite;
+}
+@keyframes esqueleto {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+/* ============================================================================
+   ETIQUETAS
+   ========================================================================= */
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  padding: 2px var(--e-2);
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--fundo-sutil);
+  color: var(--texto-medio);
+  white-space: nowrap;
+}
+.etiqueta--ok { background: var(--ok-suave); color: var(--ok); }
+.etiqueta--atencao { background: var(--atencao-suave); color: var(--atencao); }
+.etiqueta--acento { background: var(--acento-suave); color: var(--acento-texto); }

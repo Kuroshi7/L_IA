@@ -1,94 +1,129 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { getAdminToken, listarUnidades, setAdminToken } from "../lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { esquecerUnidades, getAdminToken, listarUnidadesCache, setAdminToken } from "../lib/api";
+import AppShell from "../shell/AppShell";
+import { Aviso, Cabecalho, Pagina, Silhueta, Vazio } from "../ui/Pagina";
+import Icone from "../ui/Icone";
 import type { Unidade } from "../types";
 
 export default function Admin() {
-  const [unidades, setUnidades] = useState<Unidade[]>([]);
-  const [erro, setErro] = useState<string | null>(null);
-  const [carregando, setCarregando] = useState(true);
+  const [unidades, setUnidades] = useState<Unidade[] | null>(null);
+  const [falhou, setFalhou] = useState(false);
   const [token, setToken] = useState(getAdminToken());
-  const [tokenSalvo, setTokenSalvo] = useState(false);
+  const [salvo, setSalvo] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    listarUnidades()
+  const carregar = useCallback(() => {
+    setFalhou(false);
+    listarUnidadesCache()
       .then(setUnidades)
-      .catch(() => setErro("Não foi possível carregar as unidades. O backend está rodando?"))
-      .finally(() => setCarregando(false));
+      .catch((err) => { console.error("falha ao listar unidades", err); setFalhou(true); });
   }, []);
+
+  useEffect(carregar, [carregar]);
 
   function salvarToken() {
     setAdminToken(token);
-    setTokenSalvo(true);
-    setTimeout(() => setTokenSalvo(false), 1800);
+    setSalvo(true);
+    window.setTimeout(() => setSalvo(false), 1800);
   }
 
   return (
-    <div className="app">
-      <div className="chat-card admin-card">
-        <header className="chat-header">
-          <div className="brand">
-            <div className="avatar avatar-lia"><span className="avatar-letter">L</span></div>
-            <div className="brand-text">
-              <h1 className="brand-name">Admin</h1>
-              <span className="status status-on"><span className="status-dot" />gestão de cardápio e alimentos</span>
-            </div>
-          </div>
-          <div className="header-actions">
-            <Link className="btn-ghost" to="/admin/unidades">Unidades</Link>
-            <Link className="btn-ghost" to="/admin/usuarios">Usuários</Link>
-            <Link className="btn-ghost" to="/">Início</Link>
-          </div>
-        </header>
+    <AppShell area="gestor" titulo="Gestão">
+      <Pagina>
+        <Cabecalho
+          titulo="Gestão"
+          apoio="Escolha a unidade para montar o cardápio, cuidar do catálogo de alimentos ou acompanhar o desperdício."
+        />
 
-        <main className="messages admin-body">
-          <div className="token-bar">
-            <label className="field-label" htmlFor="admin-token">Token de admin</label>
-            <div className="token-row">
+        {/* O gate de admin ainda é um token único compartilhado (SEG-03 em
+            docs/tickets-revisao-produto.md). Enquanto for assim, ele mora aqui,
+            explicado — esconder não deixa mais seguro, só mais confuso. */}
+        <section className="bloco">
+          <div>
+            <h2 className="bloco__titulo">Chave de acesso</h2>
+            <p className="bloco__apoio">
+              Fica guardada só neste navegador. Sem ela, as telas de gestão não conseguem ler nem gravar nada.
+            </p>
+          </div>
+          <div className="barra-ferramentas">
+            <div className="campo" style={{ flex: 1, minWidth: 240 }}>
+              <label className="campo-rotulo" htmlFor="admin-token">Token de gestão</label>
               <input
                 id="admin-token"
-                className="text-input"
+                className="entrada"
                 type="password"
-                placeholder="X-Admin-Token (deixe vazio se o gate estiver desabilitado)"
+                placeholder="cole a chave recebida"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
+                autoComplete="off"
               />
-              <button className="btn-primary" onClick={salvarToken}>
-                {tokenSalvo ? "Salvo ✓" : "Salvar"}
-              </button>
             </div>
+            <button className="btn btn--primario" onClick={salvarToken}>
+              {salvo ? "Guardada" : "Guardar"}
+            </button>
           </div>
+        </section>
 
-          <p className="suggestions-title">Escolha a unidade para gerenciar</p>
-          {carregando && <p className="msg-p">Carregando unidades…</p>}
-          {erro && <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erro}</p>}
+        {falhou && (
+          <Aviso
+            tom="erro"
+            titulo="Não consegui carregar as unidades"
+            acao={
+              <button className="btn btn--contorno btn--mini" onClick={() => { esquecerUnidades(); carregar(); }}>
+                Tentar de novo
+              </button>
+            }
+          >
+            Verifique sua conexão e tente de novo.
+          </Aviso>
+        )}
 
-          <div className="unidade-grid">
-            {unidades.map((u) => (
-              <div key={u.id} className="unidade-card admin-unidade">
-                <span className="unidade-nome">{u.nome}</span>
-                <span className="unidade-slug">{u.slug}</span>
-                <div className="admin-unidade-actions">
-                  <button className="btn-primary btn-mini" onClick={() => navigate(`/admin/u/${u.id}/cardapio`)}>
-                    Cardápio
-                  </button>
-                  <button className="btn-ghost btn-mini" onClick={() => navigate(`/admin/u/${u.id}/alimentos`)}>
-                    Alimentos
-                  </button>
-                  <button className="btn-ghost btn-mini" onClick={() => navigate(`/admin/u/${u.id}/desperdicio`)}>
-                    Desperdício
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+        <section className="bloco bloco--plano">
+          <span className="secao-rotulo">Unidades</span>
 
-          {!carregando && !erro && unidades.length === 0 && (
-            <p className="msg-p">Nenhuma unidade cadastrada ainda. Rode o seed do backend.</p>
+          {!unidades && !falhou && <Silhueta linhas={2} altura={120} />}
+
+          {unidades?.length === 0 && (
+            <Vazio
+              titulo="Nenhuma unidade cadastrada"
+              acao={
+                <button className="btn btn--primario" onClick={() => navigate("/admin/unidades")}>
+                  Cadastrar a primeira
+                </button>
+              }
+            >
+              Uma unidade é um refeitório: tem cardápio, catálogo e clientes próprios.
+            </Vazio>
           )}
-        </main>
-      </div>
-    </div>
+
+          {unidades && unidades.length > 0 && (
+            <div className="unidade-grid">
+              {unidades.map((u) => (
+                <div key={u.id} className="unidade-card">
+                  <Icone nome="unidade" />
+                  <span className="unidade-nome">
+                    {u.nome}
+                    {!u.ativo && <span className="etiqueta" style={{ marginLeft: 8 }}>inativa</span>}
+                  </span>
+                  <span className="unidade-slug">{u.slug}</span>
+                  <div className="unidade-card__acoes">
+                    <button className="btn btn--contorno btn--mini" onClick={() => navigate(`/admin/u/${u.id}/cardapio`)}>
+                      Cardápio
+                    </button>
+                    <button className="btn btn--fantasma btn--mini" onClick={() => navigate(`/admin/u/${u.id}/alimentos`)}>
+                      Alimentos
+                    </button>
+                    <button className="btn btn--fantasma btn--mini" onClick={() => navigate(`/admin/u/${u.id}/desperdicio`)}>
+                      Desperdício
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </Pagina>
+    </AppShell>
   );
 }

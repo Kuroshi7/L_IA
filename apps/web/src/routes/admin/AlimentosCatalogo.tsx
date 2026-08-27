@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   adminAtualizarAlimento,
   adminBuscarNutri,
@@ -7,6 +7,10 @@ import {
   adminListarAlimentos,
   adminSetAlimentoAtivo,
 } from "../../lib/api";
+import AppShell from "../../shell/AppShell";
+import { Aviso, Cabecalho, Pagina, Silhueta, Vazio } from "../../ui/Pagina";
+import { mensagemAdmin } from "../../lib/mensagens";
+import Icone from "../../ui/Icone";
 import type { Alimento, AlimentoInput, NutriAlimento, PorcaoInput } from "../../types";
 
 type RefMode = "manter" | "novo" | "vincular";
@@ -64,7 +68,7 @@ export default function AlimentosCatalogo() {
     setCarregando(true);
     adminListarAlimentos(unidadeId)
       .then(setAlimentos)
-      .catch((e: Error) => setErro(e.message))
+      .catch((e: Error) => { console.error("falha ao listar alimentos", e); setErro(mensagemAdmin(e)); })
       .finally(() => setCarregando(false));
   }, [unidadeId]);
 
@@ -115,7 +119,9 @@ export default function AlimentosCatalogo() {
 
   function buscarNutri() {
     if (busca.trim().length < 2) return;
-    adminBuscarNutri(busca.trim()).then(setResultados).catch((e: Error) => setErro(e.message));
+    adminBuscarNutri(busca.trim())
+      .then(setResultados)
+      .catch((e: Error) => { console.error("falha na busca de referências", e); setErro(mensagemAdmin(e)); });
   }
 
   function setPorcao(i: number, campo: keyof PorcaoForm, valor: string) {
@@ -186,176 +192,212 @@ export default function AlimentosCatalogo() {
         resetForm();
         carregar();
       })
-      .catch((err: Error) => setErro(err.message))
+      .catch((err: Error) => { console.error("falha ao salvar alimento", err); setErro(mensagemAdmin(err)); })
       .finally(() => setSalvando(false));
   }
 
   function alternarAtivo(a: Alimento) {
     adminSetAlimentoAtivo(a.id, !a.ativo)
       .then(() => carregar())
-      .catch((err: Error) => setErro(err.message));
+      .catch((err: Error) => { console.error("falha ao alternar alimento", err); setErro(mensagemAdmin(err)); });
   }
 
   return (
-    <div className="app">
-      <div className="chat-card admin-card">
-        <header className="chat-header">
-          <div className="brand">
-            <div className="avatar avatar-lia"><span className="avatar-letter">L</span></div>
-            <div className="brand-text">
-              <h1 className="brand-name">Catálogo de alimentos</h1>
-              <span className="status status-on"><span className="status-dot" />{editingId ? "editando" : "novo cadastro"}</span>
+    <AppShell area="gestor" unidadeId={unidadeId} titulo="Alimentos">
+      <Pagina>
+        <Cabecalho
+          titulo="Catálogo de alimentos"
+          apoio="O que existe aqui é o que pode entrar no cardápio. As medidas caseiras são o que permite a Lia responder “2 conchas” sem inventar número."
+        />
+
+        {erro && <Aviso tom="erro" titulo="Não deu certo">{erro}</Aviso>}
+
+        <form className="bloco" onSubmit={salvar}>
+          <h2 className="bloco__titulo">{editingId ? "Editar alimento" : "Novo alimento"}</h2>
+
+          <div className="form-grid">
+            <div className="campo campo-2">
+              <label className="campo-rotulo" htmlFor="al-nome">Nome *</label>
+              <input id="al-nome" className="entrada" value={nome} onChange={(e) => setNome(e.target.value)} required />
+            </div>
+            <div className="campo campo-2">
+              <label className="campo-rotulo" htmlFor="al-cat">Categoria</label>
+              <input id="al-cat" className="entrada" value={categoria} onChange={(e) => setCategoria(e.target.value)} placeholder="Proteína, Acompanhamento…" />
+            </div>
+
+            <div className="campo campo-4">
+              <label className="campo-rotulo" htmlFor="al-ing">Ingredientes</label>
+              <input id="al-ing" className="entrada" value={ingredientes} onChange={(e) => setIngredientes(e.target.value)} placeholder="arroz, alho, azeite" />
+              <span className="campo-ajuda">Separe por vírgula.</span>
+            </div>
+
+            <div className="campo campo-2">
+              <label className="campo-rotulo" htmlFor="al-alerg">Alérgenos</label>
+              <input id="al-alerg" className="entrada" value={alergenos} onChange={(e) => setAlergenos(e.target.value)} placeholder="lactose, glúten" />
+              <span className="campo-ajuda">A Lia nunca oferece este prato a quem declarou alergia a um destes.</span>
+            </div>
+            <div className="campo campo-2">
+              <label className="campo-rotulo" htmlFor="al-restr">Restrições atendidas</label>
+              <input id="al-restr" className="entrada" value={restricoes} onChange={(e) => setRestricoes(e.target.value)} placeholder="vegetariano, sem lactose" />
+              <span className="campo-ajuda">Escreva como o cliente escreveria — é contra isto que a restrição dele é comparada.</span>
+            </div>
+            <div className="campo campo-2">
+              <label className="campo-rotulo" htmlFor="al-nao">Não indicado para</label>
+              <input id="al-nao" className="entrada" value={naoIndicado} onChange={(e) => setNaoIndicado(e.target.value)} placeholder="vegano" />
+            </div>
+            <div className="campo campo-2" style={{ justifyContent: "flex-end" }}>
+              <label className="marcador">
+                <input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} />
+                Disponível para uso no cardápio
+              </label>
+            </div>
+
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="al-kcal">Calorias (kcal)</label>
+              <input id="al-kcal" className="entrada" type="number" min={0} value={calorias} onChange={(e) => setCalorias(Number(e.target.value) || 0)} />
+            </div>
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="al-prot">Proteínas (g)</label>
+              <input id="al-prot" className="entrada" type="number" min={0} step="0.1" value={proteinas} onChange={(e) => setProteinas(Number(e.target.value) || 0)} />
+            </div>
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="al-carb">Carboidratos (g)</label>
+              <input id="al-carb" className="entrada" type="number" min={0} step="0.1" value={carbo} onChange={(e) => setCarbo(Number(e.target.value) || 0)} />
+            </div>
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="al-gord">Gorduras (g)</label>
+              <input id="al-gord" className="entrada" type="number" min={0} step="0.1" value={gordura} onChange={(e) => setGordura(Number(e.target.value) || 0)} />
             </div>
           </div>
-          <div className="header-actions">
-            <Link className="btn-ghost" to={`/admin/u/${unidadeId}/cardapio`}>Cardápio</Link>
-            <Link className="btn-ghost" to="/admin">Admin</Link>
+
+          <div>
+            <span className="secao-rotulo">Medidas caseiras</span>
+            <p className="bloco__apoio">
+              Sem elas a Lia não consegue converter “uma concha” em gramas — e prefere dizer que não sabe a chutar.
+            </p>
           </div>
-        </header>
 
-        <main className="messages admin-body">
-          {erro && <p className="msg-p bubble-warning" style={{ padding: 12, borderRadius: 8 }}>{erro}</p>}
+          <div className="barra-ferramentas" role="radiogroup" aria-label="Origem das medidas caseiras">
+            {(["novo", "vincular", ...(editingId ? (["manter"] as RefMode[]) : [])] as RefMode[]).map((m) => (
+              <label key={m} className="marcador">
+                <input type="radio" name="refmode" checked={refMode === m} onChange={() => setRefMode(m)} />
+                {m === "novo" ? "Cadastrar agora" : m === "vincular" ? "Usar uma já existente" : "Manter a atual"}
+              </label>
+            ))}
+          </div>
 
-          <form className="form-card" onSubmit={salvar}>
-            <h3 className="form-section">{editingId ? "Editar alimento" : "Novo alimento"}</h3>
-
-            <div className="form-grid">
-              <div className="field field-2">
-                <label className="field-label">Nome*</label>
-                <input className="text-input" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          {refMode === "novo" && (
+            <div className="porcoes">
+              <div className="porcao-linha porcao-cabecalho">
+                <span>Medida (ex.: concha)</span><span>g</span><span>kcal</span><span>Prot</span><span>Carb</span><span>Gord</span><span />
               </div>
-              <div className="field">
-                <label className="field-label">Categoria</label>
-                <input className="text-input" value={categoria} onChange={(e) => setCategoria(e.target.value)} placeholder="Proteína, Acompanhamento…" />
-              </div>
-
-              <div className="field field-3">
-                <label className="field-label">Ingredientes (separados por vírgula)</label>
-                <input className="text-input" value={ingredientes} onChange={(e) => setIngredientes(e.target.value)} placeholder="arroz, alho, azeite" />
-              </div>
-              <div className="field">
-                <label className="field-label">Alérgenos</label>
-                <input className="text-input" value={alergenos} onChange={(e) => setAlergenos(e.target.value)} placeholder="lactose, gluten" />
-              </div>
-              <div className="field">
-                <label className="field-label">Restrições atendidas</label>
-                <input className="text-input" value={restricoes} onChange={(e) => setRestricoes(e.target.value)} placeholder="vegetariano, sem lactose" />
-              </div>
-              <div className="field">
-                <label className="field-label">Não indicado para</label>
-                <input className="text-input" value={naoIndicado} onChange={(e) => setNaoIndicado(e.target.value)} placeholder="vegano" />
-              </div>
-
-              <div className="field">
-                <label className="field-label">Calorias (kcal)</label>
-                <input className="text-input" type="number" min={0} value={calorias} onChange={(e) => setCalorias(Number(e.target.value) || 0)} />
-              </div>
-              <div className="field">
-                <label className="field-label">Proteínas (g)</label>
-                <input className="text-input" type="number" min={0} step="0.1" value={proteinas} onChange={(e) => setProteinas(Number(e.target.value) || 0)} />
-              </div>
-              <div className="field">
-                <label className="field-label">Carboidratos (g)</label>
-                <input className="text-input" type="number" min={0} step="0.1" value={carbo} onChange={(e) => setCarbo(Number(e.target.value) || 0)} />
-              </div>
-              <div className="field">
-                <label className="field-label">Gorduras (g)</label>
-                <input className="text-input" type="number" min={0} step="0.1" value={gordura} onChange={(e) => setGordura(Number(e.target.value) || 0)} />
-              </div>
-
-              <div className="field check-field">
-                <label className="check-label">
-                  <input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} /> Ativo
-                </label>
-              </div>
-            </div>
-
-            <h3 className="form-section">Medidas caseiras (trabalho do nutricionista)</h3>
-            <div className="ref-mode">
-              {(["novo", "vincular", ...(editingId ? (["manter"] as RefMode[]) : [])] as RefMode[]).map((m) => (
-                <label key={m} className="radio-label">
-                  <input type="radio" name="refmode" checked={refMode === m} onChange={() => setRefMode(m)} />
-                  {m === "novo" ? "Cadastrar porções" : m === "vincular" ? "Vincular existente" : "Manter atual"}
-                </label>
-              ))}
-            </div>
-
-            {refMode === "novo" && (
-              <div className="porcoes">
-                <div className="porcao-row porcao-head">
-                  <span>Medida (ex.: concha)</span><span>g</span><span>kcal</span><span>Prot</span><span>Carb</span><span>Gord</span><span />
+              {porcoes.map((p, i) => (
+                <div className="porcao-linha" key={i}>
+                  <input className="entrada" value={p.medida_label} onChange={(e) => setPorcao(i, "medida_label", e.target.value)} placeholder="concha" aria-label="Nome da medida" />
+                  <input className="entrada" type="number" min={0} value={p.quantidade_g} onChange={(e) => setPorcao(i, "quantidade_g", e.target.value)} aria-label="Gramas" />
+                  <input className="entrada" type="number" min={0} value={p.kcal} onChange={(e) => setPorcao(i, "kcal", e.target.value)} aria-label="Calorias" />
+                  <input className="entrada" type="number" min={0} step="0.1" value={p.proteina_g} onChange={(e) => setPorcao(i, "proteina_g", e.target.value)} aria-label="Proteínas" />
+                  <input className="entrada" type="number" min={0} step="0.1" value={p.carboidrato_g} onChange={(e) => setPorcao(i, "carboidrato_g", e.target.value)} aria-label="Carboidratos" />
+                  <input className="entrada" type="number" min={0} step="0.1" value={p.gordura_g} onChange={(e) => setPorcao(i, "gordura_g", e.target.value)} aria-label="Gorduras" />
+                  <button
+                    type="button"
+                    className="remove"
+                    aria-label={`Remover a medida ${p.medida_label || i + 1}`}
+                    onClick={() => setPorcoes((prev) => prev.filter((_, idx) => idx !== i))}
+                  >
+                    <Icone nome="remover" tam={14} />
+                  </button>
                 </div>
-                {porcoes.map((p, i) => (
-                  <div className="porcao-row" key={i}>
-                    <input className="text-input" value={p.medida_label} onChange={(e) => setPorcao(i, "medida_label", e.target.value)} placeholder="concha" />
-                    <input className="text-input" type="number" min={0} value={p.quantidade_g} onChange={(e) => setPorcao(i, "quantidade_g", e.target.value)} />
-                    <input className="text-input" type="number" min={0} value={p.kcal} onChange={(e) => setPorcao(i, "kcal", e.target.value)} />
-                    <input className="text-input" type="number" min={0} step="0.1" value={p.proteina_g} onChange={(e) => setPorcao(i, "proteina_g", e.target.value)} />
-                    <input className="text-input" type="number" min={0} step="0.1" value={p.carboidrato_g} onChange={(e) => setPorcao(i, "carboidrato_g", e.target.value)} />
-                    <input className="text-input" type="number" min={0} step="0.1" value={p.gordura_g} onChange={(e) => setPorcao(i, "gordura_g", e.target.value)} />
-                    <button type="button" className="item-remove" onClick={() => setPorcoes((prev) => prev.filter((_, idx) => idx !== i))}>×</button>
-                  </div>
-                ))}
-                <button type="button" className="btn-ghost btn-mini" onClick={() => setPorcoes((prev) => [...prev, porcaoVazia()])}>
-                  + adicionar medida
+              ))}
+              <div>
+                <button type="button" className="btn btn--contorno btn--mini" onClick={() => setPorcoes((prev) => [...prev, porcaoVazia()])}>
+                  Adicionar medida
                 </button>
               </div>
-            )}
-
-            {refMode === "vincular" && (
-              <div className="vincular">
-                <div className="token-row">
-                  <input className="text-input" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="buscar referência (ex.: arroz)" />
-                  <button type="button" className="btn-ghost" onClick={buscarNutri}>Buscar</button>
-                </div>
-                {vinculo && <p className="msg-p">Vinculado a: <strong>{vinculo.nome}</strong></p>}
-                <div className="busca-resultados">
-                  {resultados.map((r) => (
-                    <button type="button" key={r.id} className={`chip${vinculo?.id === r.id ? " chip-on" : ""}`} onClick={() => setVinculo(r)}>
-                      {r.nome}{r.categoria ? ` · ${r.categoria}` : ""}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="form-actions">
-              <button className="btn-primary" type="submit" disabled={salvando}>
-                {salvando ? "Salvando…" : editingId ? "Salvar alterações" : "Cadastrar alimento"}
-              </button>
-              {editingId && (
-                <button className="btn-ghost" type="button" onClick={resetForm}>Cancelar edição</button>
-              )}
             </div>
-          </form>
+          )}
 
-          <h3 className="form-section">Alimentos cadastrados</h3>
-          {carregando && <p className="msg-p">Carregando…</p>}
-          {!carregando && alimentos.length === 0 && <p className="msg-p">Nenhum alimento ainda.</p>}
-          <div className="cat-list">
+          {refMode === "vincular" && (
+            <div className="campo">
+              <label className="campo-rotulo" htmlFor="al-busca">Buscar referência já cadastrada</label>
+              <div className="barra-ferramentas">
+                <input
+                  id="al-busca"
+                  className="entrada"
+                  style={{ flex: 1, minWidth: 220 }}
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarNutri(); } }}
+                  placeholder="ex.: arroz"
+                />
+                <button type="button" className="btn btn--contorno" onClick={buscarNutri}>
+                  <Icone nome="busca" tam={16} /> Buscar
+                </button>
+              </div>
+              {vinculo && <p className="campo-ajuda">Vinculado a <strong>{vinculo.nome}</strong>.</p>}
+              <div className="busca-resultados">
+                {resultados.map((r) => (
+                  <button
+                    type="button"
+                    key={r.id}
+                    className={`pilula${vinculo?.id === r.id ? " pilula--ativa" : ""}`}
+                    aria-pressed={vinculo?.id === r.id}
+                    onClick={() => setVinculo(r)}
+                  >
+                    {r.nome}{r.categoria ? ` · ${r.categoria}` : ""}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="form-acoes">
+            <button className="btn btn--primario" type="submit" disabled={salvando}>
+              {salvando ? "Salvando…" : editingId ? "Salvar alterações" : "Cadastrar alimento"}
+            </button>
+            {editingId && (
+              <button className="btn btn--fantasma" type="button" onClick={resetForm}>Cancelar</button>
+            )}
+          </div>
+        </form>
+
+        <section className="bloco bloco--plano">
+          <span className="secao-rotulo">Cadastrados</span>
+
+          {carregando && <Silhueta linhas={4} altura={56} />}
+
+          {!carregando && alimentos.length === 0 && !erro && (
+            <Vazio titulo="Nenhum alimento cadastrado">
+              Cadastre o primeiro no formulário acima. Sem catálogo não há cardápio.
+            </Vazio>
+          )}
+
+          <div className="cat-lista">
             {alimentos.map((a) => (
-              <div className={`cat-row${a.ativo ? "" : " cat-inativo"}`} key={a.id}>
+              <div className={`cat-linha${a.ativo ? "" : " cat-inativo"}`} key={a.id}>
                 <div className="cat-info">
                   <span className="cat-nome">
                     {a.nome}
                     {a.categoria && <span className="cat-cat"> · {a.categoria}</span>}
-                    {a.nutri_alimento_id && <span className="cat-badge" title="Medidas caseiras vinculadas">⚖ medidas</span>}
+                    {a.nutri_alimento_id != null && (
+                      <span className="etiqueta etiqueta--acento" style={{ marginLeft: 8 }}>medidas caseiras</span>
+                    )}
                   </span>
                   <span className="cat-macros">
-                    {a.calorias} kcal · P {a.proteinas_g} · C {a.carboidratos_g} · G {a.gorduras_g}
+                    {a.calorias} kcal · P {a.proteinas_g} g · C {a.carboidratos_g} g · G {a.gorduras_g} g
                   </span>
                 </div>
-                <div className="cat-actions">
-                  <button className="btn-ghost btn-mini" onClick={() => editar(a)}>Editar</button>
-                  <button className="btn-ghost btn-mini" onClick={() => alternarAtivo(a)}>
+                <div className="cat-acoes">
+                  <button className="btn btn--fantasma btn--mini" onClick={() => editar(a)}>Editar</button>
+                  <button className="btn btn--fantasma btn--mini" onClick={() => alternarAtivo(a)}>
                     {a.ativo ? "Desativar" : "Ativar"}
                   </button>
                 </div>
               </div>
             ))}
           </div>
-        </main>
-      </div>
-    </div>
+        </section>
+      </Pagina>
+    </AppShell>
   );
 }

@@ -1,0 +1,348 @@
+/* ============================================================================
+   SHELL — a moldura de todas as telas.
+   ----------------------------------------------------------------------------
+   Padrão de app, não de site: lateral fixa no desktop, gaveta no celular,
+   conteúdo ocupando 100% da viewport. É o mesmo esqueleto que um PWA ou um
+   WebView de app nativo espera encontrar — por isso nada de "cartão flutuante
+   centralizado", que era o que fazia a tela parecer miniaturizada.
+   ========================================================================= */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--lateral) minmax(0, 1fr);
+  /* dvh acompanha a barra do navegador móvel; vh é o fallback de quem não
+     suporta. Sem isso o compositor fica embaixo da barra do Safari iOS. */
+  height: 100vh;
+  height: 100dvh;
+  background: var(--fundo);
+}
+
+.shell--sem-lateral { grid-template-columns: minmax(0, 1fr); }
+
+/* ============================================================================
+   LATERAL
+   ========================================================================= */
+
+.lateral {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--barra);
+  border-right: 1px solid var(--linha);
+  padding-top: var(--seguro-topo);
+  padding-bottom: var(--seguro-base);
+  padding-left: var(--seguro-esq);
+}
+
+.lateral__topo {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  padding: var(--e-4) var(--e-3) var(--e-3);
+}
+
+.lateral__corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--e-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.lateral__base {
+  padding: var(--e-3);
+  border-top: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+/* ---- Marca ---------------------------------------------------------------
+   Monograma + nome. O nome vem de src/brand.ts, nunca hardcoded no JSX. */
+
+.marca { display: flex; align-items: center; gap: var(--e-3); min-width: 0; }
+
+.marca__selo {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: var(--marca);
+  color: var(--marca-contraste);
+  font-family: var(--fonte-titulo);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  /* O canto vivo em cima à esquerda dá assimetria e evita o "quadradinho de
+     app genérico" perfeitamente arredondado. */
+  border-top-left-radius: 4px;
+  box-shadow: var(--sombra-1);
+  user-select: none;
+}
+.marca__selo--sm { width: 28px; height: 28px; font-size: 16px; border-radius: 9px; border-top-left-radius: 3px; }
+
+.marca__texto { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.marca__nome {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--texto);
+}
+.marca__linha {
+  font-size: var(--t-xs);
+  color: var(--texto-fraco);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Grupos de navegação ------------------------------------------------ */
+
+.nav-grupo { display: flex; flex-direction: column; gap: 2px; }
+
+.nav-titulo {
+  padding: 0 var(--e-3) var(--e-2);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-height: 38px;
+  padding: 0 var(--e-3);
+  border: none;
+  background: transparent;
+  border-radius: var(--r-md);
+  font-size: var(--t-md);
+  font-weight: 500;
+  color: var(--texto-medio);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--rapido), color var(--rapido);
+  text-decoration: none;
+  width: 100%;
+}
+.nav-item:hover { background: var(--fundo-sutil); color: var(--texto); text-decoration: none; }
+.nav-item__icone { flex-shrink: 0; color: var(--texto-fraco); transition: color var(--rapido); }
+.nav-item:hover .nav-item__icone { color: var(--texto-medio); }
+.nav-item__rotulo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-item__extra { font-size: var(--t-xs); color: var(--texto-fraco); }
+
+.nav-item.ativo {
+  background: var(--fundo-elevado);
+  color: var(--texto);
+  font-weight: 600;
+  box-shadow: var(--sombra-1);
+}
+.nav-item.ativo .nav-item__icone { color: var(--marca); }
+
+/* Ação primária da lateral ("Nova conversa"): contorno, não bloco pintado —
+   o verde cheio fica reservado para confirmar coisas, não para navegar. */
+.nav-acao {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-height: 42px;
+  padding: 0 var(--e-3);
+  width: 100%;
+  background: var(--fundo-elevado);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r-md);
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--texto);
+  cursor: pointer;
+  transition: border-color var(--rapido), background var(--rapido);
+  text-decoration: none;
+}
+.nav-acao:hover:not(:disabled) { border-color: var(--marca); background: var(--marca-suave); text-decoration: none; }
+.nav-acao:disabled { opacity: 0.5; cursor: not-allowed; }
+.nav-acao__icone { color: var(--marca); flex-shrink: 0; }
+
+/* ---- Cartão da unidade -------------------------------------------------- */
+
+.unidade-atual {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  width: 100%;
+  padding: var(--e-2) var(--e-3);
+  background: transparent;
+  border: 1px dashed var(--linha-forte);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--rapido), background var(--rapido);
+  text-decoration: none;
+}
+.unidade-atual:hover { border-color: var(--marca); background: var(--fundo-elevado); text-decoration: none; }
+.unidade-atual__texto { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.3; }
+.unidade-atual__rotulo { font-size: var(--t-xs); color: var(--texto-fraco); letter-spacing: 0.04em; text-transform: uppercase; }
+.unidade-atual__nome {
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--texto);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---- Bloco do usuário --------------------------------------------------- */
+
+.usuario-bloco {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-2) var(--e-3);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: background var(--rapido);
+}
+.usuario-bloco:hover { background: var(--fundo-sutil); text-decoration: none; }
+.usuario-bloco__texto { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.3; }
+.usuario-bloco__nome {
+  font-size: var(--t-md); font-weight: 600; color: var(--texto);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.usuario-bloco__meta { font-size: var(--t-xs); color: var(--texto-fraco); }
+
+.iniciais {
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+  font-size: var(--t-sm);
+  font-weight: 650;
+  user-select: none;
+}
+
+/* Progresso de nível: barra fina, sem número gritado. */
+.progresso { height: 3px; background: var(--linha); border-radius: var(--r-full); overflow: hidden; }
+.progresso__barra { height: 100%; background: var(--acento); border-radius: inherit; transition: width var(--normal); }
+
+/* ---- Seletor de tema ---------------------------------------------------- */
+
+.tema-troca { display: flex; gap: 2px; padding: 3px; background: var(--fundo-sutil); border-radius: var(--r-md); }
+.tema-troca__op {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: calc(var(--r-md) - 3px);
+  color: var(--texto-fraco);
+  cursor: pointer;
+  transition: background var(--rapido), color var(--rapido);
+}
+.tema-troca__op:hover { color: var(--texto-medio); }
+.tema-troca__op.ativo { background: var(--fundo-elevado); color: var(--texto); box-shadow: var(--sombra-1); }
+
+/* ============================================================================
+   ÁREA PRINCIPAL
+   ========================================================================= */
+
+.principal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--fundo);
+  padding-right: var(--seguro-dir);
+}
+
+/* Barra superior: no desktop é fina e quase invisível (o contexto já está na
+   lateral); no celular é a única navegação, então carrega o menu. */
+.barra-topo {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: 52px;
+  padding: var(--e-2) var(--e-3);
+  padding-top: calc(var(--e-2) + var(--seguro-topo));
+  border-bottom: 1px solid transparent;
+  flex-shrink: 0;
+}
+.barra-topo--com-linha { border-bottom-color: var(--linha); background: var(--fundo); }
+.barra-topo__titulo {
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--texto);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.barra-topo__acoes { margin-left: auto; display: flex; align-items: center; gap: var(--e-1); }
+.abre-menu { display: none; }
+
+/* ============================================================================
+   GAVETA (mobile)
+   ========================================================================= */
+
+.veu {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 20, 14, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: calc(var(--z-drawer) - 1);
+  border: none;
+  padding: 0;
+  animation: aparecer var(--rapido) both;
+}
+
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+@keyframes entrar-esq { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+
+  .lateral {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw);
+    z-index: var(--z-drawer);
+    box-shadow: var(--sombra-3);
+    transform: translateX(-100%);
+    visibility: hidden;
+  }
+  .lateral.aberta {
+    transform: translateX(0);
+    visibility: visible;
+    animation: entrar-esq var(--entrada) both;
+  }
+  .abre-menu { display: inline-flex; }
+  .barra-topo { border-bottom-color: var(--linha); }
+}
+
+@media (min-width: 901px) {
+  .veu { display: none; }
+}
+
+/* ============================================================================
+   PARTIDA — a fração de segundo entre abrir o app e saber para onde ir.
+   Uma marca no centro, não um spinner: o spinner promete espera, a marca
+   promete que já começou.
+   ========================================================================= */
+
+.partida {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-4);
+  height: 100vh;
+  height: 100dvh;
+  padding: var(--e-6);
+  text-align: center;
+}
+.partida .marca__selo { width: 44px; height: 44px; font-size: 24px; border-radius: 14px; border-top-left-radius: 5px; }
+.partida__texto { font-size: var(--t-md); color: var(--texto-fraco); }
+.partida .aviso { max-width: 30rem; text-align: left; }
