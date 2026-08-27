@@ -30,6 +30,7 @@ from app.agent.motor.observacao import (
 )
 from app.agent.motor.registry import tools_do_turno
 from app.agent.motor.validacao import Veredicto, verificar
+from app.agent.motor.erros import classificar
 
 log = logging.getLogger("chat")
 
@@ -121,10 +122,17 @@ def executar_turno(
     except Exception as e:
         # Loop de tools (recursion_limit) ou erro terminal do modelo após os
         # retries do client. Resposta amigável; o erro completo fica no log.
-        log.exception("agente falhou | session=%s", session_id[:12])
+        #
+        # A frase depende de insistir adiantar: rate limit de ritmo passa em
+        # segundos, chave errada não passa nunca. Mandar "tente de novo" no
+        # segundo caso põe o usuário num laço que o sistema não vai quebrar.
+        falha = classificar(e)
+        log.exception("agente falhou | session=%s | erro=%s | retentavel=%s",
+                      session_id[:12], falha.codigo, falha.retentavel)
         return ResultadoDeTurno(
-            resposta=perfil.resposta_erro_transiente,
-            erro=type(e).__name__,
+            resposta=(perfil.resposta_erro_transiente if falha.retentavel
+                      else perfil.resposta_erro_permanente),
+            erro=falha.codigo,
             llm_calls=callback.llm_calls,
             tools_chamadas=callback.tools_chamadas,
             observacoes=observacoes_do_turno(),

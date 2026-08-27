@@ -44,6 +44,16 @@ class PerfilDeDominio:
     # sistema caiu, quando na verdade ele se recusou a dizer algo inseguro.
     resposta_bloqueada: str = "Preciso conferir isso melhor antes de responder. Pode perguntar de novo?"
 
+    # Usada quando a falha NÃO passa sozinha: chave inválida, modelo inexistente,
+    # cota do período esgotada, contexto estourado. Mandar a pessoa "tentar de
+    # novo em instantes" nesses casos é mentira — ela repete para sempre e nada
+    # muda. O motor decide qual das duas frases usar (`motor/erros.py`); o
+    # domínio decide o que cada uma diz.
+    resposta_erro_permanente: str = (
+        "Estou com um problema técnico que não vou resolver sozinho agora. "
+        "Já avisei quem cuida do sistema — tente mais tarde, por favor."
+    )
+
     # Traduz as condições do turno nas instruções que vão para o fim do contexto.
     # Recebe também a mensagem do usuário: alguns reminders dependem do ASSUNTO
     # (ex.: menção a condição de saúde). O motor não interpreta o texto — só o

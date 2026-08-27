@@ -24,6 +24,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from app import config
 from app.agent.motor import provedores
+from app.agent.motor.tools import blindar_todas
 
 log = logging.getLogger("agent")
 
@@ -61,9 +62,12 @@ def _mensagem_system(system_prompt: str, nota_extra: str | None):
 
 def construir_executor(system_prompt: str, tools, nota_extra: str | None = None):
     """Monta um agente de tool-calling com o prompt e as tools do domínio."""
+    # Blindadas: tool que estoura devolve texto para o modelo em vez de abortar
+    # o turno. Sem isso, uma falha do banco vira "tive um problema" e o modelo
+    # nunca sabe que a busca falhou — nem tem chance de contornar. Ver motor/tools.py.
     return create_agent(
         model=obter_llm(),
-        tools=list(tools),
+        tools=blindar_todas(list(tools)),
         system_prompt=_mensagem_system(system_prompt, nota_extra),
     )
 

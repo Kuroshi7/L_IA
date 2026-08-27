@@ -84,6 +84,17 @@ def _on_message(ch, method, props, body):
 
 def main():
     setup_logging()
+
+    # Preflight ANTES de tocar na fila: alcança o provedor e faz tool calling?
+    # Falhar aqui é barulhento e óbvio; falhar depois é silencioso e o usuário
+    # paga. Em 24/08/2026 o worker subiu com provedor inalcançável e respondeu
+    # "tente de novo" a cada mensagem, sem nada no log de partida.
+    if config.PREFLIGHT_OBRIGATORIO:
+        from app.agent.motor import preflight, provedores
+        preflight.exigir(lambda: provedores.construir(temperatura=0, max_tokens=16))
+    else:
+        log.warning("PREFLIGHT desligado por configuração — não use assim em produção")
+
     # aquece o modelo (Ollama) antes de aceitar mensagens — evita cold start no 1º usuário
     from app.agent.orchestrator import prewarm
     prewarm()

@@ -23,6 +23,12 @@ OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
 # eles é URL, chave e nome do modelo. Um `if` por fornecedor viraria uma lista
 # que envelhece sozinha e que só o `.env` precisava saber.
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "")
+
+# Verificação de partida: alcança o provedor e faz tool calling? Se não, o
+# worker NÃO sobe. Consumir fila sem conseguir responder é pior que não subir —
+# a mensagem do usuário some e o operador não recebe sinal. Desligável para
+# desenvolvimento sem chave, nunca em produção.
+PREFLIGHT_OBRIGATORIO = os.getenv("PREFLIGHT_OBRIGATORIO", "true").lower().strip() in ("1", "true", "sim")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "")
 

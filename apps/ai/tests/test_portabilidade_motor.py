@@ -156,6 +156,9 @@ def test_nenhum_campo_do_perfil_ficou_sem_consumidor():
     # candidato a ser cortado — este teste é o lembrete de reavaliar.
     usados = {"nome", "system_prompt", "registro", "esta_no_escopo",
               "resposta_fora_de_escopo", "resposta_erro_transiente", "resposta_bloqueada",
+              # consumido em motor/turn.py: quando motor/erros.py classifica a
+              # falha como permanente, "tente de novo" seria mentira.
+              "resposta_erro_permanente",
               "reminders", "regras", "pos_processar"}
     declarados = set(PerfilDeDominio.__dataclass_fields__)
     assert declarados == usados, f"campo sem consumidor neste teste: {declarados - usados}"
