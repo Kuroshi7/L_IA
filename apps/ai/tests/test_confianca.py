@@ -57,7 +57,7 @@ def test_obs_preenchida_marca_imprecisao_mesmo_com_confianca_alta():
 
 def test_previa_avisa_o_que_ficou_de_fora(monkeypatch):
     monkeypatch.setattr(t.go_api, "calcular_consumo",
-                        lambda itens: _totais([_item("xyzabc")], ignorados=["xyzabc"], completo=False))
+                        lambda itens, unidade_id=None: _totais([_item("xyzabc")], ignorados=["xyzabc"], completo=False))
     monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
 
     out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
@@ -68,7 +68,7 @@ def test_previa_avisa_o_que_ficou_de_fora(monkeypatch):
 
 def test_previa_limpa_nao_ganha_nota(monkeypatch):
     monkeypatch.setattr(t.go_api, "calcular_consumo",
-                        lambda itens: _totais([_item("arroz", "Arroz cozido")]))
+                        lambda itens, unidade_id=None: _totais([_item("arroz", "Arroz cozido")]))
     monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
 
     out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
@@ -82,7 +82,7 @@ def test_confirmado_com_tudo_ignorado_nao_grava(monkeypatch):
     # sentido — dado corrompido, e sem desfazer.
     gravou = []
     monkeypatch.setattr(t.go_api, "calcular_consumo",
-                        lambda itens: _totais([_item("xyzabc")], ignorados=["xyzabc"], completo=False))
+                        lambda itens, unidade_id=None: _totais([_item("xyzabc")], ignorados=["xyzabc"], completo=False))
     monkeypatch.setattr(t.go_api, "registrar_consumo",
                         lambda *a, **k: gravou.append(1) or {})
     monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
@@ -98,7 +98,7 @@ def test_confirmado_parcial_grava_e_avisa(monkeypatch):
     gravou = []
     monkeypatch.setattr(
         t.go_api, "calcular_consumo",
-        lambda itens: _totais([_item("arroz", "Arroz cozido"), _item("xyzabc")],
+        lambda itens, unidade_id=None: _totais([_item("arroz", "Arroz cozido"), _item("xyzabc")],
                               ignorados=["xyzabc"], completo=False),
     )
 
@@ -136,7 +136,7 @@ def test_qualidade_registra_aproximados_no_cache_do_turno(monkeypatch):
 
     monkeypatch.setattr(
         t.go_api, "calcular_consumo",
-        lambda itens: _totais([
+        lambda itens, unidade_id=None: _totais([
             _item("arroz", "Arroz Integral Cozido", confianca="media",
                   obs="valor da tabela marcado para revisão nutricional"),
             _item("xyzabc"),
@@ -164,7 +164,7 @@ def test_aproximado_sozinho_ja_gera_sinal(monkeypatch):
 
     monkeypatch.setattr(
         t.go_api, "calcular_consumo",
-        lambda itens: _totais([_item("arroz", "Arroz Integral Cozido", confianca="media")]),
+        lambda itens, unidade_id=None: _totais([_item("arroz", "Arroz Integral Cozido", confianca="media")]),
     )
     monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
 
@@ -191,7 +191,7 @@ def test_sobra_maior_que_consumo_e_sinalizada(monkeypatch):
     comparação de dois números — não pertence ao prompt."""
     chamadas = []
 
-    def fake(itens):
+    def fake(itens, unidade_id=None):
         chamadas.append(itens)
         return _totais_g(20.0) if len(chamadas) == 1 else _totais_g(270.0)
 
@@ -210,7 +210,7 @@ def test_sobra_maior_que_consumo_e_sinalizada(monkeypatch):
 def test_sobra_menor_nao_gera_ruido(monkeypatch):
     chamadas = []
 
-    def fake(itens):
+    def fake(itens, unidade_id=None):
         chamadas.append(itens)
         return _totais_g(270.0) if len(chamadas) == 1 else _totais_g(20.0)
 

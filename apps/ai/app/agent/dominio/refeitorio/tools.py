@@ -413,9 +413,9 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
         # As SOBRAS entram na prévia — são elas que alimentam o índice de resto, então
         # o usuário precisa confirmar o que sobrou, não só o que comeu.
         try:
-            consumido = go_api.calcular_consumo(itens)
+            consumido = go_api.calcular_consumo(itens, ctx.unidade_id)
             previa: dict = {"consumido": consumido}
-            resto = go_api.calcular_consumo(sobras) if sobras else {}
+            resto = go_api.calcular_consumo(sobras, ctx.unidade_id) if sobras else {}
             if sobras:
                 previa["resto"] = resto
         except Exception:
@@ -437,8 +437,11 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
 
     # Confirmado: antes de gravar, checa a cobertura. O cálculo é sem efeito
     # colateral, então custa uma chamada a mais só no caminho de escrita.
+    #
+    # Mesma unidade da prévia, de propósito: conferir com critério diferente do
+    # que foi mostrado ao usuário faria a checagem julgar outro cálculo.
     try:
-        conferencia = _qualidade(go_api.calcular_consumo(itens))
+        conferencia = _qualidade(go_api.calcular_consumo(itens, ctx.unidade_id))
     except Exception:
         conferencia = Qualidade()
 

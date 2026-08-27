@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 
@@ -98,8 +99,32 @@ func menorConfianca(a, b string) string {
 	return b
 }
 
+// EscopoCardapio limita a resolução ao cardápio de um dia. Zero = sem escopo,
+// e o comportamento é o antigo (só a base geral).
+type EscopoCardapio struct {
+	UnidadeID int64
+	Data      string // YYYY-MM-DD
+}
+
+func (e EscopoCardapio) valido() bool { return e.UnidadeID > 0 && e.Data != "" }
+
 // CalcularConsumo resolve cada item contra a base e soma os nutrientes consumidos.
-func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemEntrada) (domain.ConsumoTotais, error) {
+//
+// Com escopo, o cardápio do dia tem PRECEDÊNCIA sobre a base geral: quem disse
+// "arroz" num refeitório que serviu "Arroz Integral" quis dizer o integral, e a
+// busca por similaridade na base geral devolvia o arroz branco. O valor errado
+// ia para consumos, para a pontuação e para o índice de resto-ingesta — erro
+// silencioso, com aparência de acerto.
+func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemEntrada, escopo EscopoCardapio) (domain.ConsumoTotais, error) {
+	var doCardapio []ItemDoCardapio
+	if escopo.valido() {
+		var err error
+		if doCardapio, err = s.itensDoCardapio(ctx, escopo.UnidadeID, escopo.Data); err != nil {
+			// Cardápio indisponível não impede o cálculo — só perde a precedência.
+			doCardapio = nil
+		}
+	}
+
 	tot := domain.ConsumoTotais{Completo: true}
 	for _, it := range itens {
 		qtd := it.Quantidade
@@ -108,7 +133,22 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 		}
 		res := domain.ConsumoItemResultado{Entrada: it}
 
-		alimento, score, err := s.ResolverAlimento(ctx, it.Alimento)
+		var alimento domain.NutriAlimento
+		var score float64
+		var err error
+
+		if id, nomeDoPrato, ok := resolverPeloCardapio(it.Alimento, doCardapio); ok {
+			alimento, err = s.alimentoPorID(ctx, id)
+			// Casou com o prato que a unidade serviu hoje: é a melhor evidência
+			// que existe sobre o que a pessoa comeu.
+			score = 1.0
+			if err == nil {
+				res.Obs = "resolvido pelo cardápio do dia: " + nomeDoPrato
+			}
+		} else {
+			alimento, score, err = s.ResolverAlimento(ctx, it.Alimento)
+		}
+
 		if errors.Is(err, ErrNotFound) {
 			// O item entra na lista (para o usuário ver que foi lido) mas NÃO
 			// soma — e é por isso que o total precisa se declarar incompleto.
@@ -167,4 +207,104 @@ func (s *Store) CalcularConsumo(ctx context.Context, itens []domain.ConsumoItemE
 		tot.Itens = append(tot.Itens, res)
 	}
 	return tot, nil
+}
+
+// ItemDoCardapio é um prato do dia já ligado à sua referência nutricional.
+type ItemDoCardapio struct {
+	Nome            string
+	NutriAlimentoID int64
+}
+
+// itensDoCardapio devolve os pratos daquele dia que têm referência nutricional.
+// Sem referência o item não serve para resolver consumo — cai no caminho geral.
+func (s *Store) itensDoCardapio(ctx context.Context, unidadeID int64, data string) ([]ItemDoCardapio, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT a.nome, a.nutri_alimento_id
+		   FROM cardapio_dias d
+		   JOIN cardapio_itens ci ON ci.cardapio_dia_id = d.id
+		   JOIN alimentos a       ON a.id = ci.alimento_id
+		  WHERE d.unidade_id = $1 AND d.data = $2::date
+		    AND a.nutri_alimento_id IS NOT NULL
+		    AND a.ativo`,
+		unidadeID, data,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var itens []ItemDoCardapio
+	for rows.Next() {
+		var it ItemDoCardapio
+		if err := rows.Scan(&it.Nome, &it.NutriAlimentoID); err != nil {
+			return nil, err
+		}
+		itens = append(itens, it)
+	}
+	return itens, rows.Err()
+}
+
+// resolverPeloCardapio tenta casar `q` com um prato servido naquele dia.
+//
+// Existe porque a base geral não sabe o que a unidade serviu: o usuário diz
+// "arroz", o refeitório serviu "Arroz Integral", e a busca por similaridade
+// devolve o arroz branco da TACO — que tem outro valor calórico. O prato certo
+// estava no cardápio, e ninguém olhava.
+//
+// Deliberadamente conservador: casa por igualdade ou por palavra inteira contida
+// no nome do prato. Similaridade difusa aqui trocaria um erro conhecido por
+// outro imprevisível — se não houver certeza, o caminho geral assume.
+func resolverPeloCardapio(q string, itens []ItemDoCardapio) (int64, string, bool) {
+	alvo := domain.Normalizar(q)
+	if alvo == "" {
+		return 0, "", false
+	}
+
+	var exato, parcial *ItemDoCardapio
+	for i := range itens {
+		nome := domain.Normalizar(itens[i].Nome)
+		if nome == alvo {
+			exato = &itens[i]
+			break
+		}
+		if parcial == nil && contemPalavra(nome, alvo) {
+			parcial = &itens[i]
+		}
+	}
+	if exato != nil {
+		return exato.NutriAlimentoID, exato.Nome, true
+	}
+	if parcial != nil {
+		return parcial.NutriAlimentoID, parcial.Nome, true
+	}
+	return 0, "", false
+}
+
+// contemPalavra diz se `alvo` aparece como palavra inteira em `nome`.
+// Palavra inteira e não substring: "arroz" casa "arroz integral", mas "ovo"
+// não pode casar "novo" nem "ovos de codorna" virar qualquer coisa com "ovo".
+func contemPalavra(nome, alvo string) bool {
+	for _, p := range strings.Fields(nome) {
+		if p == alvo {
+			return true
+		}
+	}
+	// A consulta pode ser composta ("arroz integral") e o prato ter algo a mais.
+	if len(strings.Fields(alvo)) > 1 && strings.Contains(nome, alvo) {
+		return true
+	}
+	return false
+}
+
+// alimentoPorID busca a referência nutricional já identificada.
+func (s *Store) alimentoPorID(ctx context.Context, id int64) (domain.NutriAlimento, error) {
+	var a domain.NutriAlimento
+	err := s.pool.QueryRow(ctx,
+		`SELECT id, nome, COALESCE(categoria,''), COALESCE(fonte,''), aliases
+		   FROM nutri_alimentos WHERE id = $1`, id,
+	).Scan(&a.ID, &a.Nome, &a.Categoria, &a.Fonte, &a.Aliases)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return a, ErrNotFound
+	}
+	return a, err
 }

@@ -24,7 +24,18 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"erro": msg})
 }
 
-func hoje() string { return time.Now().Format("2006-01-02") }
+// hoje é o dia no fuso do refeitório, não em UTC. O container roda em UTC: a
+// partir das 21h no horário de Brasília a data virava e o cardápio do dia
+// "sumia" para quem perguntasse à noite. Mesma convenção de store.TZRefeitorio.
+func hoje() string { return time.Now().In(locRefeitorio).Format("2006-01-02") }
+
+var locRefeitorio = func() *time.Location {
+	l, err := time.LoadLocation(store.TZRefeitorio)
+	if err != nil {
+		return time.UTC
+	}
+	return l
+}()
 
 // handleHealth é liveness: responde 200 se o processo está de pé (usado pelo
 // orquestrador para reiniciar container travado). NÃO toca dependências.

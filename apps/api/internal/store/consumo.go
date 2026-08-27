@@ -43,7 +43,12 @@ type RegistroConsumoResultado struct {
 func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (RegistroConsumoResultado, error) {
 	var out RegistroConsumoResultado
 
-	consumido, err := s.CalcularConsumo(ctx, in.Itens)
+	// O cardápio daquela unidade, naquele dia, tem precedência sobre a base
+	// geral: é a melhor evidência do que a pessoa comeu. Data no fuso do
+	// refeitório — em UTC, a partir das 21h a data vira e o cardápio some.
+	escopo := EscopoCardapio{UnidadeID: in.UnidadeID, Data: agoraLocal().Format("2006-01-02")}
+
+	consumido, err := s.CalcularConsumo(ctx, in.Itens, escopo)
 	if err != nil {
 		return out, err
 	}
@@ -51,7 +56,7 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	// value diria o contrário e reprovaria toda refeição sem sobra.
 	resto := domain.ConsumoTotais{Completo: true}
 	if len(in.Sobras) > 0 {
-		resto, err = s.CalcularConsumo(ctx, in.Sobras)
+		resto, err = s.CalcularConsumo(ctx, in.Sobras, escopo)
 		if err != nil {
 			return out, err
 		}

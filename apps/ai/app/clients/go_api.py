@@ -39,10 +39,19 @@ def get_medidas_caseiras() -> list[dict]:
     return r.json().get("medidas") or []
 
 
-def calcular_consumo(itens: list[dict]) -> dict:
+def calcular_consumo(itens: list[dict], unidade_id: int | None = None) -> dict:
     """Envia itens estruturados ({alimento, medida, quantidade}) e recebe os totais
-    nutricionais calculados deterministicamente contra a base de medidas caseiras."""
-    r = _client.post("/internal/consumo/calcular", json={"itens": itens})
+    nutricionais calculados deterministicamente contra a base de medidas caseiras.
+
+    Com `unidade_id`, o cardápio daquele dia tem precedência sobre a base geral:
+    quem disse "arroz" onde se serviu "Arroz Integral" quis dizer o integral. Sem
+    a unidade, a busca por similaridade devolvia o arroz branco da TACO — valor
+    calórico diferente indo para pontuação e desperdício.
+    """
+    corpo: dict = {"itens": itens}
+    if unidade_id:
+        corpo["unidade_id"] = unidade_id
+    r = _client.post("/internal/consumo/calcular", json=corpo)
     r.raise_for_status()
     return r.json()
 

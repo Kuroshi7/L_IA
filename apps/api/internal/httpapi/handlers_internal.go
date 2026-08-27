@@ -60,12 +60,20 @@ func (s *Server) handleMedidasInterno(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleConsumoCalcular(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Itens []domain.ConsumoItemEntrada `json:"itens"`
+		// Escopo opcional: com unidade e data, o cardápio daquele dia tem
+		// precedência sobre a base geral. Sem eles, comportamento antigo.
+		UnidadeID int64  `json:"unidade_id,omitempty"`
+		Data      string `json:"data,omitempty"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeError(w, http.StatusBadRequest, "corpo inválido")
 		return
 	}
-	tot, err := s.store.CalcularConsumo(r.Context(), body.Itens)
+	escopo := store.EscopoCardapio{UnidadeID: body.UnidadeID, Data: body.Data}
+	if escopo.UnidadeID > 0 && escopo.Data == "" {
+		escopo.Data = hoje()
+	}
+	tot, err := s.store.CalcularConsumo(r.Context(), body.Itens, escopo)
 	if err != nil {
 		s.log.Error("calcular consumo", "err", err)
 		writeError(w, http.StatusInternalServerError, "erro ao calcular consumo")

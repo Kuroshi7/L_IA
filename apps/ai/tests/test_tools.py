@@ -41,8 +41,8 @@ def test_previa_inclui_sobras(monkeypatch):
 
     chamadas = []
 
-    def fake_calcular(itens):
-        chamadas.append(itens)
+    def fake_calcular(itens, unidade_id=None):
+        chamadas.append((itens, unidade_id))
         return {"itens": itens, "kcal_total": 100 * len(itens)}
 
     monkeypatch.setattr(t.go_api, "calcular_consumo", fake_calcular)
@@ -57,3 +57,6 @@ def test_previa_inclui_sobras(monkeypatch):
     assert "consumido" in out["previa"] and "resto" in out["previa"]
     # calcular_consumo foi chamado para itens E para sobras
     assert len(chamadas) == 2
+    # IA-19: sem a unidade, o cálculo cai na base geral e "arroz" vira arroz
+    # branco mesmo com "Arroz Integral" no cardápio do dia.
+    assert all(u == 1 for _, u in chamadas), f"unidade não chegou ao cálculo: {chamadas}"
