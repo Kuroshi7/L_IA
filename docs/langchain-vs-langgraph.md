@@ -245,3 +245,50 @@ Sem nenhum desses sinais? **Não migre. LangChain é mais simples e suficiente.*
 - [LangChain docs](https://python.langchain.com/) — `create_agent`, tools, mensagens
 - [LangGraph docs](https://langchain-ai.github.io/langgraph/) — grafos, checkpoints, ToolNode
 - [LangGraph: When to use it](https://blog.langchain.dev/langgraph/) — artigo dos próprios autores
+
+---
+
+## Revisão de 24/08/2026 — evidência do Onyx
+
+Lemos o código do Onyx (clone em `~/desenvolvimento/onyx`) procurando o que faz
+o agente deles se comportar bem. Achado que muda o enquadramento deste
+documento: **o Onyx não usa LangChain nem LangGraph.** O laço agentic é
+
+```python
+for llm_cycle_count in range(MAX_LLM_CYCLES):   # chat/llm_loop.py
+```
+
+um `for` sobre o litellm, com corte de histórico e orçamento de tokens escritos
+à mão. Um produto maduro escolheu **não** usar framework de grafo.
+
+### A dicotomia é falsa, e o eixo real é outro
+
+Chain e graph não competem: um nó de grafo pode ser uma chain. A pergunta que
+decide o desenho é **quem precisa estar certo — o modelo ou o código?**
+
+| obrigação | onde vive | por quê |
+|---|---|---|
+| Sempre acontece (aviso legal, guardrail, validação) | **código** | "quase sempre" não serve |
+| Precisa de julgamento (qual tool, como frasear) | **laço agentic** | entrada aberta demais para regra |
+
+Este projeto já está certo nesse eixo, e não por teoria: pedir ao prompt o aviso
+obrigatório deu **0 de 3** de aderência mesmo com reminder reinjetado. Por isso
+`pos_processar` e `regras` são código, e a escolha de tool é do modelo.
+
+### Decisão: ficar com `create_agent`, e o gatilho para revisar
+
+**Mantido.** O motor tem ~4.100 linhas porque não escrevemos o laço; trocar
+agora pagaria caro por controle que ainda não usamos.
+
+**Revisar quando aparecer o terceiro remendo em volta do framework.** Hoje há
+um: `motor/tools.py` existe porque o `create_agent` não trata erro de tool
+(medido — a exceção aborta o grafo inteiro). Os outros dois módulos criados no
+mesmo dia, `motor/erros.py` e `motor/preflight.py`, **não** são remendos:
+existiriam com qualquer laço.
+
+Candidatos a virar o terceiro: corte de histórico por orçamento de tokens,
+retry por ciclo, streaming parcial. Se dois destes aparecerem, escrever o `for`
+fica mais barato que continuar contornando.
+
+A troca é barata porque a costura é uma função só: `construir_executor`, em
+`motor/llm.py`. Trocar o laço não toca em nenhuma linha de domínio.
