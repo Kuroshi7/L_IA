@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from app import config
+from app.agent.motor import memoria
 from app.agent.motor import reminders as rem
 from app.agent.motor.callbacks import TimingCallback
 from app.agent.motor.llm import obter_executor
@@ -101,7 +102,18 @@ def executar_turno(
     mensagens = montar_mensagens(historico, mensagem, ativos)
     callback = TimingCallback(session_id=session_id)
 
-    token = iniciar_turno(prazo=prazo, reminders=tuple(r.texto for r in ativos))
+    # Histórico vazio é o sinal barato de conversa nova ou zerada — quem chama
+    # lista o histórico ANTES de gravar a mensagem atual. Sem este esquecimento,
+    # zerar a conversa deixaria os caminhos mortos da conversa velha vivos até o
+    # TTL, e a pessoa recomeçaria já carregando o fracasso anterior.
+    if not historico:
+        memoria.esquecer(session_id)
+
+    token = iniciar_turno(
+        prazo=prazo,
+        reminders=tuple(r.texto for r in ativos),
+        sem_resultado_antes=memoria.lembrar(session_id),
+    )
     try:
         resultado = agente.invoke(
             {"messages": mensagens},
@@ -165,6 +177,13 @@ def executar_turno(
             saida.erro = "ValidacaoBloqueou"
         return saida
     finally:
+        # No `finally` e não no caminho feliz: o turno abortado por prazo ou por
+        # loop de tools é justamente aquele em que o modelo passou o tempo todo
+        # insistindo num caminho morto. Perder essa evidência seria perder o
+        # caso que mais importa.
+        obs = observacoes_do_turno()
+        if obs is not None:
+            memoria.registrar(session_id, obs.sem_resultado)
         encerrar_turno(token)
 
 

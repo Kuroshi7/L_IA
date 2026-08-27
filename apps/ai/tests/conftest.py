@@ -18,6 +18,8 @@ local com `-m llm` poderem escolher explicitamente sem editar este arquivo.
 
 import os
 
+import pytest
+
 # Provider e modelo: default previsível, mas sobrescrevível por quem roda `-m llm`.
 os.environ.setdefault("LLM_PROVIDER", "ollama")
 os.environ.setdefault("OLLAMA_MODEL", "llama3.2")
@@ -27,3 +29,24 @@ os.environ.setdefault("OLLAMA_BASE_URL", "http://127.0.0.1:9")
 os.environ["API_INTERNAL_URL"] = "http://127.0.0.1:9"
 os.environ["DATABASE_URL"] = "postgres://offline:offline@127.0.0.1:9/offline?sslmode=disable"
 os.environ["RABBITMQ_URL"] = "amqp://guest:guest@127.0.0.1:9/"
+
+
+# --- estado de processo entre testes ------------------------------------------
+
+@pytest.fixture(autouse=True)
+def _memoria_do_motor_limpa():
+    """Zera a memória de becos sem saída entre um teste e o próximo.
+
+    Ela é estado de PROCESSO indexado por `session_id` (`motor/memoria.py`), com
+    TTL de 15 minutos — muito mais que uma suíte inteira. Sem esta limpeza, dois
+    testes que usem o mesmo identificador deixam de ser independentes, e a
+    ordem de execução passa a mudar o resultado. Vale sobretudo para o eval, em
+    que as REPETIÇÕES de um caso existem para separar "o produto está errado" de
+    "o modelo variou": herdando a memória umas das outras, elas param de ser
+    amostras independentes e o número deixa de ser reproduzível.
+    """
+    from app.agent.motor import memoria
+
+    memoria._becos.clear()
+    yield
+    memoria._becos.clear()

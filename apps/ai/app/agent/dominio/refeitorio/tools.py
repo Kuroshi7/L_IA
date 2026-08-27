@@ -7,8 +7,7 @@ LLMs pequenos). A filtragem por restrição/alergia é determinística em Python
 
 import json as _json
 import logging
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, timedelta
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -18,6 +17,7 @@ from app.agent.dominio.refeitorio import filters
 from app.agent.context import current_context
 from app.agent.motor.observacao import cache_do_turno, observado
 from app.agent.motor.reminders import anexar_ao_resultado
+from app.agent.motor import relogio
 from app.clients import go_api
 from app.rag import retriever
 from app.agent.motor.tools import ErroDeTool
@@ -257,6 +257,55 @@ def _pratos(dia: str) -> list[dict]:
     return cache[chave]
 
 
+def _vocabulario_de_restricoes(pratos: list[dict]) -> list[str]:
+    """Os rótulos de restrição que ESTE cardápio declara.
+
+    Nada de constante: o vocabulário é DADO, não código. Uma unidade cadastra
+    "sem lactose/vegetariano", outra "low carb/proteico" — e amanhã, por tenant,
+    a lista muda de novo. Uma tabela fixa aqui envelheceria no primeiro cliente.
+
+    `nao_indicado_para` entra na união porque é o MESMO namespace de
+    `restricoes_atendidas`. Sem ele, num dia em que nenhum prato é vegetariano
+    mas um está marcado `nao_indicado_para=['vegetariano']`, "vegetariano" seria
+    tratado como termo desconhecido — e o roteamento devolveria ao modelo
+    justamente o prato proibido.
+
+    Deduplica por `normalizar`, mas devolve a grafia que a nutricionista
+    cadastrou: este texto vai para o modelo, e ele repete o que lê.
+    """
+    vistos: set[str] = set()
+    vocabulario: list[str] = []
+    for p in pratos:
+        declarados = list(p.get("restricoes_atendidas") or []) + list(p.get("nao_indicado_para") or [])
+        for rotulo in declarados:
+            chave = filters.normalizar(rotulo or "")
+            if not chave or chave in vistos:
+                continue
+            vistos.add(chave)
+            vocabulario.append(rotulo)
+    return vocabulario
+
+
+def _fora_do_vocabulario(termos: list[str], vocabulario: list[str]) -> list[str]:
+    """Quais dos termos pedidos este filtro NÃO sabe aplicar.
+
+    Pergunta ao PRÓPRIO `prato_atende_restricao`, com um prato-sonda sintético,
+    em vez de comparar strings normalizadas. É o que faz as equivalências de
+    `filters` ('celiaco' → 'sem gluten') continuarem valendo de graça: uma
+    comparação literal passaria a rotear 'celiaco' em vez de filtrar, e a
+    barreira determinística do celíaco viraria decisão do modelo. Copiar a
+    tabela de equivalências para cá criaria duas verdades, que divergem na
+    primeira equivalência nova.
+    """
+    return [
+        termo for termo in termos
+        if not any(
+            filters.prato_atende_restricao({"restricoes_atendidas": [rotulo]}, termo)
+            for rotulo in vocabulario
+        )
+    ]
+
+
 @tool
 @observado
 def listar_pratos_do_dia(dia: str = "hoje") -> dict:
@@ -302,19 +351,42 @@ def listar_pratos_do_dia(dia: str = "hoje") -> dict:
 
 @tool
 @observado
-def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str = "", dia: str = "hoje") -> list[dict] | str:
+def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str = "", dia: str = "hoje") -> list[dict] | dict | str:
     """Filtra os pratos do dia (da unidade atual) que atendem TODAS as restrições, são
     seguros para TODAS as alergias e combinam com as preferências. Use ao recomendar.
 
-    Args (CSV string): restricoes ex "vegetariano,sem gluten"; alergias ex "peixe,lactose";
-    preferencias ex "proteico,frango"; dia "hoje" (default) ou data ISO.
-    Retorna pratos completos compatíveis. Lista vazia = nenhum atende."""
+    Os dois campos de restrição NÃO são simétricos:
+    - `restricoes` = vocabulário FECHADO (CSV): só os rótulos que o cardápio declara
+      ("vegetariano", "sem lactose", "sem gluten"). Pedido ABERTO ("sem carne vermelha",
+      "sem fritura") NÃO vai aqui — decida você, pelos `ingredientes` que vêm no retorno.
+    - `preferencias` = vocabulário ABERTO (CSV): busca nos `ingredientes`, para o que a
+      pessoa QUER incluir (ex "frango,legumes").
+    `alergias` CSV ex "peixe,lactose". `dia` "hoje" (default) ou data ISO.
+    Retorna os pratos completos compatíveis."""
     rest, alerg, pref = _csv(restricoes), _csv(alergias), _csv(preferencias)
     pratos = _pratos(dia)
 
+    if not pratos:
+        # Cardápio não publicado é um fracasso DIFERENTE de "filtrei e nada
+        # atende", e precisa vir antes de tudo: sem pratos o vocabulário é
+        # vazio, todo termo pareceria desconhecido e o roteamento mandaria o
+        # modelo escolher pelos ingredientes de uma lista que não existe.
+        return {
+            "pratos": [],
+            "nota_do_sistema": (
+                f"Nenhum prato cadastrado para '{dia or 'hoje'}'. NÃO sugira nem cite "
+                "nenhum prato — nem de memória, nem 'o que costuma ter'. Diga que o "
+                "cardápio ainda não foi publicado e ofereça consultar outro dia."
+            ),
+        }
+
+    vocabulario = _vocabulario_de_restricoes(pratos)
+    desconhecidas = _fora_do_vocabulario(rest, vocabulario)
+    conhecidas = [r for r in rest if r not in desconhecidas]
+
     compativeis = []
     for p in pratos:
-        if not all(filters.prato_atende_restricao(p, r) for r in rest):
+        if not all(filters.prato_atende_restricao(p, r) for r in conhecidas):
             continue
         if not filters.prato_seguro_para_alergias(p, alerg):
             continue
@@ -325,11 +397,80 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
     if not compativeis:
         # Regra inviolável 4. Devolver [] deixava o modelo livre para "ajudar"
         # inventando algo plausível; a instrução vai junto do resultado.
+        #
+        # Vem ANTES do roteamento de propósito, e continua honesto mesmo com
+        # termo desconhecido na jogada: filtrar por um SUBCONJUNTO dos critérios
+        # dá um superconjunto dos pratos: se nem o subconjunto sobrou nada,
+        # o critério completo também não sobraria. Roteando aqui, a nota
+        # mandaria o modelo decidir sobre uma lista vazia.
         return (
             "Nenhum prato do cardápio atende a esses critérios. NÃO sugira nada fora "
             "do cardápio nem force um prato que não atende. Diga isso ao usuário e "
             "pergunte se ele pode flexibilizar algum critério."
         )
+
+    if desconhecidas:
+        # O falso negativo que originou isto: 'sem carne vermelha' chegou no
+        # campo fechado, não casou com rótulo nenhum e zerou o cardápio inteiro.
+        # O tool então dizia "nenhum prato atende" com voz de autoridade, o
+        # modelo obedecia — corretamente — e a conversa morria. Duas vezes
+        # seguidas, e a Lia acabou culpando o sistema na frente do cliente.
+        #
+        # Em vez de mentir, o tool declara o próprio vocabulário e devolve a
+        # decisão a quem sabe tomá-la. Os PRATOS vão junto da instrução, não só
+        # ela: o orçamento é de poucas tool calls por turno, e obrigar mais uma
+        # chamada só para ver `ingredientes` gasta o turno de novo. A assimetria
+        # decidida se mantém — alergia segue determinística no código acima, e
+        # `conflita_com_perfil` continua anotado; só a restrição ABERTA vai para
+        # o modelo, com os ingredientes na mão.
+        #
+        # Duas frases diferentes para dois fracassos diferentes. Vocabulário
+        # VAZIO não é "o termo é aberto": é a nutricionista que ainda não
+        # classificou prato nenhum — o estado normal do dia 1 de uma unidade
+        # nova, e o estado esperado com 300 lojas. Sem a distinção, a nota saía
+        # com o parêntese literalmente vazio ("os rótulos que o cardápio declara
+        # ()") e afirmava um material de decisão que não existe.
+        declarado = (
+            f"Este campo só filtra os rótulos que o cardápio declara ({', '.join(vocabulario)})."
+            if vocabulario else
+            "O cardápio de hoje não classificou prato nenhum, então não havia rótulo "
+            "por onde filtrar."
+        )
+        termos = ", ".join(desconhecidas)
+        nota = (
+            f"NÃO filtrei por: {termos}. {declarado} Isso NÃO significa que nenhum prato "
+            f"sirva — e também NÃO significa que estes {len(compativeis)} pratos atendam a "
+            f"'{termos}': eles passaram pelos critérios que EU sei aplicar, e vêm com "
+            "`ingredientes` para você olhar. Recomende só o que você consiga justificar "
+            f"pelos ingredientes do prato, e NUNCA afirme que um prato atende '{termos}' se "
+            "os ingredientes não mostrarem isso — quando não der para saber, diga o que o "
+            "prato leva e deixe a pessoa decidir. Não repita esta consulta com o mesmo "
+            "termo. Para o que a pessoa QUER incluir, use `preferencias`, que busca nos "
+            "ingredientes. NUNCA diga ao usuário que a consulta falhou ou que o sistema "
+            "está rigoroso: responda com o que dá para fazer."
+        )
+        # A lista roteada CONTÉM pratos conflitantes (é o que
+        # `test_conflito_com_perfil_sobrevive_ao_roteamento` prova), e sem esta
+        # frase a última mensagem do contexto dizia "escolha entre eles" sem
+        # nunca mencionar o campo — contradizendo, da posição de maior
+        # obediência, a regra 6b que está no topo do system. Mesmo texto de
+        # `listar_pratos_do_dia`, de propósito: dois avisos diferentes para o
+        # mesmo fato é como o modelo aprende a escolher qual obedecer.
+        conflitantes = [p["nome"] for p in compativeis if p.get("conflita_com_perfil")]
+        if conflitantes:
+            nota += (
+                f" ATENÇÃO: {conflitantes} não são indicados para esta pessoa. O campo "
+                "`conflita_com_perfil` traz o motivo já na forma de falar com ela. Nunca os "
+                "recomende; se ela perguntar sobre um deles, explique devolvendo a informação "
+                "que ela mesma deu, com o motivo concreto — sem proibir."
+            )
+        return {
+            "pratos": compativeis,
+            "restricoes_aplicadas": conhecidas,
+            "nao_filtrei_por": desconhecidas,
+            "vocabulario_de_restricoes": vocabulario,
+            "nota_do_sistema": nota,
+        }
     return compativeis
 
 
@@ -506,13 +647,12 @@ def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confi
     return anexar_ao_resultado(registro, _nota_de_incerteza(q))
 
 
-# Fuso do refeitório: "hoje" e "amanhã" são do ponto de vista de quem está na
-# fila, não do relógio UTC do servidor.
-_TZ = ZoneInfo("America/Sao_Paulo")
-
-
+# "hoje" e "amanhã" são do ponto de vista de quem está na fila, não do relógio
+# UTC do servidor. O fuso vem de `motor/relogio.py` — mesma fonte que informa a
+# data ao modelo. Duas contas de "hoje" em lugares diferentes divergem na virada
+# do dia, e o bug só aparece à noite.
 def _hoje_local() -> date:
-    return datetime.now(_TZ).date()
+    return relogio.hoje()
 
 
 def _resolver_dia(texto: str) -> date | None:
@@ -559,7 +699,7 @@ def cardapio_da_semana(inicio: str = "", data_alvo: str = "") -> dict | str:
         semana = go_api.get_cardapio_semana(ctx.unidade_id, inicio or "")
     except Exception:
         return "Não foi possível carregar o cardápio da semana agora."
-    return {
+    resultado = {
         "inicio": semana.get("inicio"),
         "dias": [
             {
@@ -570,6 +710,32 @@ def cardapio_da_semana(inicio: str = "", data_alvo: str = "") -> dict | str:
             for d in (semana.get("dias") or [])
         ],
     }
+
+    # A tool avisa quando a semana devolvida não é a de hoje.
+    #
+    # Foi por falta disto que uma resposta apresentou o cardápio de 28/05 como se
+    # fosse o de hoje: sem cardápio publicado para hoje, o modelo chutou uma data
+    # absoluta, caiu num resto de seed de três meses atrás e a tool entregou sem
+    # dizer nada. `listar_pratos_do_dia` já se protege assim quando vem vazio —
+    # é a mesma ideia, aplicada onde faltava.
+    #
+    # Não é validação de entrada (a data pedida é legítima, o gestor precisa
+    # consultar semanas passadas). É contexto: o dado vai junto com o que ele
+    # significa, para o modelo não poder confundir passado com hoje.
+    inicio_ret = resultado.get("inicio")
+    try:
+        distancia = (date.fromisoformat(inicio_ret) - _segunda_da_semana(_hoje_local())).days // 7
+    except (TypeError, ValueError):
+        distancia = 0
+    if distancia:
+        quando = "passada" if distancia < 0 else "futura"
+        resultado = anexar_ao_resultado(resultado, (
+            f"ATENÇÃO: esta é uma semana {quando} ({abs(distancia)} semana(s) de distância "
+            f"da semana atual), NÃO é o cardápio de hoje. Só apresente estes pratos se o "
+            f"usuário tiver pedido explicitamente esse período, e diga de que dias eles são. "
+            f"Se ele perguntou sobre hoje, o cardápio de hoje não está publicado."
+        ))
+    return resultado
 
 
 @tool

@@ -4,6 +4,23 @@ via RPC (publica em props.reply_to com o mesmo correlation_id).
 Concorrência de múltiplos usuários: cada processo trata uma mensagem por vez
 (prefetch=1 por padrão); escale horizontalmente rodando várias réplicas do worker.
 
+MEMÓRIA ENTRE TURNOS — ESTADO NO PROCESSO (dívida consciente). O que uma tool
+descobriu não atravessa o turno pelo envelope: o histórico que chega aqui é só
+texto de pessoa e de assistente. `motor/memoria.py` cobre o essencial disso
+guardando, em memória do processo, quais consultas já voltaram sem resultado em
+cada conversa. Consequência: com mais de uma réplica consumindo esta fila — ou
+depois de um restart, ou pelo canal do Telegram, que roda noutro processo —
+turnos da mesma conversa caem em processos diferentes e a memória não é
+encontrada. O efeito é voltar ao comportamento anterior (o modelo pode repetir
+uma consulta que já falhou), nunca uma resposta errada; por isso não vale
+travar a escala horizontal por ela.
+
+Durabilidade de verdade exige campo novo no envelope RPC e na persistência do
+lado Go. Este arquivo é a costura por onde isso entraria: o que o Go mandasse
+junto do histórico seria repassado a `processar_mensagem` e o que o turno
+aprendesse voltaria na resposta, para o Go gravar. Enquanto isso não existe, os
+tetos e o TTL ficam em `motor/memoria.py`, onde são testáveis sem fila.
+
 Uso: python -m app.workers.chat_worker
 """
 
@@ -92,7 +109,11 @@ def main():
     # "tente de novo" a cada mensagem, sem nada no log de partida.
     if config.PREFLIGHT_OBRIGATORIO:
         from app.agent.motor import preflight, provedores
-        preflight.exigir(lambda: provedores.construir(temperatura=0, max_tokens=16))
+        preflight.exigir(
+            lambda: provedores.construir(
+                temperatura=0, max_tokens=preflight.MAX_TOKENS_SONDA
+            )
+        )
     else:
         log.warning("PREFLIGHT desligado por configuração — não use assim em produção")
 

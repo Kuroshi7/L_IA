@@ -23,6 +23,7 @@ isolada não derrubar a rodada inteira.
 """
 
 import os
+import uuid
 from collections import defaultdict
 
 import pytest
@@ -46,6 +47,16 @@ def _rodar(caso, monkeypatch):
     `turnos` existe porque várias regras só se completam em dois passos: o prompt
     manda perguntar sobre sobras ANTES de registrar, então exigir a tool no
     primeiro turno reprovaria o comportamento correto.
+
+    O `session_id` é novo a cada execução, e estável entre os turnos DELA. Isso
+    importa desde que o motor passou a guardar estado por conversa entre turnos
+    (`motor/memoria.py`, TTL de 15 min): derivá-lo do nome do caso fazia as
+    REPETIÇÕES herdarem umas das outras — logo elas mediriam contextos
+    diferentes, e o número que sai daqui deixaria de ser reproduzível, quando a
+    razão de existirem é justamente separar "o produto está errado" de "o modelo
+    variou". Um prefixo truncado ainda por cima colidia entre casos DIFERENTES
+    ("recomendação" cobria três casos da bateria), tornando o resultado
+    dependente da ordem do glob.
     """
     dados = fakes.carregar_dados(caso["dados"])
     fakes.instalar(monkeypatch, dados)
@@ -56,6 +67,7 @@ def _rodar(caso, monkeypatch):
     if not PERFIL.esta_no_escopo(mensagens[0], bool(historico)):
         return None, dados
 
+    sessao = f"{caso['nome'][:12]}-{uuid.uuid4().hex[:8]}"
     contexto = RequestContext(unidade_id=1, usuario_id=caso.get("usuario_id"))
     token = set_context(contexto)
     try:
@@ -65,7 +77,7 @@ def _rodar(caso, monkeypatch):
             resultado = turn.executar_turno(
                 PERFIL, mensagem, contexto=contexto, historico=historico,
                 gatilhos=Gatilhos(primeira_interacao_do_dia=caso.get("primeira_do_dia", False) and i == 0),
-                session_id=caso["nome"][:12],
+                session_id=sessao,
             )
             tools += resultado.tools_chamadas
             if resultado.observacoes:

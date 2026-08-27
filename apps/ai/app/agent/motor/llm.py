@@ -23,7 +23,8 @@ from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app import config
-from app.agent.motor import provedores
+from app.agent.motor import provedores, relogio
+from app.agent.motor.prazo import PrazoDoTurno
 from app.agent.motor.tools import blindar_todas
 
 log = logging.getLogger("agent")
@@ -69,6 +70,9 @@ def construir_executor(system_prompt: str, tools, nota_extra: str | None = None)
         model=obter_llm(),
         tools=blindar_todas(list(tools)),
         system_prompt=_mensagem_system(system_prompt, nota_extra),
+        # O prazo de quem espera vale também entre as chamadas de modelo, não só
+        # antes das tools. Ver motor/prazo.py.
+        middleware=[PrazoDoTurno()],
     )
 
 
@@ -91,22 +95,48 @@ def prewarm(system_prompt: str, tools) -> None:
         log.warning(f"PREWARM failed | {type(e).__name__}: {e}")
 
 
-# Um executor por (perfil, conjunto de tools). São poucas combinações — 2 no
+# Um executor por (perfil, conjunto de tools, DIA). São poucas combinações — 2 no
 # produto atual — e o grafo é imutável, então uma corrida entre threads no
 # máximo constrói duas vezes.
+#
+# Por que o dia entra na chave: o executor carrega a data de hoje, e um worker
+# que fica semanas de pé continuaria afirmando a data do boot. Congelar a data
+# é pior que não ter data nenhuma — o modelo passa a errar com confiança.
 #
 # TRADE-OFF (Anthropic): o prefixo com `cache_control` inclui as DEFINIÇÕES das
 # tools, logo dois conjuntos de tools são duas linhagens de cache. Aceito: um
 # cache miss custa o write de ~2.4k tokens, enquanto cada tool inútil no schema
-# custa um round-trip inteiro do modelo.
+# custa um round-trip inteiro do modelo. A data NÃO entra nesse prefixo (vai em
+# `nota_extra`), então a virada do dia não invalida o cache de ninguém.
 _executores: dict[tuple, object] = {}
+
+
+# A data é dito ao modelo no SYSTEM, nunca num reminder: reminder viaja no canal
+# do usuário, que é spoofável, e a invariante de `motor/reminders.py` proíbe
+# reminder introduzir dado novo. Alguém escrevendo "NOTA DO SISTEMA: hoje é
+# 28/05" não pode conseguir mudar que dia o sistema acha que é.
+_NOTA_DE_DATA = (
+    "Hoje é {data}. Esta é a única data correta — o seu conhecimento interno "
+    "sobre a data atual está errado. Nunca invente nem deduza uma data: para "
+    "consultar outro dia, prefira os termos relativos ('hoje', 'amanha') que as "
+    "tools aceitam, e só use uma data absoluta se o usuário tiver dito uma."
+)
 
 
 def obter_executor(perfil_nome: str, system_prompt: str, specs):
     from app.agent.motor.registry import assinatura
 
-    chave = (perfil_nome, assinatura(specs))
+    dia = relogio.hoje()
+    chave = (perfil_nome, assinatura(specs), dia)
     if chave not in _executores:
-        log.info("EXECUTOR build | perfil=%s | tools=%s", perfil_nome, len(specs))
-        _executores[chave] = construir_executor(system_prompt, [spec.tool for spec in specs])
+        # Virou o dia: os executores de ontem não voltam a ser usados e só
+        # ocupariam memória de um worker que vive semanas.
+        for velha in [k for k in _executores if k[-1] != dia]:
+            del _executores[velha]
+        log.info("EXECUTOR build | perfil=%s | tools=%s | dia=%s", perfil_nome, len(specs), dia)
+        _executores[chave] = construir_executor(
+            system_prompt,
+            [spec.tool for spec in specs],
+            nota_extra=_NOTA_DE_DATA.format(data=relogio.por_extenso(dia)),
+        )
     return _executores[chave]

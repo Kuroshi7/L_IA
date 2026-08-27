@@ -62,6 +62,11 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 # Integrações
 API_INTERNAL_URL = os.getenv("API_INTERNAL_URL", "http://localhost:8080")
 RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+# Fuso do produto. "hoje" e "amanhã" são do ponto de vista de quem está na fila,
+# não do relógio UTC do container. Lido por `motor/relogio.py`, que é a fonte
+# única — ver a nota de multi-tenant lá.
+FUSO_HORARIO = os.getenv("FUSO_HORARIO", "America/Sao_Paulo")
+
 DATABASE_URL = os.getenv("DATABASE_URL", "postgres://menuai:menuai@localhost:5432/menuai?sslmode=disable")
 
 # Fila consumida por este worker (deve casar com a do serviço Go).

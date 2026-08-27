@@ -44,6 +44,20 @@ _TOOL_DE_SONDA = {
 }
 _PERGUNTA = "Chame _preflight_echo com valor 7."
 
+# Teto de saída que a sonda EXIGE de quem constrói o modelo.
+#
+# Não é detalhe de ajuste fino: num provider que devolve a chamada de tool como
+# bloco estruturado (Anthropic), o nome da tool e o JSON dos argumentos são
+# tokens de SAÍDA. Com teto apertado a resposta é truncada antes de o bloco
+# fechar, `tool_calls` volta vazio e a sonda conclui "o modelo não faz tool
+# calling" — sobre um modelo que faz.
+#
+# Foi exatamente o que aconteceu em 27/08/2026: o worker construía a sonda com
+# max_tokens=16 e reprovava o claude-haiku-4-5 na partida. Medido depois: 16
+# reprova, 64 e 256 passam. 256 dá folga para nome de tool e argumentos maiores
+# sem custar nada relevante — é UMA chamada, uma vez, no boot.
+MAX_TOKENS_SONDA = 256
+
 
 @dataclass(frozen=True)
 class Resultado:
@@ -73,6 +87,16 @@ def verificar(construir_modelo, *, exigir_tool: bool = True) -> Resultado:
         return Resultado(ok=False, alcancavel=False, chama_tool=False,
                          detalhe=f"não foi possível construir o modelo: {falha.detalhe}",
                          falha=falha)
+
+    teto = getattr(modelo, "max_tokens", None)
+    if exigir_tool and isinstance(teto, int) and teto < MAX_TOKENS_SONDA:
+        # Aviso e não erro: alguns providers não expõem `max_tokens` no cliente,
+        # e recusar por causa de um atributo ausente seria pior que o problema.
+        log.warning(
+            "PREFLIGHT | teto de saída do modelo é %s, abaixo de MAX_TOKENS_SONDA=%s — "
+            "a chamada de tool pode ser truncada e a sonda reprovar um modelo bom",
+            teto, MAX_TOKENS_SONDA,
+        )
 
     try:
         if exigir_tool and hasattr(modelo, "bind_tools"):
