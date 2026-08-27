@@ -14,12 +14,20 @@ from app.agent.dominio.refeitorio.guardrail import is_in_scope
 from app.agent.motor import llm
 from app.agent.motor.perfil import PerfilDeDominio
 from app.agent.motor.reminders import Gatilhos, Reminder
+from app.agent.motor import planejamento
 from app.agent.motor.registry import CATALOGO, ToolSpec
 
 RESPOSTA_ERRO_TRANSIENTE = (
     "Desculpe, tive um problema para consultar as informações agora. "
     "Pode tentar de novo em instantes?"
 )
+
+
+def _e_admin(contexto) -> bool:
+    """Tools de gestão leem dado agregado da unidade inteira — número que o
+    cliente comum não deve ver. A flag vem carimbada pela API Go a partir do
+    token validado; o worker não a recebe de cliente nenhum."""
+    return bool(getattr(contexto, "is_admin", False))
 
 
 def _tem_usuario(contexto) -> bool:
@@ -33,6 +41,9 @@ def _tem_usuario(contexto) -> bool:
 # É o que sustenta a regra "sem tool = sem recomendação": se nenhuma delas rodou
 # no turno, qualquer prato citado na resposta foi inventado.
 REGISTRO: tuple[ToolSpec, ...] = (
+    # Do MOTOR, não do domínio: planejar antes de agir não tem nada de
+    # refeitório. Exposta aqui porque quem decide oferecer é o produto.
+    ToolSpec(planejamento.pensar),
     ToolSpec(_t.listar_pratos_do_dia, capacidades=frozenset({CATALOGO})),
     ToolSpec(_t.cardapio_da_semana, capacidades=frozenset({CATALOGO})),
     ToolSpec(_t.filtrar_pratos, capacidades=frozenset({CATALOGO})),
@@ -43,6 +54,7 @@ REGISTRO: tuple[ToolSpec, ...] = (
     ToolSpec(_t.consultar_medidas_caseiras),
     ToolSpec(_t.buscar_informacao),
     ToolSpec(_t.registrar_consumo),
+    ToolSpec(_t.resumo_de_desperdicio, disponivel=_e_admin),
 )
 
 # A âncora `regra_de_origem` PRECISA aparecer literalmente no SYSTEM_AGENT — é a

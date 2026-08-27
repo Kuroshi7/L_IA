@@ -30,6 +30,9 @@ def processar_mensagem(
     usuario_id: int | None = None,
     historico: list[dict] | None = None,
     primeira_do_dia: bool = False,
+    # Carimbado pela API Go a partir do X-Admin-Token validado. Chega até aqui
+    # como dado do envelope; nenhum cliente escreve neste campo.
+    is_admin: bool = False,
     *,
     deadline: float | None = None,
 ) -> dict:
@@ -44,7 +47,7 @@ def processar_mensagem(
         log.info("REQ END | fora de escopo")
         return {"resposta": PERFIL.resposta_fora_de_escopo, "fora_de_escopo": True}
 
-    contexto = RequestContext(unidade_id=unidade_id, usuario_id=usuario_id)
+    contexto = RequestContext(unidade_id=unidade_id, usuario_id=usuario_id, is_admin=is_admin)
     token = set_context(contexto)
     try:
         resultado = turn.executar_turno(

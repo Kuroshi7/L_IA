@@ -20,6 +20,7 @@ from app.agent.motor.observacao import cache_do_turno, observado
 from app.agent.motor.reminders import anexar_ao_resultado
 from app.clients import go_api
 from app.rag import retriever
+from app.agent.motor.tools import ErroDeTool
 
 log = logging.getLogger("agent")
 
@@ -562,3 +563,24 @@ TOOLS = [
     buscar_informacao,
     registrar_consumo,
 ]
+
+
+@tool
+def resumo_de_desperdicio(de: str | None = None, ate: str | None = None) -> dict | str:
+    """GESTÃO — agregado de desperdício da unidade num período (padrão: 14 dias).
+
+    Use para perguntas de análise: quanto se desperdiça, quais pratos sobram
+    mais, como evoluiu no período. Datas em AAAA-MM-DD.
+
+    Devolve: total do período, série por dia e os alimentos mais desperdiçados.
+    Os números vêm agregados do banco — NÃO recalcule nem some de cabeça, e não
+    cite valor que não esteja aqui.
+    """
+    ctx = current_context()
+    try:
+        return go_api.resumo_desperdicio(ctx.unidade_id, de, ate)
+    except Exception as e:
+        raise ErroDeTool(
+            "Não consegui consultar o resumo de desperdício agora. "
+            "Diga isso e não estime números."
+        ) from e

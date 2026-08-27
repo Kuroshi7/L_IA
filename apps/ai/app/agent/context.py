@@ -17,6 +17,11 @@ class RequestContext:
     unidade_id: int
     usuario_id: int | None = None
 
+    # Origem confiável: carimbado pela API Go a partir do X-Admin-Token
+    # validado, nunca por campo que o cliente escreve. Libera tools que leem
+    # dado agregado da unidade — quem se declara admin sozinho escala privilégio.
+    is_admin: bool = False
+
 
 _ctx: contextvars.ContextVar[RequestContext | None] = contextvars.ContextVar(
     "request_context", default=None

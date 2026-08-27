@@ -111,3 +111,19 @@ def vincular_telegram(usuario_id: int, chat_id: int) -> dict:
     r = _client.post(f"/internal/usuario/{usuario_id}/vincular-telegram", json={"chat_id": chat_id})
     r.raise_for_status()
     return r.json()
+
+
+def resumo_desperdicio(unidade_id: int, de: str | None = None, ate: str | None = None) -> dict:
+    """Agregado de desperdício da unidade num período.
+
+    A agregação é feita no banco, não pelo modelo: somar série temporal token a
+    token erra e não dá para auditar. A tool devolve o número pronto.
+    """
+    params: dict[str, str] = {}
+    if de:
+        params["de"] = de
+    if ate:
+        params["ate"] = ate
+    r = _client.get(f"/unidades/{unidade_id}/desperdicio", params=params)
+    r.raise_for_status()
+    return r.json()

@@ -55,6 +55,7 @@ def _on_message(ch, method, props, body):
             usuario_id=req.get("usuario_id"),
             historico=req.get("historico"),
             primeira_do_dia=bool(req.get("primeira_do_dia")),
+            is_admin=bool(req.get("admin")),
             # Mesmo orçamento que o `_expirada` acima usa para DESCARTAR: a
             # diferença é que aquele só age antes de começar, e um turno pode
             # encadear várias chamadas de modelo e estourar o tempo no meio.

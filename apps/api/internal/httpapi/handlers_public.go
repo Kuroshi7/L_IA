@@ -141,11 +141,17 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Admin sai do HEADER validado, não de campo do corpo: o corpo é escrito
+	// pelo cliente. Com ADMIN_TOKEN vazio (desenvolvimento) ninguém é admin —
+	// o gate desligado abre as rotas de admin, não o chat.
+	admin := s.adminToken != "" && r.Header.Get("X-Admin-Token") == s.adminToken
+
 	out, err := s.chat.Responder(r.Context(), chat.Input{
 		SessionID: body.SessionID,
 		UnidadeID: body.UnidadeID,
 		UsuarioID: body.UsuarioID,
 		Mensagem:  body.Mensagem,
+		Admin:     admin,
 	})
 	if err != nil {
 		if errors.Is(err, chat.ErrEntradaInvalida) {

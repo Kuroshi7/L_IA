@@ -32,6 +32,11 @@ type Input struct {
 	UnidadeID int64
 	UsuarioID *int64
 	Mensagem  string
+
+	// Admin vem do TOKEN validado no handler, nunca do corpo da requisição.
+	// Cliente que se declara admin é escalonamento de privilégio: as tools de
+	// gestão leem dado agregado da unidade inteira.
+	Admin bool
 }
 
 type Output struct {
@@ -70,6 +75,10 @@ type rpcRequest struct {
 	// cardápio completo antes de recomendar. Calculado aqui (fonte da verdade)
 	// para não depender do comportamento da LLM.
 	PrimeiraDoDia bool `json:"primeira_do_dia"`
+
+	// Habilita as tools de gestão no worker. Carimbado a partir do token
+	// validado — o worker confia nisto porque só o Go pode escrever aqui.
+	Admin bool `json:"admin,omitempty"`
 }
 
 type histTurno struct {
@@ -112,6 +121,7 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		UsuarioID:     sess.UsuarioID,
 		Mensagem:      in.Mensagem,
 		PrimeiraDoDia: primeiraDoDia,
+		Admin:         in.Admin,
 	}
 	for _, m := range historico {
 		req.Historico = append(req.Historico, histTurno{Papel: m.Papel, Conteudo: m.Conteudo})
