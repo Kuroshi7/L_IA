@@ -61,6 +61,21 @@ REMINDER_SAUDE = Reminder(
     regra_de_origem="CONDIÇÃO DE SAÚDE",
 )
 
+REMINDER_CONFIRMACAO = Reminder(
+    nome="confirmacao_de_registro",
+    texto=prompts.REMINDER_CONFIRMACAO_DE_REGISTRO,
+    regra_de_origem="DUAS ETAPAS",
+)
+
+# Formas de confirmar que apareceram ou aparecem no uso real. Fica no domínio:
+# "pode registrar" só significa algo num produto que registra consumo.
+_CONFIRMACAO = re.compile(
+    r"^(sim|isso|isso mesmo|exato|exatamente|correto|ta certo|esta certo|confirmo|"
+    r"pode (ser|salvar|registrar|confirmar|pontuar)|manda|beleza|ok|certo|perfeito|"
+    r"tudo certo|e isso)\b",
+    re.IGNORECASE,
+)
+
 # Condições que exigem encaminhamento a profissional. Lista do domínio, não do
 # motor — outro produto teria outros gatilhos (ou nenhum).
 _CONDICAO_DE_SAUDE = re.compile(
@@ -77,6 +92,8 @@ def reminders_do_turno(gatilhos: Gatilhos, mensagem: str = "") -> tuple[Reminder
         ativos.append(REMINDER_ABERTURA_DO_DIA)
     if _CONDICAO_DE_SAUDE.search(normalizar(mensagem or "")):
         ativos.append(REMINDER_SAUDE)
+    if _CONFIRMACAO.match(normalizar(mensagem or "").strip()):
+        ativos.append(REMINDER_CONFIRMACAO)
     return tuple(ativos)
 
 

@@ -138,3 +138,22 @@ ENCAMINHAMENTO_PROFISSIONAL = (
     "\n\nIsso aqui é orientação geral 🙂 Para um plano do seu caso, vale conversar "
     "com seu médico ou nutricionista, combinado?"
 )
+
+# IA-21: no teste de usabilidade, o usuário escreveu "isso mesmo, pode registrar"
+# e a resposta foi "Está correto? Se sim, é só me confirmar que eu salvo". Ao fim
+# da conversa nada tinha sido gravado — nem consumo, nem pontos.
+#
+# A instrução das DUAS ETAPAS chega no retorno da tool, que no turno seguinte já
+# está enterrado no meio do histórico. Reminder existe exatamente para isso:
+# repõe a regra no fim do contexto, onde o modelo a lê antes de decidir.
+#
+# Condicional de propósito ("se houver"): a pessoa pode dizer "pode registrar"
+# antes de qualquer prévia, e aí a etapa de prévia continua valendo.
+REMINDER_CONFIRMACAO_DE_REGISTRO = (
+    "O usuário acabou de CONFIRMAR algo. Se houver uma prévia de consumo pendente nesta "
+    "conversa, ele está confirmando ELA: chame `registrar_consumo` agora com os MESMOS "
+    "itens e sobras da prévia e `confirmado=true`.\n"
+    "NÃO peça confirmação de novo — ele já confirmou, e pedir outra vez deixa o registro "
+    "sem acontecer.\n"
+    "Se ainda não houver prévia, siga as DUAS ETAPAS normalmente: prévia primeiro."
+)
