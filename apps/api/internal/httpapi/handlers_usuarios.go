@@ -68,6 +68,27 @@ func (s *Server) handleLoginUsuario(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, usuarioComPerfil(u))
 }
 
+// handleDemoUsuario entra no perfil seed sem transformar credencial de
+// apresentação em segredo hardcoded no front. A rota responde 404 fora do modo
+// demo para não expor uma identidade previsível em instalações reais.
+func (s *Server) handleDemoUsuario(w http.ResponseWriter, r *http.Request) {
+	if !s.demoMode {
+		writeError(w, http.StatusNotFound, "modo demonstração desabilitado")
+		return
+	}
+	u, err := s.store.GetUsuarioDemo(r.Context())
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusConflict, "execute o seed para criar o perfil de demonstração")
+		return
+	}
+	if err != nil {
+		s.log.Error("perfil demo", "err", err)
+		writeError(w, http.StatusInternalServerError, "erro ao carregar perfil de demonstração")
+		return
+	}
+	writeJSON(w, http.StatusOK, usuarioComPerfil(u))
+}
+
 func (s *Server) handleGetUsuario(w http.ResponseWriter, r *http.Request) {
 	id, err := paramInt64(r, "usuarioID")
 	if err != nil {

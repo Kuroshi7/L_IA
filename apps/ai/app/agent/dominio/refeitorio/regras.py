@@ -210,6 +210,35 @@ def _numero_nao_exposto(a: Achado) -> str | None:
         return None
     return f"números citados que nenhuma tool expôs: {fora}"
 
+def reparar_resposta(resposta: str, veredicto, observacoes) -> str:
+    """Remove linhas com números que nenhuma tool expôs.
+
+    Reparo conservador: não tenta adivinhar o valor correto e não faz outra
+    inferência. O card estruturado usa a ficha real; a prosa mantém apenas o que
+    passou pela mesma R3 que detectou o problema.
+    """
+    ids = set(getattr(veredicto, "ids", ()) or ())
+    if "R3-numero-nao-exposto" not in ids:
+        return resposta
+
+    linhas_seguras = []
+    removeu = False
+    for linha in resposta.splitlines():
+        if _numero_nao_exposto(Achado(linha, (), observacoes)):
+            removeu = True
+            continue
+        linhas_seguras.append(linha)
+    reparada = "\n".join(linhas_seguras).strip()
+    if not reparada:
+        reparada = "Consultei o cardápio, mas retirei valores que não estavam confirmados na ficha."
+    if removeu:
+        reparada += (
+            "\n\nOs valores nutricionais exibidos nos cartões abaixo vêm diretamente "
+            "da ficha do cardápio."
+        )
+    return reparada
+
+
 
 # --- R5 ----------------------------------------------------------------------
 

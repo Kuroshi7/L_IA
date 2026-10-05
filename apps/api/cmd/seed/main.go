@@ -89,6 +89,10 @@ func main() {
 		log.Error("seed nutrição", "err", err)
 		os.Exit(1)
 	}
+	if err := vincularReferenciasNutricionais(ctx, pool, log); err != nil {
+		log.Error("seed vínculo nutricional", "err", err)
+		os.Exit(1)
+	}
 	if err := seedUsuarioDemo(ctx, pool, log); err != nil {
 		log.Error("seed usuário demo", "err", err)
 		os.Exit(1)
@@ -138,19 +142,19 @@ type nutriSeed struct {
 		Fonte     string   `json:"fonte"`
 		Aliases   []string `json:"aliases"`
 		Porcoes   []struct {
-			MedidaLabel   string  `json:"medida_label"`
-			MedidaCod     string  `json:"medida_cod"`
-			Tamanho       string  `json:"tamanho"`
-			Estado        string  `json:"estado"`
-			QuantidadeG   float64 `json:"quantidade_g"`
-			Kcal          float64 `json:"kcal"`
-			ProteinaG     float64 `json:"proteina_g"`
-			CarboidratoG  float64 `json:"carboidrato_g"`
-			GorduraG      float64 `json:"gordura_g"`
-			CalcioMg      float64 `json:"calcio_mg"`
-			FerroMg       float64 `json:"ferro_mg"`
-			VitCMg        float64 `json:"vit_c_mg"`
-			VitAUg        float64 `json:"vit_a_ug"`
+			MedidaLabel  string  `json:"medida_label"`
+			MedidaCod    string  `json:"medida_cod"`
+			Tamanho      string  `json:"tamanho"`
+			Estado       string  `json:"estado"`
+			QuantidadeG  float64 `json:"quantidade_g"`
+			Kcal         float64 `json:"kcal"`
+			ProteinaG    float64 `json:"proteina_g"`
+			CarboidratoG float64 `json:"carboidrato_g"`
+			GorduraG     float64 `json:"gordura_g"`
+			CalcioMg     float64 `json:"calcio_mg"`
+			FerroMg      float64 `json:"ferro_mg"`
+			VitCMg       float64 `json:"vit_c_mg"`
+			VitAUg       float64 `json:"vit_a_ug"`
 		} `json:"porcoes"`
 	} `json:"alimentos"`
 }
@@ -200,7 +204,63 @@ func seedNutricao(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger) err
 			}
 		}
 	}
-	log.Info("seed nutrição", "alimentos", len(data.Alimentos), "aliases", len(data.MedidaAliases))
+	// As migrações rodam antes do seed, com a base vazia: a marcação de porções
+	// implausíveis (0007/0008) precisa rodar de novo depois da carga.
+	var suspeitas int
+	if err := pool.QueryRow(ctx, `SELECT marcar_porcoes_suspeitas()`).Scan(&suspeitas); err != nil {
+		return err
+	}
+	log.Info("seed nutrição", "alimentos", len(data.Alimentos), "aliases", len(data.MedidaAliases),
+		"porcoes_suspeitas_marcadas", suspeitas)
+	return nil
+}
+
+// vincularReferenciasNutricionais liga cada prato do catálogo à referência da base
+// cujo nome ou alias é EXATAMENTE o nome do prato. Sem vínculo, a precedência do
+// cardápio no cálculo de consumo (store.CalcularConsumo) nunca age: "salada" caía
+// em "Salada de Legumes" (83 kcal/100 g) num dia em que a unidade serviu Salada
+// Verde. Só igualdade — casamento aproximado aqui escolheria a referência errada
+// com cara de certa; o que não casar fica sem vínculo e a nutricionista liga no admin.
+func vincularReferenciasNutricionais(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger) error {
+	rows, err := pool.Query(ctx, `SELECT id, nome FROM alimentos WHERE nutri_alimento_id IS NULL`)
+	if err != nil {
+		return err
+	}
+	type prato struct {
+		id   int64
+		nome string
+	}
+	var pratos []prato
+	for rows.Next() {
+		var p prato
+		if err := rows.Scan(&p.id, &p.nome); err != nil {
+			rows.Close()
+			return err
+		}
+		pratos = append(pratos, p)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	vinculados := 0
+	for _, p := range pratos {
+		norm := domain.Normalizar(p.nome)
+		ct, err := pool.Exec(ctx,
+			`UPDATE alimentos SET nutri_alimento_id = (
+			     SELECT id FROM nutri_alimentos
+			      WHERE nome_norm = $2 OR $2 = ANY(aliases)
+			      ORDER BY (nome_norm = $2) DESC, id LIMIT 1)
+			  WHERE id = $1
+			    AND EXISTS (SELECT 1 FROM nutri_alimentos WHERE nome_norm = $2 OR $2 = ANY(aliases))`,
+			p.id, norm)
+		if err != nil {
+			return err
+		}
+		vinculados += int(ct.RowsAffected())
+	}
+	log.Info("seed vínculo nutricional", "pratos", len(pratos), "vinculados", vinculados)
 	return nil
 }
 

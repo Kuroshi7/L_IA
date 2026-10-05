@@ -72,7 +72,7 @@ func main() {
 	log.Info("outbox relay iniciado")
 
 	chatSvc := chat.New(st, chatClient, time.Duration(cfg.ChatTimeout)*time.Second)
-	srv := httpapi.NewServer(st, chatSvc, log, cfg.AdminToken)
+	srv := httpapi.NewServer(st, chatSvc, log, cfg.AdminToken, cfg.DemoMode)
 	srv.SetRabbitCheck(func() bool { return rabbit.Conn != nil && !rabbit.Conn.IsClosed() })
 
 	// GC das chaves de idempotência (>30 dias): passada no boot + diária.

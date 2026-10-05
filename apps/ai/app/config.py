@@ -74,18 +74,13 @@ CHAT_REQUESTS_QUEUE = os.getenv("CHAT_REQUESTS_QUEUE", "chat.requests")
 PREFETCH = int(os.getenv("WORKER_PREFETCH", "1"))
 
 # --- Validação pós-resposta -------------------------------------------------
-# Ids de regra que BLOQUEIAM a resposta (CSV). Vazio = todas apenas registram em
-# log. O default é log-only de propósito: bloquear sem poder REPARAR troca uma
-# resposta provavelmente boa por uma mensagem de erro, e reparar exigiria mais
-# uma chamada de modelo dentro de um orçamento de 60s. Promover uma regra só
-# depois de medir a taxa de falso positivo nos logs `VALIDACAO | regra=`.
-# R5 nasce bloqueante, sozinha. É a única regra 100% estrutural (o conflito vem
-# anotado no prato, calculado em código a partir do perfil) e a única cujo erro
-# pode mandar alguém para o hospital. Nas demais, bloquear trocaria uma resposta
-# provavelmente boa por uma mensagem de erro — aqui, deixar passar é pior.
+# Ids de regra que BLOQUEIAM a resposta (CSV). R3 é reparada em código antes do
+# bloqueio: linhas com números sem procedência são retiradas e a resposta passa
+# novamente pelo validador. Se ainda houver número inventado, não chega ao
+# usuário. R5 continua sendo a barreira estrutural de segurança alimentar.
 VALIDACAO_BLOQUEANTE = frozenset(
     r.strip() for r in os.getenv(
-        "VALIDACAO_BLOQUEANTE", "R5-prato-conflita-com-perfil"
+        "VALIDACAO_BLOQUEANTE", "R3-numero-nao-exposto,R5-prato-conflita-com-perfil"
     ).split(",") if r.strip()
 )
 

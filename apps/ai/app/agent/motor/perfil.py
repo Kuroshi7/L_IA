@@ -69,3 +69,10 @@ class PerfilDeDominio:
     # deu 0 de 3 de aderência mesmo com reminder reinjetado — e exigência
     # regulatória não admite 'quase sempre'.
     pos_processar: Callable[[str, Gatilhos, str], str] = lambda resposta, _g, _m: resposta
+
+    # Reparo determinístico após a validação. Recebe (resposta, veredicto,
+    # observações) e remove/reescreve somente o que o domínio consegue provar
+    # incorreto. O default preserva produtos que não precisam desse estágio.
+    reparar_resposta: Callable[[str, object, object], str] = (
+        lambda resposta, _veredicto, _observacoes: resposta
+    )

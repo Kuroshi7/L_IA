@@ -16,6 +16,7 @@ type Config struct {
 	ChatTimeout  int    // segundos para aguardar a resposta do worker de IA (RPC)
 	InternalAddr string // host:port exposto internamente para o serviço de IA
 	AdminToken   string // token do gate de admin (header X-Admin-Token). Vazio = gate desabilitado (dev).
+	DemoMode     bool   // habilita entrada de apresentação com o perfil seed.
 }
 
 // Load carrega o .env (se existir) e monta a Config com defaults sensatos.
@@ -30,6 +31,7 @@ func Load() Config {
 		ChatTimeout:  envInt("CHAT_TIMEOUT_SECONDS", 60),
 		InternalAddr: env("API_INTERNAL_ADDR", ":8080"),
 		AdminToken:   env("ADMIN_TOKEN", ""),
+		DemoMode:     env("DEMO_MODE", "0") == "1",
 	}
 }
 

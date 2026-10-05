@@ -56,6 +56,27 @@ def test_sem_perfil_nao_ha_conflito():
     assert conflitos_com_perfil(AMENDOIM, None) == []
 
 
+def test_condicao_de_saude_nao_veta_o_cardapio_inteiro():
+    # Medido no E2E de 23/09: "pressão alta" no campo de restrições não é rótulo
+    # que ficha nenhuma declare, e TODO prato saía com conflito — o seu João
+    # ouviu que não havia nada para ele no cardápio. Condição fora do vocabulário
+    # vai para a regra 6c (escolher o mais compatível), não para o veto.
+    joao = {"nome": "Joao", "alergias": [], "restricoes": ["pressão alta", "pré-diabetes"]}
+    vocabulario = t._vocabulario_de_restricoes([AMENDOIM, CARNE, FRANGO])
+    for prato in (AMENDOIM, CARNE, FRANGO):
+        assert conflitos_com_perfil(prato, joao, vocabulario) == [], prato["nome"]
+
+
+def test_restricao_do_vocabulario_continua_vetando():
+    vocabulario = t._vocabulario_de_restricoes([AMENDOIM, CARNE, FRANGO])
+    motivos = conflitos_com_perfil(CARNE, PERFIL_ALERGICO, vocabulario)
+    assert any("vegetariano" in m for m in motivos)
+    # Veto explícito da nutricionista vale mesmo para termo que nenhum prato "atende".
+    so_veto = {**FRANGO, "nao_indicado_para": ["pressão alta"]}
+    joao = {"alergias": [], "restricoes": ["pressão alta"]}
+    assert conflitos_com_perfil(so_veto, joao, t._vocabulario_de_restricoes([so_veto]))
+
+
 # --- a anotação chega na listagem -------------------------------------------
 
 def _turno(monkeypatch, perfil):
@@ -288,3 +309,27 @@ def test_motivo_traz_o_fato_do_prato():
     # "porque leva X" é o que torna o aviso verificável em vez de opinião.
     assert "leva" in " ".join(conflitos_com_perfil(AMENDOIM, PERFIL_ALERGICO))
     assert "leva" in " ".join(conflitos_com_perfil(CARNE, PERFIL_ALERGICO))
+
+
+# --- preferência ordena, não elimina (E2E 23/09) -----------------------------
+
+def test_preferencia_sem_ingrediente_nao_zera_o_cardapio(monkeypatch):
+    # "comida caseira" não é ingrediente: antes, a tool respondia "nenhum prato
+    # atende" a quem só tinha dito do que gosta.
+    obs = _turno(monkeypatch, PERFIL_SO_ALERGIA)
+    try:
+        r = t.filtrar_pratos.invoke({"preferencias": "comida caseira", "alergias": "amendoim"})
+    finally:
+        encerrar_turno(obs)
+    assert isinstance(r, dict), r
+    nomes = {p["nome"] for p in r["pratos"]}
+    assert nomes == {FRANGO["nome"], CARNE["nome"]}  # alergia continua filtrando
+
+
+def test_preferencia_que_casa_continua_filtrando(monkeypatch):
+    obs = _turno(monkeypatch, PERFIL_SO_ALERGIA)
+    try:
+        r = t.filtrar_pratos.invoke({"preferencias": "frango"})
+    finally:
+        encerrar_turno(obs)
+    assert [p["nome"] for p in r] == [FRANGO["nome"]]

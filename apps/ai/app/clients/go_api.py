@@ -61,6 +61,7 @@ def registrar_consumo(
     itens: list[dict],
     usuario_id: int | None = None,
     sobras: list[dict] | None = None,
+    session_id: str = "",
 ) -> dict:
     """Registra o consumo (e sobras) de uma refeição: calcula, persiste, pontua o
     usuário (gamificação) e alimenta o agregado de desperdício do admin."""
@@ -69,6 +70,8 @@ def registrar_consumo(
         body["usuario_id"] = usuario_id
     if sobras:
         body["sobras"] = sobras
+    if session_id:
+        body["sessao_id"] = session_id
     r = _client.post("/internal/consumo/registrar", json=body)
     r.raise_for_status()
     return r.json()
@@ -88,6 +91,13 @@ def get_gamificacao(usuario_id: int) -> dict:
     r = _client.get(f"/internal/usuario/{usuario_id}/gamificacao")
     r.raise_for_status()
     return r.json()
+
+
+def get_ranking(unidade_id: int, limit: int = 100) -> list[dict]:
+    """Ranking da unidade (rota pública): [{usuario_id, nome, pontos, nivel}], por pontos."""
+    r = _client.get(f"/unidades/{unidade_id}/ranking", params={"limit": limit})
+    r.raise_for_status()
+    return r.json().get("ranking") or []
 
 
 def get_unidades() -> list[dict]:

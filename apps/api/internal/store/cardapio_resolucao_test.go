@@ -99,3 +99,24 @@ func TestProcedenciaCarregaOValorDeclarado(t *testing.T) {
 		t.Fatalf("prato=%+v: valor declarado não veio junto", prato)
 	}
 }
+
+// E2E 23/09/2026: "café com leite" resolvia para "Doce de Leite" por trigram.
+func TestMesmoNucleoBarraTrocaDeAlimento(t *testing.T) {
+	casos := []struct {
+		consulta string
+		nomes    []string
+		quer     bool
+	}{
+		{"cafe com leite", []string{"doce de leite"}, false},
+		{"pao com manteiga", []string{"pudim de leite", "pudim"}, false},
+		{"arros", []string{"arroz branco cozido", "arroz"}, true},
+		{"feijoes", []string{"feijao-preto cozido", "feijao"}, true},
+		{"frango grelhadinho", []string{"frango assado", "frango grelhado"}, true},
+		{"", []string{"arroz"}, false},
+	}
+	for _, c := range casos {
+		if got := mesmoNucleo(c.consulta, c.nomes); got != c.quer {
+			t.Errorf("mesmoNucleo(%q, %v) = %v, quer %v", c.consulta, c.nomes, got, c.quer)
+		}
+	}
+}

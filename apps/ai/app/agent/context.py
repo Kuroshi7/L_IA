@@ -16,6 +16,10 @@ from dataclasses import dataclass
 class RequestContext:
     unidade_id: int
     usuario_id: int | None = None
+    # Estado durável carregado pela API Go. O modelo pode ler o histórico; só
+    # o código usa este payload para confirmar exatamente a prévia mostrada.
+    session_id: str = ""
+    acao_pendente: dict | None = None
 
     # Origem confiável: carimbado pela API Go a partir do X-Admin-Token
     # validado, nunca por campo que o cliente escreve. Libera tools que leem

@@ -51,6 +51,23 @@ func (s *Store) GetUsuario(ctx context.Context, id int64) (domain.Usuario, error
 	return u, err
 }
 
+// GetUsuarioDemo busca o perfil idempotente criado pelo seed. O endpoint que o
+// expõe só existe quando DEMO_MODE=1; produção nunca deve selecionar identidade
+// por um nome conhecido.
+func (s *Store) GetUsuarioDemo(ctx context.Context) (domain.Usuario, error) {
+	var u domain.Usuario
+	err := s.pool.QueryRow(ctx,
+		`SELECT id, unidade_id, nome, peso_kg, altura_cm, idade, sexo, nivel_atividade,
+		        restricoes, preferencias, alergias
+		   FROM usuarios WHERE nome = 'Ana Demo' ORDER BY id LIMIT 1`,
+	).Scan(&u.ID, &u.UnidadeID, &u.Nome, &u.PesoKg, &u.AlturaCm, &u.Idade, &u.Sexo,
+		&u.NivelAtividade, &u.Restricoes, &u.Preferencias, &u.Alergias)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return u, ErrNotFound
+	}
+	return u, err
+}
+
 // GetPerfil retorna o recorte nutricional do usuário (IMC, meta calórica, restrições).
 func (s *Store) GetPerfil(ctx context.Context, id int64) (domain.PerfilNutricional, error) {
 	u, err := s.GetUsuario(ctx, id)

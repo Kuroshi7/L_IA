@@ -73,6 +73,7 @@ def _on_message(ch, method, props, body):
             historico=req.get("historico"),
             primeira_do_dia=bool(req.get("primeira_do_dia")),
             is_admin=bool(req.get("admin")),
+            acao_pendente=req.get("acao_pendente"),
             # Mesmo orçamento que o `_expirada` acima usa para DESCARTAR: a
             # diferença é que aquele só age antes de começar, e um turno pode
             # encadear várias chamadas de modelo e estourar o tempo no meio.
@@ -81,8 +82,9 @@ def _on_message(ch, method, props, body):
             ),
         )
         resp = {"resposta": result["resposta"], "fora_de_escopo": result["fora_de_escopo"]}
-        if result.get("confianca"):
-            resp["confianca"] = result["confianca"]
+        for chave in ("confianca", "experiencia", "acao_pendente", "limpar_acao_pendente"):
+            if result.get(chave) is not None:
+                resp[chave] = result[chave]
     except Exception as e:  # nunca derruba o worker; devolve erro estruturado
         log.exception("falha ao processar mensagem")
         resp = {"resposta": "", "fora_de_escopo": False, "erro": f"{type(e).__name__}: {e}"}

@@ -88,6 +88,28 @@ _CONFIRMACAO = re.compile(
     re.IGNORECASE,
 )
 
+_SEM_SOBRAS = re.compile(
+    r"\b(nao sobrou|sem sobra|nada sobrou|prato limpo|comi tudo|nao deixei nada)\b",
+    re.IGNORECASE,
+)
+_CANCELAMENTO = re.compile(
+    r"^(nao|não|cancelar|cancela|deixa pra la|nao quero registrar)\b",
+    re.IGNORECASE,
+)
+
+
+def eh_confirmacao(mensagem: str) -> bool:
+    return bool(_CONFIRMACAO.match(normalizar(mensagem or "").strip()))
+
+
+def eh_sem_sobras(mensagem: str) -> bool:
+    return bool(_SEM_SOBRAS.search(normalizar(mensagem or "")))
+
+
+def eh_cancelamento(mensagem: str) -> bool:
+    return bool(_CANCELAMENTO.match(normalizar(mensagem or "").strip()))
+
+
 # Condições que exigem encaminhamento a profissional. Lista do domínio, não do
 # motor — outro produto teria outros gatilhos (ou nenhum).
 _CONDICAO_DE_SAUDE = re.compile(
@@ -144,6 +166,7 @@ PERFIL = PerfilDeDominio(
     reminders=reminders_do_turno,
     regras=_regras.construir(REGISTRO),
     pos_processar=pos_processar,
+    reparar_resposta=_regras.reparar_resposta,
 )
 
 

@@ -15,6 +15,7 @@ type Sessao struct {
 	UnidadeID int64
 	UsuarioID *int64
 	Canal     string
+	Estado    json.RawMessage
 }
 
 func (s *Store) CriarSessao(ctx context.Context, unidadeID int64, usuarioID *int64, canal string) (Sessao, error) {
@@ -25,17 +26,17 @@ func (s *Store) CriarSessao(ctx context.Context, unidadeID int64, usuarioID *int
 	err := s.pool.QueryRow(ctx,
 		`INSERT INTO sessoes (unidade_id, usuario_id, canal)
 		 VALUES ($1, $2, $3)
-		 RETURNING id, unidade_id, usuario_id, canal`,
+		 RETURNING id, unidade_id, usuario_id, canal, estado`,
 		unidadeID, usuarioID, canal,
-	).Scan(&sess.ID, &sess.UnidadeID, &sess.UsuarioID, &sess.Canal)
+	).Scan(&sess.ID, &sess.UnidadeID, &sess.UsuarioID, &sess.Canal, &sess.Estado)
 	return sess, err
 }
 
 func (s *Store) GetSessao(ctx context.Context, id string) (Sessao, error) {
 	var sess Sessao
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, unidade_id, usuario_id, canal FROM sessoes WHERE id = $1`, id,
-	).Scan(&sess.ID, &sess.UnidadeID, &sess.UsuarioID, &sess.Canal)
+		`SELECT id, unidade_id, usuario_id, canal, estado FROM sessoes WHERE id = $1`, id,
+	).Scan(&sess.ID, &sess.UnidadeID, &sess.UsuarioID, &sess.Canal, &sess.Estado)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return sess, ErrNotFound
 	}
@@ -133,7 +134,59 @@ func (s *Store) VincularSessaoUsuario(ctx context.Context, sessaoID string, usua
 	return err
 }
 
-func (s *Store) ResetSessao(ctx context.Context, id string) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM mensagens WHERE sessao_id = $1`, id)
+// AcaoPendente devolve o estado transacional que precisa atravessar turnos
+// (hoje, uma prévia de consumo aguardando sobra ou confirmação). Ausência é
+// representada por nil, não por um mapa vazio.
+func (s *Store) AcaoPendente(ctx context.Context, sessaoID string) (map[string]any, error) {
+	var bruto []byte
+	err := s.pool.QueryRow(ctx,
+		`SELECT estado->'acao_pendente' FROM sessoes WHERE id = $1`, sessaoID,
+	).Scan(&bruto)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil || len(bruto) == 0 || string(bruto) == "null" {
+		return nil, err
+	}
+	var acao map[string]any
+	if err := json.Unmarshal(bruto, &acao); err != nil {
+		return nil, err
+	}
+	return acao, nil
+}
+
+// DefinirAcaoPendente grava ou remove atomicamente apenas a chave da ação,
+// preservando futuras extensões do estado da sessão.
+func (s *Store) DefinirAcaoPendente(ctx context.Context, sessaoID string, acao map[string]any) error {
+	if acao == nil {
+		_, err := s.pool.Exec(ctx,
+			`UPDATE sessoes SET estado = estado - 'acao_pendente', updated_at = now() WHERE id = $1`,
+			sessaoID)
+		return err
+	}
+	bruto, err := json.Marshal(acao)
+	if err != nil {
+		return err
+	}
+	_, err = s.pool.Exec(ctx,
+		`UPDATE sessoes
+		    SET estado = jsonb_set(estado, '{acao_pendente}', $2::jsonb, true), updated_at = now()
+		  WHERE id = $1`, sessaoID, bruto)
 	return err
+}
+
+func (s *Store) ResetSessao(ctx context.Context, id string) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if _, err := tx.Exec(ctx, `DELETE FROM mensagens WHERE sessao_id = $1`, id); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx,
+		`UPDATE sessoes SET estado = '{}'::jsonb, updated_at = now() WHERE id = $1`, id); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }

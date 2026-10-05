@@ -16,13 +16,14 @@ type Server struct {
 	chat       *chat.Service
 	log        *slog.Logger
 	adminToken string
+	demoMode   bool
 	// rabbitOK reporta se a conexão com o RabbitMQ está viva (checado em /ready).
 	// Opcional: se nil, /ready só verifica o Postgres.
 	rabbitOK func() bool
 }
 
-func NewServer(st *store.Store, chatSvc *chat.Service, log *slog.Logger, adminToken string) *Server {
-	return &Server{store: st, chat: chatSvc, log: log, adminToken: adminToken}
+func NewServer(st *store.Store, chatSvc *chat.Service, log *slog.Logger, adminToken string, demoMode bool) *Server {
+	return &Server{store: st, chat: chatSvc, log: log, adminToken: adminToken, demoMode: demoMode}
 }
 
 // SetRabbitCheck registra a checagem de readiness do RabbitMQ (chamada em /ready).
@@ -42,11 +43,13 @@ func (s *Server) Router() http.Handler {
 	r.Get("/unidades/{unidadeID}/cardapio", s.handleCardapioPublico)
 	r.Get("/unidades/{unidadeID}/ranking", s.handleGetRanking)
 	r.Get("/chat/saudacao", s.handleSaudacao)
+	r.Get("/chat/{sessionID}", s.handleGetChat)
 	r.Delete("/chat/{sessionID}", s.handleResetChat)
 
 	// Usuários (cadastro/perfil) e gamificação.
 	r.Post("/usuarios", s.handleCreateUsuario)
 	r.Post("/usuarios/login", s.handleLoginUsuario)
+	r.Post("/usuarios/demo", s.handleDemoUsuario)
 	r.Get("/usuarios/{usuarioID}", s.handleGetUsuario)
 	r.Put("/usuarios/{usuarioID}", s.handleUpdateUsuario)
 	r.Get("/usuarios/{usuarioID}/gamificacao", s.handleGetGamificacao)

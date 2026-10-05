@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/tamy-ai/menu-ai/api/internal/domain"
 	"github.com/tamy-ai/menu-ai/api/internal/queue"
 	"github.com/tamy-ai/menu-ai/api/internal/store"
 )
@@ -47,6 +48,10 @@ type Output struct {
 	// Presente só quando há incerteza a declarar (ver Confianca). Omitido no
 	// caso normal, então clientes antigos seguem válidos.
 	Confianca *Confianca `json:"confianca,omitempty"`
+
+	// Bloco estruturado renderizado pelo cliente. Texto continua sendo o
+	// fallback universal (Telegram e clientes antigos).
+	Experiencia map[string]any `json:"experiencia,omitempty"`
 }
 
 // Confianca é o sinal de incerteza de um turno: o assistente não gera números,
@@ -78,7 +83,8 @@ type rpcRequest struct {
 
 	// Habilita as tools de gestão no worker. Carimbado a partir do token
 	// validado — o worker confia nisto porque só o Go pode escrever aqui.
-	Admin bool `json:"admin,omitempty"`
+	Admin        bool           `json:"admin,omitempty"`
+	AcaoPendente map[string]any `json:"acao_pendente,omitempty"`
 }
 
 type histTurno struct {
@@ -87,10 +93,13 @@ type histTurno struct {
 }
 
 type rpcResponse struct {
-	Resposta     string     `json:"resposta"`
-	ForaDeEscopo bool       `json:"fora_de_escopo"`
-	Erro         string     `json:"erro,omitempty"`
-	Confianca    *Confianca `json:"confianca,omitempty"`
+	Resposta           string         `json:"resposta"`
+	ForaDeEscopo       bool           `json:"fora_de_escopo"`
+	Erro               string         `json:"erro,omitempty"`
+	Confianca          *Confianca     `json:"confianca,omitempty"`
+	Experiencia        map[string]any `json:"experiencia,omitempty"`
+	AcaoPendente       map[string]any `json:"acao_pendente,omitempty"`
+	LimparAcaoPendente bool           `json:"limpar_acao_pendente,omitempty"`
 }
 
 // Responder resolve a sessão, persiste a mensagem do usuário, delega a inferência
@@ -110,6 +119,10 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 	if err != nil {
 		primeiraDoDia = false // regra é best-effort: não derruba o chat
 	}
+	acaoPendente, err := s.store.AcaoPendente(ctx, sess.ID)
+	if err != nil && !errors.Is(err, store.ErrNotFound) {
+		return Output{}, fmt.Errorf("carregar ação pendente: %w", err)
+	}
 
 	if err := s.store.AddMensagem(ctx, sess.ID, "user", in.Mensagem); err != nil {
 		return Output{}, fmt.Errorf("persistir mensagem do usuário: %w", err)
@@ -122,6 +135,7 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		Mensagem:      in.Mensagem,
 		PrimeiraDoDia: primeiraDoDia,
 		Admin:         in.Admin,
+		AcaoPendente:  acaoPendente,
 	}
 	for _, m := range historico {
 		req.Historico = append(req.Historico, histTurno{Papel: m.Papel, Conteudo: m.Conteudo})
@@ -143,6 +157,16 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		return Output{}, fmt.Errorf("worker reportou erro: %s", resp.Erro)
 	}
 
+	if resp.LimparAcaoPendente {
+		if err := s.store.DefinirAcaoPendente(ctx, sess.ID, nil); err != nil {
+			return Output{}, fmt.Errorf("limpar ação pendente: %w", err)
+		}
+	} else if resp.AcaoPendente != nil {
+		if err := s.store.DefinirAcaoPendente(ctx, sess.ID, resp.AcaoPendente); err != nil {
+			return Output{}, fmt.Errorf("persistir ação pendente: %w", err)
+		}
+	}
+
 	if err := s.store.AddMensagem(ctx, sess.ID, "assistant", resp.Resposta); err != nil {
 		return Output{}, fmt.Errorf("persistir resposta: %w", err)
 	}
@@ -152,7 +176,18 @@ func (s *Service) Responder(ctx context.Context, in Input) (Output, error) {
 		Resposta:     resp.Resposta,
 		ForaDeEscopo: resp.ForaDeEscopo,
 		Confianca:    resp.Confianca,
+		Experiencia:  resp.Experiencia,
 	}, nil
+}
+
+// Historico devolve a conversa persistida para restaurar a tela após refresh.
+// O UUID da sessão é o próprio segredo de acesso deste MVP local; autenticação
+// por usuário continua como trilha separada antes de exposição pública.
+func (s *Service) Historico(ctx context.Context, sessionID string) ([]domain.Mensagem, error) {
+	if _, err := s.store.GetSessao(ctx, sessionID); err != nil {
+		return nil, err
+	}
+	return s.store.ListMensagens(ctx, sessionID, 100)
 }
 
 func (s *Service) resolverSessao(ctx context.Context, in Input) (store.Sessao, error) {

@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -29,7 +30,34 @@ func (s *Store) ResolverAlimento(ctx context.Context, q string) (domain.NutriAli
 	if errors.Is(err, pgx.ErrNoRows) {
 		return a, 0, ErrNotFound
 	}
+	if err == nil && score < 0.999 && !mesmoNucleo(norm, append([]string{domain.Normalizar(a.Nome)}, a.Aliases...)) {
+		// Trigram sozinho troca de alimento: no E2E de 23/09 "café com leite" virou
+		// "Doce de Leite" (290 kcal/100 g) só por dividir "leite", e o número entrou
+		// no total. Alimento não reconhecido fica FORA do total e é declarado;
+		// alimento trocado entra com cara de certo.
+		return a, 0, ErrNotFound
+	}
 	return a, score, err
+}
+
+// mesmoNucleo diz se a primeira palavra da consulta — o núcleo do que a pessoa
+// comeu ("café" em "café com leite", "pão" em "pão com manteiga") — aparece em
+// algum nome do candidato. Prefixo de 4 letras cobre plural e erro de digitação
+// ("feijoes"/"feijao", "arros"/"arroz") sem aceitar alimento diferente.
+func mesmoNucleo(consulta string, nomes []string) bool {
+	campos := strings.Fields(consulta)
+	if len(campos) == 0 {
+		return false
+	}
+	nucleo := campos[0]
+	for _, nome := range nomes {
+		for _, w := range strings.Fields(nome) {
+			if w == nucleo || (len(w) >= 4 && len(nucleo) >= 4 && w[:4] == nucleo[:4]) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (s *Store) resolverMedidaCod(ctx context.Context, medida string) string {
@@ -75,6 +103,7 @@ func (s *Store) ResolverPorcao(ctx context.Context, alimentoID int64, medida str
 	}
 
 	// fallback: 100g de referência
+	var p100 domain.NutriPorcao
 	err := s.pool.QueryRow(ctx,
 		`SELECT id, alimento_id, medida_label, COALESCE(medida_cod,''),
 		        quantidade_g, COALESCE(kcal,0), COALESCE(proteina_g,0),
@@ -83,12 +112,35 @@ func (s *Store) ResolverPorcao(ctx context.Context, alimentoID int64, medida str
 		  WHERE alimento_id = $1 AND medida_label = '100g'
 		  LIMIT 1`,
 		alimentoID,
-	).Scan(&p.ID, &p.AlimentoID, &p.MedidaLabel, &p.MedidaCod,
-		&p.QuantidadeG, &p.Kcal, &p.ProteinaG, &p.CarboidratoG, &p.GorduraG, &p.Suspeito)
+	).Scan(&p100.ID, &p100.AlimentoID, &p100.MedidaLabel, &p100.MedidaCod,
+		&p100.QuantidadeG, &p100.Kcal, &p100.ProteinaG, &p100.CarboidratoG, &p100.GorduraG, &p100.Suspeito)
 	if err != nil {
 		return domain.NutriPorcao{}, "baixa", "porção não encontrada"
 	}
-	return p, "baixa", "medida '" + medida + "' não encontrada; usando 100g como referência"
+
+	// Medida conhecida, mas sem porção para ESTE alimento: tratar "colher" como
+	// 100 g multiplicava o número por 4 (E2E 23/09: 4 colheres de arroz integral
+	// viraram 400 g). O peso que essa medida tem nos outros alimentos da base é
+	// uma estimativa muito melhor — e continua declarada como estimativa.
+	if cod != "" {
+		var tipicaG float64
+		if err := s.pool.QueryRow(ctx,
+			`SELECT COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY quantidade_g), 0)
+			   FROM nutri_porcoes WHERE medida_cod = $1 AND quantidade_g > 0`, cod,
+		).Scan(&tipicaG); err == nil && tipicaG > 0 && p100.QuantidadeG > 0 {
+			f := tipicaG / p100.QuantidadeG
+			est := p100
+			est.MedidaLabel = cod + " (peso típico)"
+			est.QuantidadeG = tipicaG
+			est.Kcal = p100.Kcal * f
+			est.ProteinaG = p100.ProteinaG * f
+			est.CarboidratoG = p100.CarboidratoG * f
+			est.GorduraG = p100.GorduraG * f
+			return est, "baixa", fmt.Sprintf(
+				"sem porção '%s' para este alimento; estimado pelo peso típico dessa medida (%.0f g)", medida, tipicaG)
+		}
+	}
+	return p100, "baixa", "medida '" + medida + "' não encontrada; usando 100g como referência"
 }
 
 func menorConfianca(a, b string) string {

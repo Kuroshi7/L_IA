@@ -8,6 +8,7 @@ import type {
   ChatResponse,
   DesperdicioRelatorio,
   GamificacaoResumo,
+  MensagemHistorico,
   NutriAlimento,
   Prato,
   RankingEntry,
@@ -86,9 +87,14 @@ export async function getCardapio(unidadeId: number): Promise<Prato[]> {
   return data.pratos ?? [];
 }
 
-export async function getSaudacao(): Promise<string> {
-  const data = await getJSON<{ mensagem: string }>("/chat/saudacao");
-  return data.mensagem;
+export async function getSaudacao(): Promise<{ mensagem: string; demo_mode: boolean }> {
+  return getJSON<{ mensagem: string; demo_mode: boolean }>("/chat/saudacao");
+}
+
+export function getHistorico(sessionId: string) {
+  return getJSON<{ session_id: string; mensagens: MensagemHistorico[] | null }>(
+    `/chat/${encodeURIComponent(sessionId)}`,
+  ).then((d) => ({ ...d, mensagens: d.mensagens ?? [] }));
 }
 
 export async function enviarMensagem(
@@ -225,6 +231,9 @@ async function sendJSON<T>(path: string, method: "POST" | "PUT", body: unknown):
   if (!r.ok) throw new ApiError((await r.text()) || `${method} ${path} falhou (${r.status})`, r.status);
   return r.json() as Promise<T>;
 }
+
+export const entrarDemo = () =>
+  sendJSON<UsuarioComPerfil>("/usuarios/demo", "POST", {});
 
 export const criarUsuario = (body: UsuarioInput) =>
   sendJSON<UsuarioComPerfil>("/usuarios", "POST", body);

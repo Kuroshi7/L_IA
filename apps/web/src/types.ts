@@ -15,7 +15,59 @@ export interface Confianca {
   aproximados?: string[];
 }
 
+export interface PratoExperiencia {
+  id?: number;
+  nome: string;
+  categoria?: string;
+  calorias?: number | null;
+  proteinas_g?: number | null;
+  carboidratos_g?: number | null;
+  gorduras_g?: number | null;
+  ingredientes?: string[];
+  is_proteina_do_dia?: boolean;
+  conflita_com_perfil?: string[];
+}
+
+export interface ConsumoItemExperiencia {
+  entrada?: { alimento?: string; medida?: string; quantidade?: number };
+  alimento_resolvido?: string;
+  kcal?: number;
+  proteina_g?: number;
+  carboidrato_g?: number;
+  gordura_g?: number;
+  aproximado?: boolean;
+}
+
+export interface ResumoConsumoExperiencia {
+  itens?: ConsumoItemExperiencia[];
+  kcal?: number;
+  proteina_g?: number;
+  carboidrato_g?: number;
+  gordura_g?: number;
+}
+
+/** Dados verificáveis que acompanham a fala da IA e viram cartões e ações. */
+export interface ExperienciaChat {
+  tipo: string;
+  titulo?: string;
+  fonte?: string;
+  pratos?: PratoExperiencia[];
+  consumido?: ResumoConsumoExperiencia;
+  resto?: ResumoConsumoExperiencia;
+  pode_confirmar?: boolean;
+  indice_resto_perc?: number;
+  pontuacao?: { pontos?: number; nivel?: number; streak_dias?: number };
+  gamificacao?: { pontos?: number; nivel?: number; streak_dias?: number };
+}
+
+export interface MensagemHistorico {
+  papel: "user" | "assistant";
+  conteudo: string;
+  created_at: string;
+}
+
 export interface ChatResponse {
+  experiencia?: ExperienciaChat;
   session_id: string;
   resposta: string;
   fora_de_escopo: boolean;

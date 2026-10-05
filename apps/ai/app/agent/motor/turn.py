@@ -171,6 +171,18 @@ def executar_turno(
             tools_chamadas=saida.tools_chamadas, observacoes=saida.observacoes,
             session_id=session_id, bloqueantes=config.VALIDACAO_BLOQUEANTE,
         )
+        # Se o domínio sabe reparar a violação sem inventar informação, faz isso
+        # e valida novamente. Só o que continuar inválido chega ao bloqueio.
+        reparada = perfil.reparar_resposta(
+            saida.resposta, saida.veredicto, saida.observacoes
+        )
+        if reparada != saida.resposta:
+            saida.resposta = reparada
+            saida.veredicto = verificar(
+                perfil.regras, saida.resposta,
+                tools_chamadas=saida.tools_chamadas, observacoes=saida.observacoes,
+                session_id=session_id, bloqueantes=config.VALIDACAO_BLOQUEANTE,
+            )
         if saida.veredicto.bloqueia:
             log.error("REQ BLOCK | regras=%s | session=%s", saida.veredicto.ids, session_id[:12])
             saida.resposta = perfil.resposta_bloqueada

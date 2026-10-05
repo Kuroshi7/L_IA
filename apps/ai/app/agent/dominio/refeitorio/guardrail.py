@@ -40,6 +40,15 @@ _KEYWORDS_BASE = {
     "ponto", "pontos", "pontuacao", "nivel", "meta", "ranking", "streak",
     "registrar", "registro", "sobra", "sobrou", "sobras", "deixei", "resto",
     "desperdicio", "prato limpo",
+    # Alimentos de base e medidas caseiras. "quanto de arroz eu coloco?" — a
+    # pergunta de porção, que é o coração do self-service — não batia em nada e
+    # o classificador, que vê a frase sem a conversa, respondia NAO.
+    "arroz", "feijao", "macarrao", "batata", "legume", "legumes", "verdura", "verduras",
+    "fruta", "frutas", "sobremesa", "lentilha", "quinoa", "grao", "bowl", "strogonoff",
+    "colher", "colheres", "conchas", "porcoes", "pegador", "escumadeira", "quantidade",
+    "sodio", "sal", "acucar", "fibra", "fibras", "pressao", "diabetes", "diabetico",
+    "diabetica", "colesterol", "emagrecer", "engordar", "peso", "imc", "vegana",
+    "vegetariana", "servir", "bandeja",
 }
 
 # Continuações curtas (≤4 palavras, TODAS deste conjunto, só com histórico):

@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { enviarMensagem, getSaudacao, limparConversa, setUnidadeSalva } from "../lib/api";
+import {
+  entrarDemo,
+  enviarMensagem,
+  getHistorico,
+  getSaudacao,
+  limparConversa,
+  setUnidadeSalva,
+} from "../lib/api";
+import type { ExperienciaChat, ResumoConsumoExperiencia } from "../types";
 import { marca } from "../brand";
 import AppShell from "../shell/AppShell";
 import { usePerfil } from "../shell/PerfilContexto";
@@ -15,6 +23,7 @@ interface Msg {
   foraDeEscopo?: boolean;
   naoReconhecidos?: string[];
   aproximados?: string[];
+  experiencia?: ExperienciaChat;
 }
 
 /**
@@ -26,7 +35,7 @@ interface Msg {
  * gamificação e o painel de desperdício e que ninguém descobria sozinho.
  */
 const SUGESTOES: { icone: NomeIcone; texto: string }[] = [
-  { icone: "prato", texto: "O que tem para comer hoje?" },
+  { icone: "prato", texto: "Quero um almoço leve, sem lactose e com bastante proteína" },
   { icone: "folha", texto: "Sou vegetariano — o que dá para montar hoje?" },
   { icone: "veto", texto: "Tenho intolerância à lactose e alergia a amendoim" },
   { icone: "alvo", texto: "Comi 2 conchas de arroz e um filé de frango" },
@@ -111,11 +120,126 @@ function BotaoCopiar({ texto }: { texto: string }) {
   );
 }
 
+function numero(valor?: number | null, casas = 0): string {
+  if (typeof valor !== "number" || !Number.isFinite(valor)) return "—";
+  return valor.toLocaleString("pt-BR", { maximumFractionDigits: casas });
+}
+
+function ResumoConsumo({ titulo, resumo }: { titulo: string; resumo?: ResumoConsumoExperiencia }) {
+  if (!resumo) return null;
+  return (
+    <section className="exp-resumo">
+      <span className="exp-resumo__titulo">{titulo}</span>
+      {!!resumo.itens?.length && (
+        <ul className="exp-resumo__itens">
+          {resumo.itens.map((item, indice) => {
+            const entrada = item.entrada;
+            const nome = item.alimento_resolvido || entrada?.alimento || "Item";
+            return (
+              <li key={`${nome}-${indice}`}>
+                <span>{entrada?.quantidade ? `${numero(entrada.quantidade, 1)} ` : ""}{entrada?.medida || "porção"} de {nome}</span>
+                <strong>{numero(item.kcal)} kcal</strong>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <div className="exp-macros">
+        <strong>{numero(resumo.kcal)} kcal</strong>
+        <span>{numero(resumo.proteina_g, 1)} g proteína</span>
+        <span>{numero(resumo.carboidrato_g, 1)} g carboidratos</span>
+      </div>
+    </section>
+  );
+}
+
+function Experiencia({
+  dados,
+  ocupada,
+  aoEnviar,
+  aoCorrigir,
+}: {
+  dados?: ExperienciaChat;
+  ocupada: boolean;
+  aoEnviar: (texto: string) => void;
+  aoCorrigir: (inicio: string) => void;
+}) {
+  if (!dados) return null;
+
+  if (dados.pratos?.length) {
+    return (
+      <div className="exp-pratos" aria-label={dados.titulo || "Opções do cardápio"}>
+        {dados.pratos.map((prato) => (
+          <article className="exp-prato" key={prato.id ?? prato.nome}>
+            <div className="exp-prato__topo">
+              <span className="exp-prato__categoria">{prato.categoria || "opção"}</span>
+              {prato.is_proteina_do_dia && <span className="exp-selo">proteína do dia</span>}
+            </div>
+            <strong className="exp-prato__nome">{prato.nome}</strong>
+            <div className="exp-macros">
+              <strong>{numero(prato.calorias)} kcal</strong>
+              <span>{numero(prato.proteinas_g, 1)} g proteína</span>
+              <span>{numero(prato.carboidratos_g, 1)} g carboidratos</span>
+            </div>
+            {!!prato.ingredientes?.length && (
+              <p className="exp-prato__ingredientes">{prato.ingredientes.join(" · ")}</p>
+            )}
+          </article>
+        ))}
+        {dados.fonte && <p className="exp-fonte">Dados verificados · {dados.fonte}</p>}
+      </div>
+    );
+  }
+
+  if (dados.tipo === "pergunta_sobras") {
+    return (
+      <div className="exp-acoes" aria-label="Informe se houve sobra">
+        <button className="exp-btn exp-btn--principal" disabled={ocupada} onClick={() => aoEnviar("Não sobrou nada")}>Não sobrou nada</button>
+        <button className="exp-btn" disabled={ocupada} onClick={() => aoCorrigir("Sobrou ")}>Informar sobra</button>
+      </div>
+    );
+  }
+
+  if (dados.tipo === "consumo_previa") {
+    return (
+      <div className="exp-consumo exp-consumo--previa">
+        <div className="exp-cabecalho"><span>Prévia verificável</span><strong>Nada salvo ainda</strong></div>
+        <ResumoConsumo titulo="Consumido" resumo={dados.consumido} />
+        {dados.resto?.itens?.length ? <ResumoConsumo titulo="Sobras" resumo={dados.resto} /> : <p className="exp-sem-sobra">Sem sobras informadas</p>}
+        <div className="exp-acoes">
+          <button className="exp-btn exp-btn--principal" disabled={ocupada || dados.pode_confirmar === false} onClick={() => aoEnviar("Confirmar registro")}>Confirmar e pontuar</button>
+          <button className="exp-btn" disabled={ocupada} onClick={() => aoCorrigir("Quero corrigir: ")}>Corrigir</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (dados.tipo === "consumo_registrado") {
+    const pontos = dados.pontuacao?.pontos;
+    return (
+      <div className="exp-consumo exp-consumo--confirmado" role="status">
+        <div className="exp-impacto">
+          <span className="exp-impacto__icone">✓</span>
+          <div><span>Consumo registrado</span><strong>{typeof pontos === "number" ? `+${pontos} pontos` : "Impacto atualizado"}</strong></div>
+        </div>
+        <ResumoConsumo titulo="Resumo final" resumo={dados.consumido} />
+        <div className="exp-metricas">
+          <span><small>desperdício</small><strong>{numero(dados.indice_resto_perc, 1)}%</strong></span>
+          {dados.gamificacao && <span><small>nível</small><strong>{numero(dados.gamificacao.nivel)}</strong></span>}
+          {dados.gamificacao && <span><small>sequência</small><strong>{numero(dados.gamificacao.streak_dias)} dias</strong></span>}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export default function ChatRoute() {
   const { unidadeId: param } = useParams();
   const unidadeId = Number(param);
   const unidade = useUnidade(unidadeId);
-  const { usuarioId, nome, atualizar, brinde } = usePerfil();
+  const { usuarioId, nome, atualizar, brinde, entrar } = usePerfil();
 
   const chaveSessao = `lia_sessao_${unidadeId}`;
 
@@ -126,6 +250,11 @@ export default function ChatRoute() {
   const [offline, setOffline] = useState(false);
   const [saudacao, setSaudacao] = useState("");
   const [mostrarDescer, setMostrarDescer] = useState(false);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(Boolean(sessionId));
+  const [etapa, setEtapa] = useState("Entendendo seu pedido…");
+  const [entrandoDemo, setEntrandoDemo] = useState(false);
+  const [erroDemo, setErroDemo] = useState("");
+  const [demoDisponivel, setDemoDisponivel] = useState(false);
 
   const fluxoRef = useRef<HTMLDivElement>(null);
   const fimRef = useRef<HTMLDivElement>(null);
@@ -146,10 +275,56 @@ export default function ChatRoute() {
 
   useEffect(() => {
     getSaudacao()
-      .then((m) => { setSaudacao(m); setOffline(false); })
+      .then((dados) => {
+        setSaudacao(dados.mensagem);
+        setDemoDisponivel(dados.demo_mode);
+        setOffline(false);
+      })
       .catch(() => setOffline(true));
   }, []);
 
+  // Restaura a conversa da API, não apenas o identificador local. Ao trocar de
+  // unidade, cada refeitório continua com sua própria sessão e seu histórico.
+  useEffect(() => {
+    let vivo = true;
+    const salvo = localStorage.getItem(chaveSessao) || "";
+    setSessionId(salvo);
+    setMsgs([]);
+    setCarregandoHistorico(Boolean(salvo));
+    if (!salvo) return () => { vivo = false; };
+
+    getHistorico(salvo)
+      .then((data) => {
+        if (!vivo) return;
+        const restauradas: Msg[] = data.mensagens.map((m, indice) => ({
+          id: indice,
+          autor: m.papel === "user" ? "usuario" : "lia",
+          texto: m.conteudo,
+        }));
+        proximoId.current = restauradas.length;
+        setMsgs(restauradas);
+      })
+      .catch(() => {
+        if (!vivo) return;
+        localStorage.removeItem(chaveSessao);
+        setSessionId("");
+      })
+      .finally(() => { if (vivo) setCarregandoHistorico(false); });
+    return () => { vivo = false; };
+  }, [chaveSessao]);
+
+  useEffect(() => {
+    if (!ocupada) {
+      setEtapa("Entendendo seu pedido…");
+      return;
+    }
+    const consultando = window.setTimeout(() => setEtapa("Consultando cardápio e perfil…"), 900);
+    const verificando = window.setTimeout(() => setEtapa("Verificando dados nutricionais…"), 2800);
+    return () => {
+      window.clearTimeout(consultando);
+      window.clearTimeout(verificando);
+    };
+  }, [ocupada]);
   // Cresce com o texto até um teto — depois rola por dentro. Sem isso, uma
   // mensagem de três linhas fica escondida numa fresta de uma linha.
   useLayoutEffect(() => {
@@ -185,10 +360,30 @@ export default function ChatRoute() {
     setMsgs((prev) => [...prev, { ...m, id: proximoId.current++ }]);
   }, []);
 
+  const corrigir = useCallback((inicio: string) => {
+    setEntrada(inicio);
+    window.setTimeout(() => campoRef.current?.focus(), 0);
+  }, []);
+
+  const ativarDemo = useCallback(async () => {
+    if (entrandoDemo) return;
+    setEntrandoDemo(true);
+    setErroDemo("");
+    try {
+      const data = await entrarDemo();
+      entrar(data.usuario.id);
+      setOffline(false);
+    } catch {
+      setErroDemo("O perfil de demonstração não está habilitado nesta instalação.");
+    } finally {
+      setEntrandoDemo(false);
+    }
+  }, [entrandoDemo, entrar]);
+
   const enviar = useCallback(
     async (bruto?: string) => {
       const texto = (bruto ?? entrada).trim();
-      if (!texto || ocupada) return;
+      if (!texto || ocupada || carregandoHistorico) return;
 
       setEntrada("");
       coladoNoFim.current = true; // mandei uma mensagem: quero ver a resposta
@@ -207,6 +402,7 @@ export default function ChatRoute() {
           foraDeEscopo: data.fora_de_escopo,
           naoReconhecidos: data.confianca?.nao_reconhecidos,
           aproximados: data.confianca?.aproximados,
+          experiencia: data.experiencia,
         });
         setOffline(false);
         // A pessoa pode ter registrado consumo nesta mensagem — a pontuação muda.
@@ -223,7 +419,7 @@ export default function ChatRoute() {
         setOcupada(false);
       }
     },
-    [entrada, ocupada, unidadeId, sessionId, usuarioId, chaveSessao, adicionar, atualizar],
+    [entrada, ocupada, carregandoHistorico, unidadeId, sessionId, usuarioId, chaveSessao, adicionar, atualizar],
   );
 
   const novaConversa = useCallback(async () => {
@@ -250,7 +446,7 @@ export default function ChatRoute() {
     return <Navigate to="/unidades" replace />;
   }
 
-  const vazia = msgs.length === 0;
+  const vazia = msgs.length === 0 && !carregandoHistorico;
   const primeiroNome = nome.trim().split(/\s+/)[0] ?? "";
 
   return (
@@ -260,9 +456,9 @@ export default function ChatRoute() {
       titulo={unidade?.nome ?? marca.assistente}
       variante="conversa"
       aoNovaConversa={novaConversa}
-      novaConversaOcupada={ocupada}
+      novaConversaOcupada={ocupada || carregandoHistorico}
       acoes={
-        <button className="btn-icone" onClick={novaConversa} disabled={ocupada || vazia} aria-label="Nova conversa">
+        <button className="btn-icone" onClick={novaConversa} disabled={ocupada || carregandoHistorico || vazia} aria-label="Nova conversa">
           <Icone nome="nova" />
         </button>
       }
@@ -277,7 +473,9 @@ export default function ChatRoute() {
 
         <div className="chat__fluxo" ref={fluxoRef} onScroll={aoRolar}>
           <div className="coluna">
-            {vazia ? (
+            {carregandoHistorico ? (
+              <div className="chat-carregando" role="status">Retomando sua conversa…</div>
+            ) : vazia ? (
               <div className="abertura">
                 {/* Cumprimenta pelo nome quando sabe quem é. A apresentação da
                     Lia não vem daqui: vem da saudação do servidor, logo abaixo —
@@ -292,6 +490,15 @@ export default function ChatRoute() {
                     : saudacao ||
                       "Me conte suas restrições ou peça uma recomendação do cardápio de hoje."}
                 </p>
+                {!usuarioId && !offline && demoDisponivel && (
+                  <div className="demo-entrada">
+                    <button className="exp-btn exp-btn--principal" onClick={ativarDemo} disabled={entrandoDemo}>
+                      {entrandoDemo ? "Preparando perfil…" : "Usar perfil de demonstração"}
+                    </button>
+                    <span>restrições, meta e pontos prontos para a apresentação</span>
+                  </div>
+                )}
+                {erroDemo && <p className="demo-entrada__erro" role="alert">{erroDemo}</p>}
               </div>
             ) : (
               <div className="msgs" role="log" aria-live="polite" aria-label="Conversa">
@@ -318,6 +525,12 @@ export default function ChatRoute() {
                           <span className="msg__fora-nota">fora do cardápio</span>
                         )}
                         <NotaIncerteza fora={m.naoReconhecidos} aprox={m.aproximados} />
+                        <Experiencia
+                          dados={m.experiencia}
+                          ocupada={ocupada}
+                          aoEnviar={(texto) => { void enviar(texto); }}
+                          aoCorrigir={corrigir}
+                        />
                         <div className="msg__acoes">
                           <BotaoCopiar texto={m.texto} />
                         </div>
@@ -330,9 +543,10 @@ export default function ChatRoute() {
                   <article className="msg msg--lia" data-testid="msg-digitando">
                     <span className="msg__selo" aria-hidden="true">{marca.monograma}</span>
                     <div className="msg__corpo">
-                      <span className="digitando" role="status" aria-label={`${marca.assistente} está escrevendo`}>
-                        <span /><span /><span />
-                      </span>
+                      <div className="progresso-ia" role="status">
+                        <span className="digitando" aria-hidden="true"><span /><span /><span /></span>
+                        <span>{etapa}</span>
+                      </div>
                     </div>
                   </article>
                 )}
@@ -358,14 +572,14 @@ export default function ChatRoute() {
                 onKeyDown={aoTeclar}
                 placeholder={`Fale com a ${marca.assistente}…`}
                 rows={1}
-                disabled={ocupada}
+                disabled={ocupada || carregandoHistorico}
                 aria-label="Sua mensagem"
                 data-testid="compositor"
               />
               <button
                 className="compositor__enviar"
                 onClick={() => enviar()}
-                disabled={ocupada || !entrada.trim()}
+                disabled={ocupada || carregandoHistorico || !entrada.trim()}
                 aria-label="Enviar mensagem"
                 data-testid="enviar"
               >

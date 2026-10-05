@@ -87,6 +87,54 @@ def _qualidade(*totais: dict) -> Qualidade:
 CACHE_NAO_RECONHECIDOS = "nao_reconhecidos"
 # Itens que a base reconheceu, mas cujo número é aproximado (casamento
 # incerto ou porção marcada para revisão nutricional).
+# Estado/saída estruturada do fluxo conversacional. Estas chaves atravessam a
+# fronteira pelo ResultadoDeTurno; o motor não precisa conhecer o conteúdo.
+CACHE_ACAO_PENDENTE = "acao_pendente"
+CACHE_LIMPAR_ACAO_PENDENTE = "limpar_acao_pendente"
+CACHE_EXPERIENCIA = "experiencia"
+CACHE_RESPOSTA_DETERMINISTICA = "resposta_deterministica"
+
+
+def _guardar_fluxo(*, acao=None, experiencia=None, resposta=None, limpar=False) -> None:
+    cache = cache_do_turno()
+    if cache is None:
+        return
+    if acao is not None:
+        cache[CACHE_ACAO_PENDENTE] = acao
+    if experiencia is not None:
+        cache[CACHE_EXPERIENCIA] = experiencia
+    if resposta is not None:
+        cache[CACHE_RESPOSTA_DETERMINISTICA] = resposta
+    if limpar:
+        cache[CACHE_LIMPAR_ACAO_PENDENTE] = True
+
+
+def _cartao_prato(prato: dict) -> dict:
+    """Recorte factual exibido pelo front; nenhum texto do modelo entra aqui."""
+    return {
+        "id": prato.get("id"),
+        "nome": prato.get("nome"),
+        "categoria": prato.get("categoria") or "",
+        "calorias": prato.get("calorias"),
+        "proteinas_g": prato.get("proteinas_g"),
+        "carboidratos_g": prato.get("carboidratos_g"),
+        "gorduras_g": prato.get("gorduras_g"),
+        "ingredientes": list(prato.get("ingredientes") or []),
+        "is_proteina_do_dia": bool(prato.get("is_proteina_do_dia")),
+        "conflita_com_perfil": list(prato.get("conflita_com_perfil") or []),
+    }
+
+
+def _guardar_pratos(pratos: list[dict], tipo: str) -> None:
+    seguros = [p for p in pratos if not p.get("conflita_com_perfil")]
+    exibidos = seguros[:3] if tipo == "recomendacoes" else pratos
+    _guardar_fluxo(experiencia={
+        "tipo": tipo,
+        "titulo": "Opções compatíveis" if tipo == "recomendacoes" else "Cardápio consultado",
+        "pratos": [_cartao_prato(p) for p in exibidos],
+        "fonte": "Cardápio da unidade",
+    })
+
 CACHE_APROXIMADOS = "aproximados"
 
 
@@ -231,9 +279,10 @@ def _anotar_conflitos(pratos: list[dict]) -> list[dict]:
     perfil = _perfil_do_turno()
     if not perfil:
         return pratos
+    vocabulario = _vocabulario_de_restricoes(pratos)
     anotados = []
     for p in pratos:
-        motivos = filters.conflitos_com_perfil(p, perfil)
+        motivos = filters.conflitos_com_perfil(p, perfil, vocabulario)
         anotados.append({**p, "conflita_com_perfil": motivos} if motivos else p)
     return anotados
 
@@ -297,13 +346,7 @@ def _fora_do_vocabulario(termos: list[str], vocabulario: list[str]) -> list[str]
     tabela de equivalências para cá criaria duas verdades, que divergem na
     primeira equivalência nova.
     """
-    return [
-        termo for termo in termos
-        if not any(
-            filters.prato_atende_restricao({"restricoes_atendidas": [rotulo]}, termo)
-            for rotulo in vocabulario
-        )
-    ]
+    return [termo for termo in termos if not filters.restricao_verificavel(termo, vocabulario)]
 
 
 @tool
@@ -316,6 +359,7 @@ def listar_pratos_do_dia(dia: str = "hoje") -> dict:
     Retorna {total, pratos: [{id, nome, categoria, conflita_com_perfil?}], nota_do_sistema}.
     `total` é quantos pratos existem: sua resposta precisa citar todos eles."""
     pratos = [filters.resumir(p) for p in _pratos(dia)]
+    _guardar_pratos(pratos, "cardapio")
 
     # `total` explícito e a nota logo abaixo existem porque o modelo resumia o
     # cardápio quando ele crescia — com 8 pratos, chegava a omitir 5. O número
@@ -384,15 +428,24 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
     desconhecidas = _fora_do_vocabulario(rest, vocabulario)
     conhecidas = [r for r in rest if r not in desconhecidas]
 
-    compativeis = []
-    for p in pratos:
-        if not all(filters.prato_atende_restricao(p, r) for r in conhecidas):
-            continue
-        if not filters.prato_seguro_para_alergias(p, alerg):
-            continue
-        if pref and not any(filters.prato_combina_preferencia(p, x) for x in pref):
-            continue
-        compativeis.append(p)
+    compativeis = [
+        p for p in pratos
+        if all(filters.prato_atende_restricao(p, r) for r in conhecidas)
+        and filters.prato_seguro_para_alergias(p, alerg)
+    ]
+    # Preferência ORDENA, não elimina. "comida caseira" não é ingrediente de ficha
+    # nenhuma, e como filtro zerava o cardápio: a tool dizia "nenhum prato atende" a
+    # quem só tinha dito do que gosta (E2E 23/09, seu João). Se ao menos um prato casa,
+    # fica só quem casa — é o pedido "quero frango"; se nenhum casa, a preferência não
+    # tinha como ser checada e não pode custar o almoço.
+    preferencia_sem_efeito: list[str] = []
+    if pref and compativeis:
+        preferidos = [p for p in compativeis if any(filters.prato_combina_preferencia(p, x) for x in pref)]
+        if preferidos:
+            compativeis = preferidos
+        else:
+            preferencia_sem_efeito = pref
+    _guardar_pratos(compativeis, "recomendacoes")
 
     if not compativeis:
         # Regra inviolável 4. Devolver [] deixava o modelo livre para "ajudar"
@@ -408,6 +461,16 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
             "do cardápio nem force um prato que não atende. Diga isso ao usuário e "
             "pergunte se ele pode flexibilizar algum critério."
         )
+
+    if preferencia_sem_efeito and not desconhecidas:
+        return {
+            "pratos": compativeis,
+            "nota_do_sistema": (
+                f"Nenhum prato cita '{', '.join(preferencia_sem_efeito)}' nos ingredientes, então "
+                "estes são todos os que passaram nas restrições e alergias. Recomende entre eles "
+                "normalmente; não diga que nenhum prato atende."
+            ),
+        }
 
     if desconhecidas:
         # O falso negativo que originou isto: 'sem carne vermelha' chegou no
@@ -474,13 +537,23 @@ def filtrar_pratos(restricoes: str = "", alergias: str = "", preferencias: str =
     return compativeis
 
 
+_NOTA_DADO_AUSENTE = (
+    "Esta ficha NÃO tem sódio/sal, açúcar, fibra nem modo de preparo. Se perguntarem, diga "
+    "que você não tem esse dado e sugira perguntar à equipe do refeitório — não deduza pelos "
+    "ingredientes nem pelo nome do prato."
+)
+
+
 @tool
 @observado
 def detalhar_prato(prato_id: int, dia: str = "hoje") -> dict | str:
     """Detalhes completos de um prato do cardápio do dia (ingredientes, alérgenos, nutrição)."""
     for p in _pratos(dia):
         if p["id"] == prato_id:
-            return p
+            # Regra 6d no system não bastou: no E2E de 23/09, com esta ficha na mão, a
+            # Lia afirmou "a grelha não adiciona sódio" para um hipertenso. A nota
+            # chega no fim do contexto, colada à pergunta.
+            return {**p, "nota_do_sistema": _NOTA_DADO_AUSENTE}
     return f"Prato com id {prato_id} não encontrado no cardápio de hoje."
 
 
@@ -555,96 +628,221 @@ def _parse_itens(itens) -> list[dict] | None:
     return itens
 
 
-@tool
-@observado
-def registrar_consumo(itens: list[dict], sobras: list[dict] | None = None, confirmado: bool = False) -> dict | str:
-    """Registra a refeição que o usuário consumiu, em DUAS ETAPAS:
-    1) SEM `confirmado` (default): retorna uma PRÉVIA calculada (itens interpretados +
-       kcal/macros), SEM salvar nada. Apresente a prévia ao usuário e PERGUNTE se está
-       correto (ex.: "Entendi: 2 conchas de arroz (~180 kcal)… confirma?").
-    2) Com `confirmado=true` (só após o usuário confirmar): SALVA o registro, PONTUA
-       (gamificação: proximidade da meta calórica + bônus prato limpo + streak) e
-       alimenta o controle de desperdício da unidade.
+def _numero(valor) -> str:
+    n = float(valor or 0)
+    return f"{n:.0f}" if n.is_integer() else f"{n:.1f}".replace(".", ",")
 
-    `itens` = o que a pessoa COMEU. `sobras` (opcional) = o que ela DEIXOU NO PRATO
-    (pergunta se sobrou algo — é assim que medimos desperdício). Ambos são listas de:
-      - alimento: nome (ex: "arroz", "frango grelhado", "feijao")
-      - medida: medida caseira (ex: "concha", "colher de sopa", "file", "prato raso")
-      - quantidade: número (ex: 2)
-    Exemplo:
-      itens=[{"alimento":"arroz","medida":"concha","quantidade":2}], sobras=[{"alimento":"arroz","medida":"colher de sopa","quantidade":1}]
 
-    Retorno confirmado: consumido (totais/itens), resto, indice_resto_perc, pontuacao
-    {pontos, pontos_base, bonus_prato_limpo, bonus_streak, meta_kcal_refeicao, desvio_perc}
-    e gamificacao {pontos acumulados, nivel, streak_dias}. Os NÚMEROS vêm da base — não invente.
-    """
-    itens = _parse_itens(itens)
-    if not itens:
-        return "Envie ao menos um item {alimento, medida, quantidade}."
-    sobras = _parse_itens(sobras) if sobras else []
+def _kcal(total: dict) -> float:
+    return float(total.get("kcal") or total.get("kcal_total") or 0)
+
+
+def _linha_item(item: dict) -> str:
+    entrada = item.get("entrada") or {}
+    quantidade = entrada.get("quantidade") or 1
+    medida = entrada.get("medida") or item.get("porcao_resolvida") or "porção"
+    nome = item.get("alimento_resolvido") or entrada.get("alimento") or "item"
+    return f"- {_numero(quantidade)} {medida} de {nome} — {_numero(item.get('kcal'))} kcal"
+
+
+def _texto_previa(previa: dict, q: Qualidade) -> str:
+    consumido = previa.get("consumido") or {}
+    resto = previa.get("resto") or {}
+    linhas = ["Preparei a prévia — **nada foi salvo ainda**.", "", "Você comeu:"]
+    linhas.extend(_linha_item(i) for i in (consumido.get("itens") or []))
+    linhas.append(f"Total calculado: **{_numero(_kcal(consumido))} kcal**.")
+    if resto:
+        linhas.extend(["", "Sobrou no prato:"])
+        linhas.extend(_linha_item(i) for i in (resto.get("itens") or []))
+        linhas.append(f"Total das sobras: **{_numero(_kcal(resto))} kcal**.")
+    else:
+        linhas.extend(["", "Sobras: **nenhuma**."])
+    if q.ignorados:
+        linhas.append(
+            "Não reconheci " + ", ".join(sorted(set(q.ignorados)))
+            + "; esses itens ficaram fora do total."
+        )
+    elif q.imprecisos:
+        linhas.append("Alguns valores são aproximados; deixei isso sinalizado no resumo.")
+    linhas.extend(["", "Está correto? Confirme para eu registrar e calcular seus pontos."])
+    return "\n".join(linhas)
+
+
+def _texto_registro(registro: dict) -> str:
+    consumido = registro.get("consumido") or {}
+    pontos = registro.get("pontuacao") or {}
+    gami = registro.get("gamificacao") or {}
+    linhas = [
+        "Registro confirmado ✓",
+        f"- Consumo: **{_numero(_kcal(consumido))} kcal**",
+        f"- Desperdício: **{_numero(registro.get('indice_resto_perc'))}%**",
+    ]
+    if pontos:
+        linhas.append(f"- Pontos ganhos: **+{_numero(pontos.get('pontos'))}**")
+    if gami:
+        linhas.append(
+            f"- Total: **{_numero(gami.get('pontos'))} pontos** · nível "
+            f"{_numero(gami.get('nivel'))} · sequência de {_numero(gami.get('streak_dias'))} dia(s)"
+        )
+    if registro.get("pontuacao_pendente"):
+        linhas.append("O consumo foi salvo, mas a pontuação ficou pendente porque o total está incompleto.")
+    return "\n".join(linhas)
+
+
+def pedir_sobras_consumo(itens: list[dict]) -> dict:
+    acao = {"tipo": "consumo", "etapa": "aguardando_sobras", "itens": itens}
+    resposta = (
+        "Antes de calcular a prévia: **sobrou algo no prato?** "
+        "Pode responder “não sobrou nada” ou dizer o alimento e a medida que ficou."
+    )
+    return {
+        "resposta": resposta,
+        "experiencia": {"tipo": "pergunta_sobras", "itens": itens},
+        "acao_pendente": acao,
+        "resultado_tool": {
+            "aguardando_sobras": True,
+            "instrucao": "Pergunte o que sobrou. Nada foi calculado nem salvo.",
+        },
+    }
+
+
+def preparar_previa_consumo(itens: list[dict], sobras: list[dict]) -> dict:
+    ctx = current_context()
+    try:
+        consumido = go_api.calcular_consumo(itens, ctx.unidade_id)
+        resto = go_api.calcular_consumo(sobras, ctx.unidade_id) if sobras else {}
+    except Exception:
+        return {"erro": "Não foi possível calcular a prévia agora."}
+
+    previa: dict = {"consumido": consumido}
+    if sobras:
+        previa["resto"] = resto
+    q = _qualidade(consumido, resto)
+    _registrar_qualidade(q)
+    notas = [n for n in (
+        _incoerencia(consumido, resto),
+        _divergencia_de_procedencia(consumido),
+        _nota_de_incerteza(q),
+    ) if n]
+    acao = {
+        "tipo": "consumo", "etapa": "aguardando_confirmacao",
+        "itens": itens, "sobras": sobras, "previa": previa,
+    }
+    resultado_tool = {
+        "previa": previa,
+        "instrucao": (
+            "PRÉVIA — NADA FOI SALVO AINDA. O sistema guardou exatamente estes "
+            "itens; a próxima confirmação persiste este payload, sem reinterpretá-lo."
+        ),
+    }
+    return {
+        "resposta": _texto_previa(previa, q),
+        "experiencia": {
+            "tipo": "consumo_previa", "consumido": consumido,
+            "resto": resto, "pode_confirmar": not bool(_incoerencia(consumido, resto)),
+        },
+        "acao_pendente": acao,
+        "resultado_tool": anexar_ao_resultado(resultado_tool, " ".join(notas)),
+    }
+
+
+def confirmar_consumo_pendente(acao: dict) -> dict:
+    """Persiste SOMENTE o payload da prévia guardada na sessão."""
+    if acao.get("tipo") != "consumo" or acao.get("etapa") != "aguardando_confirmacao":
+        return {"erro": "Não há uma prévia de consumo pronta para confirmar."}
+    itens = _parse_itens(acao.get("itens")) or []
+    sobras = _parse_itens(acao.get("sobras")) or []
     ctx = current_context()
 
-    if not confirmado:
-        # Prévia determinística, sem efeito colateral: erro de extração da LLM é
-        # corrigido pelo usuário ANTES de virar pontuação e métrica de desperdício.
-        # As SOBRAS entram na prévia — são elas que alimentam o índice de resto, então
-        # o usuário precisa confirmar o que sobrou, não só o que comeu.
-        try:
-            consumido = go_api.calcular_consumo(itens, ctx.unidade_id)
-            previa: dict = {"consumido": consumido}
-            resto = go_api.calcular_consumo(sobras, ctx.unidade_id) if sobras else {}
-            if sobras:
-                previa["resto"] = resto
-        except Exception:
-            return "Não foi possível calcular a prévia agora."
-
-        q = _qualidade(consumido, resto)
-        _registrar_qualidade(q)
-        notas = [n for n in (_incoerencia(consumido, resto),
-                             _divergencia_de_procedencia(consumido),
-                             _nota_de_incerteza(q)) if n]
-        resultado = {
-            "previa": previa,
-            "instrucao": (
-                "PRÉVIA — NADA FOI SALVO AINDA. Diga isso ao usuário com estas palavras. Mostre os itens interpretados e as "
-                "calorias do que ele COMEU e, se houver, do que SOBROU no prato, e pergunte "
-                "se está correto ANTES de salvar. Só depois de ele confirmar, chame registrar_consumo "
-                "de novo com os MESMOS itens/sobras e confirmado=true."
-            ),
-        }
-        return anexar_ao_resultado(resultado, " ".join(notas))
-
-    # Confirmado: antes de gravar, checa a cobertura. O cálculo é sem efeito
-    # colateral, então custa uma chamada a mais só no caminho de escrita.
-    #
-    # Mesma unidade da prévia, de propósito: conferir com critério diferente do
-    # que foi mostrado ao usuário faria a checagem julgar outro cálculo.
     try:
         conferencia = _qualidade(go_api.calcular_consumo(itens, ctx.unidade_id))
     except Exception:
         conferencia = Qualidade()
-
     if conferencia.tudo_ignorado:
-        # Gravar aqui produziria um registro de 0 kcal: desvio máximo na
-        # pontuação e índice de resto sem sentido. Isso é dado corrompido, não
-        # dado impreciso — e, uma vez gravado, não há como desfazer.
         _logar_nao_resolvidos(conferencia)
-        return (
-            "Não reconheci nenhum dos itens informados ("
-            + ", ".join(sorted(set(conferencia.ignorados)))
-            + "), então NÃO salvei nada — salvar daria 0 kcal e estragaria a pontuação. "
-            "Peça ao usuário para descrever os alimentos de forma mais simples "
-            "(ex.: 'frango', 'arroz', 'feijão') e refaça a prévia."
-        )
+        return {
+            "resposta": (
+                "Não reconheci nenhum dos itens da prévia, então **não salvei nada**. "
+                "Descreva os alimentos de forma mais simples e eu preparo outra prévia."
+            ),
+            "experiencia": {"tipo": "consumo_erro", "motivo": "itens_nao_reconhecidos"},
+            "limpar_acao_pendente": True,
+            "resultado_tool": "Nenhum item reconhecido; nada foi salvo.",
+        }
 
     try:
-        registro = go_api.registrar_consumo(ctx.unidade_id, itens, ctx.usuario_id, sobras)
+        registro = go_api.registrar_consumo(
+            ctx.unidade_id, itens, ctx.usuario_id, sobras, session_id=ctx.session_id
+        )
     except Exception:
-        return "Não foi possível registrar o consumo agora."
+        return {"erro": "Não foi possível registrar o consumo agora."}
 
     q = _qualidade(registro.get("consumido") or {}, registro.get("resto") or {})
     _registrar_qualidade(q)
-    return anexar_ao_resultado(registro, _nota_de_incerteza(q))
+    return {
+        "resposta": _texto_registro(registro),
+        "experiencia": {"tipo": "consumo_registrado", **registro},
+        "limpar_acao_pendente": True,
+        "resultado_tool": anexar_ao_resultado(registro, _nota_de_incerteza(q)),
+    }
+
+
+def _cachear_resultado_fluxo(resultado: dict) -> None:
+    if resultado.get("erro"):
+        _guardar_fluxo(resposta=resultado["erro"])
+        return
+    _guardar_fluxo(
+        acao=resultado.get("acao_pendente"),
+        experiencia=resultado.get("experiencia"),
+        resposta=resultado.get("resposta"),
+        limpar=bool(resultado.get("limpar_acao_pendente")),
+    )
+
+
+@tool
+@observado
+def registrar_consumo(
+    itens: list[dict],
+    sobras: list[dict] | None = None,
+    sobras_informadas: bool = False,
+    confirmado: bool = False,
+) -> dict | str:
+    """Conduz consumo em três estados: perguntar sobras → prévia → confirmar.
+
+    `itens` e `sobras` usam {alimento, medida, quantidade}. Se a pessoa disser
+    explicitamente que não sobrou nada, passe `sobras=[]` e
+    `sobras_informadas=true`. Nunca use `confirmado=true` no mesmo turno do
+    relato: confirmação só vale quando já existe prévia pendente na sessão.
+    """
+    itens = _parse_itens(itens)
+    if not itens:
+        return "Envie ao menos um item {alimento, medida, quantidade}."
+    sobras_ausentes = sobras is None and not sobras_informadas
+    sobras_parseadas = _parse_itens(sobras) if sobras is not None else []
+    if sobras is not None and sobras_parseadas is None:
+        return "Sobras precisam ser uma lista {alimento, medida, quantidade}."
+
+    ctx = current_context()
+    pendente = getattr(ctx, "acao_pendente", None) or {}
+
+    # O modelo não tem autoridade para pular a prévia. Mesmo que envie
+    # confirmado=true no primeiro relato, cai no fluxo normal.
+    if confirmado and pendente.get("etapa") == "aguardando_confirmacao":
+        resultado = confirmar_consumo_pendente(pendente)
+        _cachear_resultado_fluxo(resultado)
+        return resultado.get("resultado_tool") or resultado.get("erro")
+
+    # Ao responder a pergunta de sobras, os itens consumidos vêm do estado, não
+    # da reconstrução do modelo.
+    if pendente.get("etapa") == "aguardando_sobras":
+        itens = _parse_itens(pendente.get("itens")) or itens
+
+    if sobras_ausentes:
+        resultado = pedir_sobras_consumo(itens)
+    else:
+        resultado = preparar_previa_consumo(itens, sobras_parseadas or [])
+    _cachear_resultado_fluxo(resultado)
+    return resultado.get("resultado_tool") or resultado.get("erro")
 
 
 # "hoje" e "amanhã" são do ponto de vista de quem está na fila, não do relógio
@@ -738,20 +936,45 @@ def cardapio_da_semana(inicio: str = "", data_alvo: str = "") -> dict | str:
     return resultado
 
 
+# Espelha domain.PontosPorNivel (apps/api/internal/domain/gamificacao.go): nível = 1 + pontos/500.
+_PONTOS_POR_NIVEL = 500
+
+
 @tool
 @observado
 def meus_pontos() -> dict | str:
     """Pontuação de gamificação do usuário atual: pontos acumulados, nível, streak de
-    dias registrando consumo e os últimos eventos de pontuação. Use quando perguntarem
-    "quantos pontos eu tenho?", "qual meu nível?", "como funciona a pontuação?"."""
+    dias registrando consumo, os últimos eventos, quanto falta para o próximo nível e a
+    posição no ranking da unidade. Use quando perguntarem "quantos pontos eu tenho?",
+    "qual meu nível?", "como subo de nível?", "quem está em primeiro?", "como funciona a pontuação?"."""
     ctx = current_context()
     if not ctx.usuario_id:
         return ("Usuário não identificado nesta sessão — para acumular pontos é preciso "
                 "criar um perfil (no site) e conversar identificado.")
     try:
-        return go_api.get_gamificacao(ctx.usuario_id)
+        estado = go_api.get_gamificacao(ctx.usuario_id)
     except Exception:
         return "Não foi possível carregar sua pontuação agora."
+
+    pontos = int((estado.get("gamificacao") or {}).get("pontos") or 0)
+    estado["pontos_para_proximo_nivel"] = _PONTOS_POR_NIVEL - pontos % _PONTOS_POR_NIVEL
+    # Ranking: a Lia respondia "não tenho acesso" a "quem está em primeiro?", com a
+    # tela de ranking no próprio app. Só o primeiro nome, como a tela mostra.
+    try:
+        ranking = go_api.get_ranking(ctx.unidade_id)
+    except Exception:
+        ranking = None
+    if ranking is not None:
+        posicao = next((i + 1 for i, r in enumerate(ranking) if r.get("usuario_id") == ctx.usuario_id), None)
+        estado["ranking_da_unidade"] = {
+            "sua_posicao": posicao,
+            "participantes": len(ranking),
+            "top3": [
+                {"posicao": i + 1, "nome": (r.get("nome") or "").split(" ")[0], "pontos": r.get("pontos")}
+                for i, r in enumerate(ranking[:3])
+            ],
+        }
+    return estado
 
 
 TOOLS = [

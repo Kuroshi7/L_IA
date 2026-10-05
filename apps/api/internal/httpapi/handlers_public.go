@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/tamy-ai/menu-ai/api/internal/chat"
+	"github.com/tamy-ai/menu-ai/api/internal/domain"
 	"github.com/tamy-ai/menu-ai/api/internal/store"
 )
 
@@ -117,9 +118,10 @@ func (s *Server) responderCardapio(w http.ResponseWriter, r *http.Request, unida
 }
 
 func (s *Server) handleSaudacao(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{
-		"mensagem": "Olá! Sou a Lia 🍽️ Posso te ajudar a escolher uma refeição do cardápio de hoje. " +
-			"Tem alguma restrição (vegetariano, sem lactose, celíaco) ou alergia que eu deva considerar?",
+	writeJSON(w, http.StatusOK, map[string]any{
+		"mensagem": "Em uma frase, diga o que você quer comer ou evitar. " +
+			"Eu cruzo seu perfil com o cardápio de hoje e mostro opções com dados nutricionais verificados.",
+		"demo_mode": s.demoMode,
 	})
 }
 
@@ -163,6 +165,26 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, out)
+}
+
+func (s *Server) handleGetChat(w http.ResponseWriter, r *http.Request) {
+	sessionID := chi.URLParam(r, "sessionID")
+	mensagens, err := s.chat.Historico(r.Context(), sessionID)
+	if errors.Is(err, store.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "sessão não encontrada")
+		return
+	}
+	if err != nil {
+		s.log.Error("histórico do chat", "err", err)
+		writeError(w, http.StatusInternalServerError, "erro ao carregar conversa")
+		return
+	}
+	if mensagens == nil {
+		mensagens = []domain.Mensagem{}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"session_id": sessionID, "mensagens": mensagens,
+	})
 }
 
 func (s *Server) handleResetChat(w http.ResponseWriter, r *http.Request) {

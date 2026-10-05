@@ -95,6 +95,8 @@ ESTÃO no escopo:
 - Restrições alimentares (vegetariano, vegano, celíaco, lactose, alergias)
 - Comparações entre pratos (proteína, calorias, carboidratos)
 - Pedidos de recomendação ("o que comer hoje?", "quero algo leve")
+- Quanto servir de um alimento ("quanto de arroz eu coloco?", "quantas colheres posso pegar?")
+- Perguntas sobre um alimento ou prato e a saúde de quem come ("tenho pressão alta, posso comer isso?")
 - Relato do que a pessoa comeu/deixou no prato ("comi 2 conchas de arroz", "sobrou metade")
 - Pontuação/gamificação ("quantos pontos tenho?", "qual meu nível?", "como pontuar?")
 - Saudações curtas e mensagens de continuidade da conversa ("ok", "obrigado", "e mais?")
@@ -113,8 +115,8 @@ RESPOSTA_FORA_DE_ESCOPO = (
 )
 
 MENSAGEM_INICIAL = (
-    "Olá! Sou a Lia 🍽️ Posso te ajudar a escolher uma refeição do cardápio de hoje. "
-    "Tem alguma restrição (vegetariano, sem lactose, celíaco) ou alergia que eu deva considerar?"
+    "Em uma frase, diga o que você quer comer ou evitar. "
+    "Eu cruzo seu perfil com o cardápio de hoje e mostro opções com dados nutricionais verificados."
 )
 
 

@@ -46,6 +46,7 @@ services:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       CHAT_TIMEOUT_SECONDS: ${CHAT_TIMEOUT_SECONDS:-60}
       ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-admin}
+      DEMO_MODE: ${DEMO_MODE:-0}
     depends_on:
       postgres:
         condition: service_healthy

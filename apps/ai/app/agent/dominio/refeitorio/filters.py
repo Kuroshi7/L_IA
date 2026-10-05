@@ -181,6 +181,15 @@ def prato_atende_restricao(prato: dict, restricao: str) -> bool:
     return bool(eq and eq in atendidas)
 
 
+def restricao_verificavel(restricao: str, vocabulario: list[str]) -> bool:
+    """O cardápio declara algum rótulo com o qual dá para checar esta restrição?
+
+    Pergunta ao PRÓPRIO `prato_atende_restricao`, com um prato-sonda sintético,
+    para as equivalências ('celiaco' → 'sem gluten') valerem aqui também.
+    """
+    return any(prato_atende_restricao({"restricoes_atendidas": [rotulo]}, restricao) for rotulo in vocabulario)
+
+
 def culpados_por_alergia(prato: dict, alergias: list[str]) -> list[tuple[str, str]]:
     """Pares (alergia declarada, termo do prato que a acusa).
 
@@ -242,15 +251,26 @@ def prato_combina_preferencia(prato: dict, preferencia: str) -> bool:
 
 
 def resumir(prato: dict) -> dict:
-    """Versão enxuta para listagem. O aviso de conflito com o perfil SEMPRE
-    acompanha — é a única informação da listagem que pode evitar um acidente."""
-    resumo = {"id": prato["id"], "nome": prato["nome"], "categoria": prato.get("categoria", "")}
+    """Versão compacta, mas factual, para listagem.
+
+    Nutrição entra aqui porque a listagem era a única tool chamada em perguntas
+    como "o que tem hoje?". Sem os valores, o modelo via o nome do prato e
+    completava kcal/proteína por memória. Expor a ficha real permite à R3
+    conferir a resposta e ao front montar cards sem uma segunda inferência.
+    """
+    resumo = {
+        "id": prato["id"], "nome": prato["nome"], "categoria": prato.get("categoria", ""),
+        "calorias": prato.get("calorias"), "proteinas_g": prato.get("proteinas_g"),
+        "carboidratos_g": prato.get("carboidratos_g"), "gorduras_g": prato.get("gorduras_g"),
+        "ingredientes": prato.get("ingredientes") or [],
+        "is_proteina_do_dia": bool(prato.get("is_proteina_do_dia")),
+    }
     if prato.get("conflita_com_perfil"):
         resumo["conflita_com_perfil"] = prato["conflita_com_perfil"]
     return resumo
 
 
-def conflitos_com_perfil(prato: dict, perfil: dict | None) -> list[str]:
+def conflitos_com_perfil(prato: dict, perfil: dict | None, vocabulario: list[str] | None = None) -> list[str]:
     """Por que este prato é inadequado para esta pessoa, na voz certa.
 
     Existe porque filtrar não bastou. `filtrar_pratos` já devolve só o que é
@@ -282,6 +302,16 @@ def conflitos_com_perfil(prato: dict, perfil: dict | None) -> list[str]:
         )
 
     for restricao in (perfil.get("restricoes") or []):
+        # Com `vocabulario`, só acusa o que o cardápio sabe checar. O campo de
+        # restrições também recebe condição de saúde ("pressão alta",
+        # "pré-diabetes"), que nenhuma ficha declara como atendida: sem isto,
+        # TODO prato saía anotado como "não atende", o modelo obedecia ao "nunca
+        # recomende" e o cliente hipertenso ouvia que o cardápio inteiro era
+        # proibido — o oposto da regra 6c (escolher o mais compatível).
+        # `nao_indicado_para` entra no vocabulário, então veto explícito da
+        # nutricionista continua valendo.
+        if vocabulario is not None and not restricao_verificavel(restricao, vocabulario):
+            continue
         if restricao and not prato_atende_restricao(prato, restricao):
             ingredientes = [i for i in (prato.get("ingredientes") or [])][:3]
             porque = f" — leva {', '.join(ingredientes)}" if ingredientes else ""

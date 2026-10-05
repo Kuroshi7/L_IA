@@ -34,6 +34,9 @@ def test_perguntas_mais_comuns_nao_dependem_do_classificador():
         "quero registrar o que deixei no prato",
         "tem ovo no cardapio?",
         "quero algo leve",
+        # E2E 23/09: porção é a pergunta do self-service e era barrada.
+        "quanto de arroz eu coloco?",
+        "quantas colheres posso pegar?",
     ]
     for f in frases:
         assert _bate_keyword(normalizar(f)), f"pergunta comum caiu no classificador: {f!r}"
