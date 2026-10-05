@@ -1,10 +1,32 @@
 """Confiança: o produto declara incerteza em vez de fingir precisão."""
 
+from types import SimpleNamespace
+
 import app.agent.dominio.refeitorio.tools as t
 from app.agent.dominio.refeitorio.prompts import SYSTEM_AGENT
 from app.agent.dominio.refeitorio.tools import _qualidade, registrar_consumo
 
 ITENS = [{"alimento": "arroz", "medida": "concha", "quantidade": 2}]
+
+
+def test_previa_sem_item_reconhecido_pede_correcao(monkeypatch):
+    monkeypatch.setattr(t.go_api, 'calcular_consumo', lambda *a: _totais([_item('xyzabc')], ['xyzabc'], False))
+    monkeypatch.setattr(t, 'current_context', lambda: SimpleNamespace(unidade_id=1, usuario_id=7))
+    previa = t.preparar_previa_consumo(ITENS, [])
+    assert not previa['experiencia']['pode_confirmar']
+    assert 'Não salvei nada' in previa['resposta']
+    assert 'Descreva os alimentos' in previa['resposta']
+
+
+def test_previa_incoerente_explicita_o_problema(monkeypatch):
+    consumido = {'itens':[], 'gramas_totais':80, 'kcal':110, 'completo':True}
+    resto = {'itens':[], 'gramas_totais':240, 'kcal':330, 'completo':True}
+    monkeypatch.setattr(t.go_api, 'calcular_consumo', lambda itens, unidade_id=None: consumido if itens == ITENS else resto)
+    monkeypatch.setattr(t, 'current_context', lambda: SimpleNamespace(unidade_id=1, usuario_id=7))
+    previa = t.preparar_previa_consumo(ITENS, [{'alimento':'arroz', 'medida':'concha', 'quantidade':3}])
+    assert not previa['experiencia']['pode_confirmar']
+    assert 'sobras informadas são maiores' in previa['resposta']
+    assert 'Confirme para' not in previa['resposta']
 
 
 def _totais(itens, ignorados=None, completo=True):
@@ -58,9 +80,9 @@ def test_obs_preenchida_marca_imprecisao_mesmo_com_confianca_alta():
 def test_previa_avisa_o_que_ficou_de_fora(monkeypatch):
     monkeypatch.setattr(t.go_api, "calcular_consumo",
                         lambda itens, unidade_id=None: _totais([_item("xyzabc")], ignorados=["xyzabc"], completo=False))
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
-    out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
+    out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False, "sobras_informadas": True})
     assert "nota_do_sistema" in out
     assert "xyzabc" in out["nota_do_sistema"]
     assert "NÃO entraram no total" in out["nota_do_sistema"]
@@ -69,9 +91,9 @@ def test_previa_avisa_o_que_ficou_de_fora(monkeypatch):
 def test_previa_limpa_nao_ganha_nota(monkeypatch):
     monkeypatch.setattr(t.go_api, "calcular_consumo",
                         lambda itens, unidade_id=None: _totais([_item("arroz", "Arroz cozido")]))
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
-    out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
+    out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False, "sobras_informadas": True})
     assert "nota_do_sistema" not in out
 
 
@@ -85,11 +107,11 @@ def test_confirmado_com_tudo_ignorado_nao_grava(monkeypatch):
                         lambda itens, unidade_id=None: _totais([_item("xyzabc")], ignorados=["xyzabc"], completo=False))
     monkeypatch.setattr(t.go_api, "registrar_consumo",
                         lambda *a, **k: gravou.append(1) or {})
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
     out = registrar_consumo.invoke({"itens": ITENS, "confirmado": True})
     assert gravou == [], "não deveria ter gravado"
-    assert isinstance(out, str) and "não salvei nada" in out.lower()
+    assert isinstance(out, str) and "nada foi salvo" in out.lower()
 
 
 def test_confirmado_parcial_grava_e_avisa(monkeypatch):
@@ -102,7 +124,7 @@ def test_confirmado_parcial_grava_e_avisa(monkeypatch):
                               ignorados=["xyzabc"], completo=False),
     )
 
-    def fake_registrar(unidade_id, itens, usuario_id=None, sobras=None):
+    def fake_registrar(unidade_id, itens, usuario_id=None, sobras=None, session_id=None):
         gravou.append(1)
         return {
             "consumo_id": 1,
@@ -112,7 +134,7 @@ def test_confirmado_parcial_grava_e_avisa(monkeypatch):
         }
 
     monkeypatch.setattr(t.go_api, "registrar_consumo", fake_registrar)
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
     out = registrar_consumo.invoke({"itens": ITENS, "confirmado": True})
     assert gravou == [1]
@@ -142,11 +164,11 @@ def test_qualidade_registra_aproximados_no_cache_do_turno(monkeypatch):
             _item("xyzabc"),
         ], ignorados=["xyzabc"], completo=False),
     )
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
     token = iniciar_turno()
     try:
-        registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
+        registrar_consumo.invoke({"itens": ITENS, "confirmado": False, "sobras_informadas": True})
         cache = cache_do_turno()
     finally:
         encerrar_turno(token)
@@ -166,11 +188,11 @@ def test_aproximado_sozinho_ja_gera_sinal(monkeypatch):
         t.go_api, "calcular_consumo",
         lambda itens, unidade_id=None: _totais([_item("arroz", "Arroz Integral Cozido", confianca="media")]),
     )
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
     token = iniciar_turno()
     try:
-        out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False})
+        out = registrar_consumo.invoke({"itens": ITENS, "confirmado": False, "sobras_informadas": True})
         cache = cache_do_turno()
     finally:
         encerrar_turno(token)
@@ -196,7 +218,7 @@ def test_sobra_maior_que_consumo_e_sinalizada(monkeypatch):
         return _totais_g(20.0) if len(chamadas) == 1 else _totais_g(270.0)
 
     monkeypatch.setattr(t.go_api, "calcular_consumo", fake)
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
     out = registrar_consumo.invoke({
         "itens": [{"alimento": "arroz", "medida": "colher de sopa", "quantidade": 1}],
@@ -215,7 +237,7 @@ def test_sobra_menor_nao_gera_ruido(monkeypatch):
         return _totais_g(270.0) if len(chamadas) == 1 else _totais_g(20.0)
 
     monkeypatch.setattr(t.go_api, "calcular_consumo", fake)
-    monkeypatch.setattr(t, "current_context", lambda: type("C", (), {"unidade_id": 1, "usuario_id": 7})())
+    monkeypatch.setattr(t, "current_context", lambda: SimpleNamespace(unidade_id=1, usuario_id=7, session_id="qa", acao_pendente={"tipo": "consumo", "etapa": "aguardando_confirmacao", "itens": ITENS, "sobras": []}))
 
     out = registrar_consumo.invoke({
         "itens": [{"alimento": "arroz", "medida": "concha", "quantidade": 3}],

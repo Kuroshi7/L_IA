@@ -69,6 +69,9 @@ services:
 
   # Worker Go — consome eventos de domínio (outbox → RabbitMQ) de forma idempotente.
   api-worker:
+    # Workers não expõem o endpoint HTTP da imagem base.
+    healthcheck:
+      disable: true
     build:
       context: ../apps/api
     command: ["/app/worker"]
@@ -84,6 +87,9 @@ services:
 
   # Worker de IA — consome chat.requests, roda o agente, responde via RPC.
   ai-worker:
+    # Workers não expõem o endpoint HTTP da imagem base.
+    healthcheck:
+      disable: true
     build:
       context: ../apps/ai
     command: ["python", "-m", "app.workers.chat_worker"]

@@ -41,6 +41,34 @@ def _rodar(monkeypatch, roteiro, mensagem, dados="padrao", usuario_id=7, primeir
 
 # --- o caminho feliz percorre tudo -------------------------------------------
 
+def test_eval_preserva_acao_pendente_entre_turnos(monkeypatch):
+    from tests.eval.test_eval_llm import _rodar
+    modelo_scriptado.instalar(monkeypatch, [
+        ('registrar_consumo', {'itens':[{'alimento':'arroz','medida':'concha','quantidade':2}]}),
+        'Sobrou algo?',
+    ])
+    ctx, _ = _rodar({
+        'nome':'QA estado do eval', 'dados':'padrao', 'usuario_id':7,
+        'turnos':['comi 2 conchas de arroz', 'não sobrou nada'],
+    }, monkeypatch)
+    assert 'nada foi salvo ainda' in ctx.resposta
+    assert 'Confirme' in ctx.resposta
+    assert 'registrar_consumo' in ctx.tools
+
+
+def test_eval_confirma_payload_da_previa(monkeypatch):
+    from tests.eval.test_eval_llm import _rodar
+    modelo_scriptado.instalar(monkeypatch, [
+        ('registrar_consumo', {'itens':[{'alimento':'arroz','medida':'concha','quantidade':2}]}),
+        'Sobrou algo?',
+    ])
+    ctx, _ = _rodar({
+        'nome':'QA confirmação do eval', 'dados':'padrao', 'usuario_id':7,
+        'turnos':['comi 2 conchas de arroz', 'não sobrou nada', 'confirmo'],
+    }, monkeypatch)
+    assert 'Registro confirmado' in ctx.resposta
+    assert any('"confirmado": true' in args for tool,args in ctx.chamadas if tool=='registrar_consumo')
+
 def test_turno_completo_chama_tool_e_responde(monkeypatch):
     resultado, _ = _rodar(
         monkeypatch,

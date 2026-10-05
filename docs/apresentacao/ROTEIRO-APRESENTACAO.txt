@@ -1,0 +1,231 @@
+LIA — ROTEIRO DE APRESENTAÇÃO E DEMONSTRAÇÃO
+Preparado em 05/10/2026 • duração sugerida: 18–22 minutos
+Aplicação: http://localhost:5273
+Projeto: https://github.com/Kuroshi7/L_IA
+Checkout local: /home/victorsoffi/Apps/L_IA
+Branch efetiva: feat/motor-agente-onyx
+
+OBJETIVO DA APRESENTAÇÃO
+Mostrar como uma conversa pode consultar o cardápio, considerar o perfil,
+ajudar a escolher uma refeição e registrar consumo e sobras com confirmação.
+As telas dão visibilidade aos dados que sustentam a conversa e aos resultados.
+Apresentar o motor reutilizável como uma separação entre condução do agente
+e regras específicas do refeitório.
+
+ESCOPO DESTE ROTEIRO
+“Cadastro de despesas” foi interpretado como registro de consumo/desperdício.
+Não foi identificado um módulo de despesas financeiras nesta implementação.
+Conta/perfil, alimentos e cardápio são cadastrados pelas telas. O chat consulta
+esses dados e registra consumo/sobras; não prometer criação de conta ou de
+alimentos por conversa. O foco da demonstração continua sendo o chat.
+
+PREPARAÇÃO — ANTES DE COMPARTILHAR A TELA
+• Abra a aplicação e confira o cardápio de hoje da unidade Refeitório Central.
+  Se a data não tiver cardápio, prepare-o no editor antes da apresentação.
+• Deixe abertas três abas: perfil, conversa e administração. Para uma criação
+  de perfil nova, use uma janela privada e um nome fictício de demonstração.
+• No painel administrativo local, use o token de gestão dev-admin.
+  Não mostre arquivos .env, chaves de API ou terminais com credenciais.
+• Prepare uma unidade separada para cadastrar alimentos durante a apresentação.
+  Preserve o cardápio Central usado nos exemplos da conversa.
+• Confira se o Frango Grelhado tem a referência cadastrada de 1 filé, 100 g.
+• Se usar alergia a leite, confira os ingredientes do Strogonoff de Grão-de-Bico.
+  O exemplo depende do creme de leite informado na ficha atual.
+• Reserve tempo para a resposta da IA. Avalie o conteúdo antes de prosseguir.
+• Este roteiro foi conferido com as rotas e ferramentas do código e com o
+  relatório de testes existente. A sequência visual completa ainda exige
+  uma passagem manual do apresentador; não foi validada em navegador nesta sessão.
+
+1. ABERTURA — A IDEIA DO PROJETO (1–2 MIN)
+Tela: conversa ou página inicial.
+Fala sugerida:
+“A Lia aproxima o usuário do refeitório por uma conversa. A pessoa pode perguntar
+sobre o almoço, consultar ingredientes e medidas, e registrar o que consumiu.
+Por trás dessa experiência há um cadastro organizado, regras de acesso e um
+fluxo de confirmação. A conversa é a porta de entrada; as telas permitem
+conferir os dados e administrar a operação.”
+
+“Também existe uma proposta de arquitetura: construir um motor de agente que
+possa ser reaproveitado em outros domínios. O refeitório é a aplicação concreta
+que estamos demonstrando hoje.”
+Transição: “Vou começar pelos dados que tornam a conversa personalizada.”
+
+2. CRIAR CONTA/PERFIL E MOSTRAR RESTRIÇÕES (2 MIN)
+Tela: http://localhost:5273/perfil
+Ação: crie um perfil fictício, por exemplo Apresentação Lia. Mostre a unidade,
+o nome e os campos de personalização. Use somente dados fictícios.
+Mostre restrições, alergias e preferências; registre leite para o exemplo.
+Explique os campos opcionais de peso, altura, idade e atividade, se exibidos.
+Telefone e PIN permitem demonstrar identificação/recuperação do perfil quando
+cadastrados; não apresentar o fluxo como autenticação empresarial completa.
+Fala:
+“O perfil permite que a Lia considere informações declaradas pela pessoa.
+Uma alergia cadastrada é diferente de uma preferência: ela deve influenciar
+as opções e os avisos. A qualidade disso depende também do cadastro dos pratos.”
+Resultado a observar: perfil salvo e identificado na conversa.
+Transição: “Agora vou mostrar de onde vêm os alimentos e os ingredientes.”
+
+3. CADASTRO DE ALIMENTOS E MEDIDAS (2–3 MIN)
+Telas: /admin → catálogo de alimentos da unidade de demonstração.
+Exemplo de rota do Central: /admin/u/1/alimentos.
+Ação: abra uma ficha e mostre nome, categoria, ingredientes, alergênicos,
+restrições e dados nutricionais. Mostre a referência nutricional e as porções.
+Para demonstrar criação, use a unidade preparada e um nome inequívoco como
+“Prato de demonstração”. Prefira vincular uma referência existente e sua medida
+cadastrada. Revise os campos exigidos antes de salvar; dados fictícios devem
+ficar identificados como demonstração. Não improvisar composição nutricional.
+Alternativa curta: mostre o formulário e uma ficha já salva sem criar outro prato.
+Fala:
+“A informação que a IA consulta começa aqui. Ingredientes, restrições e medidas
+não devem ser inventados na conversa. A ligação com uma referência permite
+apresentar, por exemplo, um filé e o peso correspondente quando isso existe.”
+Limite: o valor nutricional da ficha não prova o total da refeição sugerida;
+peso e base de referência precisam coincidir para uma conta válida.
+
+4. CARDÁPIO E CONTEXTO DA UNIDADE (1 MIN)
+Tela: /admin/u/1/cardapio; depois /unidades.
+Ação: mostre seleção de data, pratos e cópia semanal. Volte ao Refeitório Central.
+Fala:
+“O catálogo é o conjunto de alimentos. O cardápio seleciona o que está disponível
+em uma unidade e em um dia. A conversa usa esse contexto; ela não deve oferecer
+como disponível um prato que não está no cardápio consultado.”
+
+5. CONVERSA: CONSULTAR, ESCOLHER E ENTENDER LIMITES (4 MIN)
+Tela: http://localhost:5273/u/1/chat
+Envie uma mensagem por vez e aguarde a resposta.
+
+Mensagem A: “Qual é o cardápio de hoje?”
+Mostre: nomes e informações dos pratos, vínculo com a unidade e a data.
+Fala: “A resposta consulta o cadastro; isso permite comparar a conversa com a tela.”
+
+Mensagem B: “Quero algo com bastante proteína, quanto eu ponho no prato?”
+Mostre: recomendação, justificativa e medida cadastrada. No cenário testado,
+o Frango Grelhado foi apresentado como 1 filé, 100 g.
+Critério: se não houver medida cadastrada, a Lia deve explicar a falta de dado.
+Não anunciar que qualquer alimento ou pergunta sempre produzirá essa porção.
+
+Mensagem C: “Tenho alergia a leite. O Strogonoff de Grão-de-Bico é uma opção?”
+Mostre: o creme de leite na ficha e o aviso de incompatibilidade.
+Fala: “O nome do prato sozinho não basta. A decisão precisa considerar os
+ingredientes cadastrados. Isso não certifica ausência de contaminação cruzada.”
+
+Mensagem D, opcional: “Compare o frango grelhado e o strogonoff considerando meu perfil.”
+Mostre: comparação apoiada nas fichas e no perfil.
+Se a resposta usar afirmação sem apoio, como ‘salada sem calorias’, confira a
+ficha e diga: “Essa frase precisa de ajuste; a ficha é a referência para este dado.”
+Não apresentar essa inconsistência conhecida como funcionalidade já resolvida.
+
+6. REGISTRAR CONSUMO PELO CHAT — PARTE CENTRAL (3 MIN)
+Mensagem:
+“Comi 2 colheres de sopa de arroz integral e 1 concha de feijão. Não sobrou nada.”
+Ação: aguarde a prévia estruturada. Leia alimentos, medidas e avisos.
+Fala:
+“A Lia interpreta a mensagem e prepara um registro. A prévia permite conferir
+se o que ela entendeu corresponde ao que eu disse. Ainda não é um registro
+concluído: a confirmação é uma etapa explícita.”
+Ação: confirme pelo botão ou escreva “Confirmo.”
+Resultado: mensagem de registro concluído. Se aparecer pergunta de esclarecimento,
+responda e aguarde a prévia antes de confirmar.
+Fala: “A escrita efetiva passa pela ferramenta e pelas regras da aplicação.”
+
+7. SOBRAS, CANCELAMENTO E DESPERDÍCIO (2 MIN)
+Mensagem:
+“Comi 2 conchas de feijão e deixei meia concha no prato.”
+Ação: confira como consumo e sobra foram interpretados. Responda eventual pergunta.
+Opção A: escreva “Cancelar” na prévia para mostrar que o usuário pode desistir.
+Opção B: confirme uma prévia correta para mostrar o agregado no painel.
+Evite confirmar as duas versões do mesmo almoço durante a apresentação.
+Tela: /admin/u/1/desperdicio.
+Fala:
+“O registro pode informar também a sobra. Esses dados alimentam a visão de
+desperdício da unidade. O painel é atualizado pelo processamento de eventos,
+então pode levar alguns segundos depois da confirmação.”
+Limite: sobra superior à quantidade consumida deve provocar revisão, não uma
+confirmação automática. Pode ser demonstrado como caso opcional, sem gravar.
+
+8. PONTOS E TELAS DE ACOMPANHAMENTO (1 MIN)
+Tela: /u/1/ranking e, se útil, /admin/usuarios.
+Ação: mostre pontos após o consumo de um perfil identificado e o ranking.
+Fala:
+“Há um retorno de engajamento para o usuário e uma visão administrativa.
+A pontuação usa regras da aplicação, como a meta da refeição, prato limpo e
+sequência de dias. Pontos não são um certificado de qualidade nutricional.”
+Não prometer um ganho fixo antes de ver o resultado do registro.
+
+9. EXPLICAÇÃO TÉCNICA: MOTOR REAPROVEITÁVEL (3 MIN)
+Fala principal:
+“O motor organiza a conversa com o modelo: recebe contexto, disponibiliza
+ferramentas, acompanha os resultados e aplica validações. As regras do refeitório
+ficam em um perfil de domínio. Esse perfil informa o objetivo, o que está no
+escopo, quais ferramentas existem e como tratar ou reparar uma resposta.”
+
+“O contrato é aberto para configurar outro domínio. Podemos mudar instruções,
+ferramentas e regras específicas preservando a condução geral do agente.
+Isso dá ao modelo espaço para escolher uma sequência de consultas conforme a
+pergunta, mantendo as operações reais dentro de interfaces e permissões.”
+
+“O reaproveitamento não é simplesmente trocar o nome no prompt. Um novo domínio
+precisa implementar ferramentas, dados, permissões e validações próprias.
+A arquitetura oferece um ponto de separação para esse trabalho.”
+
+Fluxo para explicar em voz alta:
+1. Interface React envia a mensagem com o contexto de sessão e unidade.
+2. Backend Go mantém os dados e expõe operações da aplicação.
+3. O serviço Python conduz o agente e chama o provedor de modelo configurado.
+4. Ferramentas consultam dados ou preparam ações; seus resultados voltam ao agente.
+5. O usuário confirma o consumo; a aplicação persiste o registro.
+6. Eventos seguem pelo RabbitMQ para processamento, incluindo pontuação/agregados.
+
+Complementos se houver perguntas:
+• PostgreSQL guarda os dados; pgvector apoia a busca de conteúdo dos guias.
+• A recuperação de documentos pode complementar respostas com conteúdo disponível.
+• Há configuração para diferentes provedores. Nesta instalação usamos Anthropic.
+  Não foi provada equivalência de qualidade entre todos os provedores.
+• As ferramentas disponíveis dependem de identificação e permissão administrativa.
+• A escolha das ferramentas pode variar; dados e efeitos devem continuar verificáveis.
+• Não afirmar compatibilidade universal com protocolos externos sem implementação.
+
+Referências no código, se quiser abrir rapidamente:
+apps/ai/app/agent/motor/perfil.py — contrato PerfilDeDominio.
+apps/ai/app/agent/dominio/refeitorio/perfil.py — configuração do refeitório.
+apps/ai/app/agent/dominio/refeitorio/tools.py — operações oferecidas ao agente.
+Evite abrir o código durante o fluxo principal; deixe para perguntas técnicas.
+
+10. ENCERRAMENTO (30 SEGUNDOS)
+Fala:
+“O que mostramos foi um ciclo completo: dados cadastrados, perfil, consulta por
+conversa, escolha, prévia, confirmação e acompanhamento. A próxima expansão
+pode usar o mesmo desenho de motor com outro domínio e outro conjunto de
+ferramentas. A experiência continua sendo conversacional, com dados e ações
+que podemos conferir.”
+
+SE UMA RESPOSTA SAIR DIFERENTE DURANTE A DEMO
+• Pedido de esclarecimento: responda com a quantidade, o alimento ou a sobra.
+• Medida ausente: mostre a falta no cadastro; não complete com um número inventado.
+• Cardápio vazio: confira unidade/data no editor; não diga que a IA inventou pratos.
+• Prévia errada: cancele e reformule; não confirme um registro incorreto.
+• Valor nutricional duvidoso: abra a ficha e diferencie dado cadastrado de inferência.
+• Demora: aguarde; evite repetir confirmação enquanto o registro está em andamento.
+• Falha persistente: mostre a tela correspondente e descreva o limite observado.
+
+O QUE PODEMOS AFIRMAR HOJE
+Os testes anteriores cobriram os fluxos de API e conversa descritos no relatório.
+A correção de porção trouxe 1 filé/100 g em três conversas novas do caso específico.
+Ainda há variação de conteúdo e afirmações nutricionais imprecisas em respostas
+livres. Algumas referências nutricionais da base demonstrativa exigem revisão.
+A validação visual completa e Telegram não fazem parte da evidência concluída.
+Não dizer “todas as respostas estão corretas” ou “pronto para qualquer situação”.
+
+VERSÃO CURTA — 10 MINUTOS
+1 min ideia → 1 min perfil → 1 min catálogo/cardápio → 3 min chat e restrições
+→ 2 min prévia/confirmação e painel → 2 min motor e encerramento.
+Deixe criação detalhada de alimento, comparação e cancelamento para perguntas.
+
+OPERAÇÃO LOCAL
+Para iniciar os serviços já configurados:
+cd /home/victorsoffi/Apps/L_IA
+docker compose --project-name lia --env-file .env -f deploy/docker-compose.yml -f deploy/compose.local.yml up -d
+Para conferir o estado:
+docker compose --project-name lia --env-file .env -f deploy/docker-compose.yml -f deploy/compose.local.yml ps
+Configuração e credenciais ficam no .env local; não incluídas neste documento.
+Relatório e evidências: /home/victorsoffi/Apps/L_IA/docs/validacao/

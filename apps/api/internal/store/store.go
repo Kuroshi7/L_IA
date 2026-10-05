@@ -77,7 +77,7 @@ func (s *Store) GetCardapioDoDia(ctx context.Context, unidadeID int64, data stri
 		`SELECT a.id, a.unidade_id, a.nome, COALESCE(a.categoria,''),
 		        a.ingredientes, a.alergenos, a.restricoes_atendidas, a.nao_indicado_para,
 		        COALESCE(a.calorias,0), COALESCE(a.proteinas_g,0), COALESCE(a.carboidratos_g,0),
-		        COALESCE(a.gorduras_g,0), a.ativo, ci.is_proteina_do_dia
+		        COALESCE(a.gorduras_g,0), a.ativo, ci.is_proteina_do_dia, a.nutri_alimento_id
 		   FROM cardapio_itens ci
 		   JOIN alimentos a ON a.id = ci.alimento_id
 		  WHERE ci.cardapio_dia_id = $1 AND a.ativo = TRUE
@@ -93,7 +93,7 @@ func (s *Store) GetCardapioDoDia(ctx context.Context, unidadeID int64, data stri
 		var a domain.Alimento
 		if err := rows.Scan(&a.ID, &a.UnidadeID, &a.Nome, &a.Categoria,
 			&a.Ingredientes, &a.Alergenos, &a.RestricoesAtendidas, &a.NaoIndicadoPara,
-			&a.Calorias, &a.ProteinasG, &a.CarboidratosG, &a.GordurasG, &a.Ativo, &a.IsProteinaDoDia,
+			&a.Calorias, &a.ProteinasG, &a.CarboidratosG, &a.GordurasG, &a.Ativo, &a.IsProteinaDoDia, &a.NutriAlimentoID,
 		); err != nil {
 			return dia, err
 		}

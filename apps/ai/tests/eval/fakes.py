@@ -76,7 +76,7 @@ def instalar(monkeypatch, dados: dict) -> None:
     monkeypatch.setattr(t.go_api, "get_medidas_caseiras", lambda: list(dados["medidas"]))
     monkeypatch.setattr(t.go_api, "get_gamificacao", lambda usuario_id: dict(dados["gamificacao"]))
     monkeypatch.setattr(t.go_api, "calcular_consumo",
-                        lambda itens: _consumo_proporcional(dados["consumo"], itens))
+                        lambda itens, unidade_id=None: _consumo_proporcional(dados["consumo"], itens))
     monkeypatch.setattr(
         t.go_api, "get_cardapio_semana",
         lambda unidade_id, inicio="": {
@@ -86,7 +86,7 @@ def instalar(monkeypatch, dados: dict) -> None:
     )
     monkeypatch.setattr(
         t.go_api, "registrar_consumo",
-        lambda unidade_id, itens, usuario_id=None, sobras=None: {
+        lambda unidade_id, itens, usuario_id=None, sobras=None, session_id=None: {
             "consumo_id": 1, "consumido": dict(dados["consumo"]),
             "resto": {"itens": [], "kcal": 0, "gramas_totais": 0, "completo": True},
             "indice_resto_perc": 0.0,

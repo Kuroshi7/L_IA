@@ -299,11 +299,29 @@ def _pratos(dia: str) -> list[dict]:
     dia = dia or "hoje"
     cache = cache_do_turno()
     if cache is None:
-        return go_api.get_pratos(ctx.unidade_id, dia)
+        return [_com_porcao(p) for p in go_api.get_pratos(ctx.unidade_id, dia)]
     chave = ("pratos", ctx.unidade_id, dia)
     if chave not in cache:
-        cache[chave] = _anotar_conflitos(go_api.get_pratos(ctx.unidade_id, dia))
+        cache[chave] = _anotar_conflitos([_com_porcao(p) for p in go_api.get_pratos(ctx.unidade_id, dia)])
     return cache[chave]
+
+
+def _com_porcao(prato: dict) -> dict:
+    """A medida vem da referência vinculada, sem inferir pelo nome do prato."""
+    medidas = {'FILE':'filé', 'CO':'concha', 'COL S':'colher de sopa',
+               'COL A':'colher de arroz', 'FAT':'fatia', 'PEG':'pegador'}
+    porcoes = []
+    for p in prato.get('porcoes') or []:
+        medida = medidas.get(p.get('medida_cod'))
+        if medida:
+            porcoes.append({'quantidade':1, 'medida':medida, 'gramas':p['quantidade_g'],
+                            'rotulo_cadastrado':p['medida_label'],
+                            'fonte':'referência nutricional vinculada'})
+    # Filé tem prioridade sobre cortes alternativos da referência genérica.
+    porcoes.sort(key=lambda p: p['medida'] != 'filé')
+    return {**prato, 'porcoes_caseiras':porcoes,
+            'porcao_referencia':porcoes[0] if porcoes else None,
+            'porcao_status':'cadastrada' if porcoes else 'sem_medida_caseira_cadastrada'}
 
 
 def _vocabulario_de_restricoes(pratos: list[dict]) -> list[str]:
@@ -574,7 +592,7 @@ def comparar_pratos(
     if ids:
         pratos = [p for p in pratos if p["id"] in ids]
 
-    resultado = [{"id": p["id"], "nome": p["nome"], "criterio": criterio, "valor": p.get(chave, 0)} for p in pratos]
+    resultado = [{**filters.resumir(p), "criterio": criterio, "valor": p.get(chave, 0)} for p in pratos]
     resultado.sort(key=lambda x: x["valor"], reverse=True)
     return resultado
 
@@ -648,6 +666,12 @@ def _linha_item(item: dict) -> str:
 def _texto_previa(previa: dict, q: Qualidade) -> str:
     consumido = previa.get("consumido") or {}
     resto = previa.get("resto") or {}
+    if q.tudo_ignorado:
+        return (
+            "Não reconheci nenhum dos alimentos: " + ", ".join(sorted(set(q.ignorados)))
+            + ". **Não salvei nada** e esses itens ficaram fora do cálculo. "
+            "Descreva os alimentos de forma mais simples para eu preparar uma nova prévia."
+        )
     linhas = ["Preparei a prévia — **nada foi salvo ainda**.", "", "Você comeu:"]
     linhas.extend(_linha_item(i) for i in (consumido.get("itens") or []))
     linhas.append(f"Total calculado: **{_numero(_kcal(consumido))} kcal**.")
@@ -664,7 +688,11 @@ def _texto_previa(previa: dict, q: Qualidade) -> str:
         )
     elif q.imprecisos:
         linhas.append("Alguns valores são aproximados; deixei isso sinalizado no resumo.")
-    linhas.extend(["", "Está correto? Confirme para eu registrar e calcular seus pontos."])
+    if _incoerencia(consumido, resto):
+        linhas.extend(["", "As sobras informadas são maiores que o consumo informado. "
+                       "Confira as quantidades e me diga o que precisa corrigir antes de registrar."])
+    else:
+        linhas.extend(["", "Está correto? Confirme para eu registrar e calcular seus pontos."])
     return "\n".join(linhas)
 
 
@@ -739,7 +767,7 @@ def preparar_previa_consumo(itens: list[dict], sobras: list[dict]) -> dict:
         "resposta": _texto_previa(previa, q),
         "experiencia": {
             "tipo": "consumo_previa", "consumido": consumido,
-            "resto": resto, "pode_confirmar": not bool(_incoerencia(consumido, resto)),
+            "resto": resto, "pode_confirmar": not q.tudo_ignorado and not bool(_incoerencia(consumido, resto)),
         },
         "acao_pendente": acao,
         "resultado_tool": anexar_ao_resultado(resultado_tool, " ".join(notas)),

@@ -1,0 +1,23 @@
+go: downloading github.com/go-chi/chi/v5 v5.3.0
+go: downloading github.com/joho/godotenv v1.5.1
+go: downloading golang.org/x/text v0.38.0
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/rabbitmq/amqp091-go v1.11.0
+go: downloading github.com/jackc/pgx/v5 v5.9.2
+go: downloading golang.org/x/crypto v0.53.0
+go: downloading github.com/jackc/puddle/v2 v2.2.2
+go: downloading github.com/jackc/pgpassfile v1.0.0
+go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+go: downloading golang.org/x/sync v0.21.0
+?   	github.com/tamy-ai/menu-ai/api/cmd/api	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/cmd/seed	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/cmd/worker	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/internal/chat	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/internal/config	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/internal/db	[no test files]
+ok  	github.com/tamy-ai/menu-ai/api/internal/domain	0.006s
+?   	github.com/tamy-ai/menu-ai/api/internal/httpapi	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/internal/queue	[no test files]
+ok  	github.com/tamy-ai/menu-ai/api/internal/store	0.005s
+?   	github.com/tamy-ai/menu-ai/api/migrations	[no test files]
+?   	github.com/tamy-ai/menu-ai/api/seed	[no test files]

@@ -267,6 +267,60 @@ func TestIntegracaoNivelERanking(t *testing.T) {
 
 // TestIntegracaoDesperdicio cobre o ETL do worker (agregado diário) com a
 // idempotência do inbox e o resumo lido pelo dashboard admin.
+func TestIntegracaoCardapioPreservaReferenciaDaPorcao(t *testing.T) {
+	limpar(t)
+	unidadeID := seedBase(t)
+	ctx := context.Background()
+	var refID int64
+	if err := pool.QueryRow(ctx, `SELECT id FROM nutri_alimentos LIMIT 1`).Scan(&refID); err != nil {
+		t.Fatal(err)
+	}
+	alimento, err := st.CreateAlimento(ctx, unidadeID, domain.AlimentoInput{
+		Nome: "Arroz cadastrado", Ativo: true, NutriAlimentoID: &refID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.SetCardapioItens(ctx, unidadeID, "2026-10-05", []domain.CardapioItemInput{{AlimentoID: alimento.ID}}); err != nil {
+		t.Fatal(err)
+	}
+	dia, err := st.GetCardapioDoDia(ctx, unidadeID, "2026-10-05")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dia.Pratos) != 1 || dia.Pratos[0].NutriAlimentoID == nil || *dia.Pratos[0].NutriAlimentoID != refID {
+		t.Fatalf("cardápio perdeu a referência nutricional: %+v", dia.Pratos)
+	}
+}
+
+func TestIntegracaoDesperdicioSemSobrasENullLegado(t *testing.T) {
+	limpar(t)
+	unidadeID := seedBase(t)
+	u := criarUsuario(t, unidadeID, "QA prato limpo")
+	ctx := context.Background()
+	registro := registrar(t, unidadeID, u.ID, 2, 0)
+	var tipo string
+	if err := pool.QueryRow(ctx, `SELECT jsonb_typeof(resto_itens) FROM consumos WHERE id=$1`, registro.ConsumoID).Scan(&tipo); err != nil {
+		t.Fatal(err)
+	}
+	if tipo != "array" {
+		t.Fatalf("sobras vazias devem ser array, veio %s", tipo)
+	}
+	// Registros anteriores guardavam JSON null; o dashboard deve tolerá-los.
+	if _, err := pool.Exec(ctx, `UPDATE consumos SET resto_itens='null'::jsonb WHERE id=$1`, registro.ConsumoID); err != nil {
+		t.Fatal(err)
+	}
+	loc, _ := time.LoadLocation("America/Sao_Paulo")
+	hoje := time.Now().In(loc).Format("2006-01-02")
+	resumo, err := st.GetDesperdicioResumo(ctx, unidadeID, hoje, hoje)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resumo.TopDesperdicados) != 0 {
+		t.Fatalf("sem sobras não deve gerar top: %+v", resumo.TopDesperdicados)
+	}
+}
+
 func TestIntegracaoDesperdicio(t *testing.T) {
 	limpar(t)
 	unidadeID := seedBase(t)
@@ -545,7 +599,7 @@ func TestIntegracaoPorcaoSuspeitaRebaixaConfianca(t *testing.T) {
 
 	tot, err := st.CalcularConsumo(ctx, []domain.ConsumoItemEntrada{
 		{Alimento: "feijao", Medida: "concha", Quantidade: 1},
-	})
+	}, store.EscopoCardapio{})
 	if err != nil {
 		t.Fatalf("calcular: %v", err)
 	}

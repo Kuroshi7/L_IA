@@ -1,0 +1,40 @@
+Readiness 200 PASS
+Saudação 200 PASS
+Admin protegido 401 PASS
+Listar unidades 200 PASS
+Cardápio Central 200 PASS
+Cardápio Norte 200 PASS
+Criar unidade QA 201 PASS
+Editar unidade 200 PASS
+Referência para prato 200 PASS
+Cadastrar alimento 201 PASS
+Editar alimento 200 PASS
+Publicar cardápio 200 PASS
+Cardápio publicado 200 PASS
+Cardápio semanal 200 PASS
+Copiar semana 200 PASS
+Inativar alimento 200 PASS
+Reativar alimento 200 PASS
+Busca nutricional 200 PASS
+Cadastro com perfil 201 PASS
+Login válido 200 PASS
+Login inválido 401 PASS
+Telefone duplicado 409 PASS
+Recuperar perfil 200 PASS
+Atualizar perfil 200 PASS
+Gamificação inicial 200 PASS
+Cardápio via chat 200 PASS
+Recomendação com alergia 200 PASS
+Consumo e sobras 200 PASS
+Confirmar consumo 200 PASS
+Confirmar prévia estruturada 200 PASS
+Histórico persistido 200 PASS
+Gamificação após consumo 200 PASS
+Ranking 200 PASS
+Admin usuários 200 PASS
+Desperdício 200 PASS
+Fora de escopo 200 PASS
+Apagar conversa QA 200 PASS
+Histórico limpo 200 PASS
+Inativar unidade QA 200 PASS
+Concluído: 39 verificações HTTP

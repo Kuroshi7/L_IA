@@ -25,21 +25,22 @@ type Usuario struct {
 }
 
 type Alimento struct {
-	ID                  int64    `json:"id"`
-	UnidadeID           int64    `json:"unidade_id"`
-	Nome                string   `json:"nome"`
-	Categoria           string   `json:"categoria"`
-	Ingredientes        []string `json:"ingredientes"`
-	Alergenos           []string `json:"alergenos"`
-	RestricoesAtendidas []string `json:"restricoes_atendidas"`
-	NaoIndicadoPara     []string `json:"nao_indicado_para"`
-	Calorias            int      `json:"calorias"`
-	ProteinasG          float64  `json:"proteinas_g"`
-	CarboidratosG       float64  `json:"carboidratos_g"`
-	GordurasG           float64  `json:"gorduras_g"`
-	Ativo               bool     `json:"ativo"`
-	IsProteinaDoDia     bool     `json:"is_proteina_do_dia"`
-	NutriAlimentoID     *int64   `json:"nutri_alimento_id,omitempty"`
+	ID                  int64         `json:"id"`
+	UnidadeID           int64         `json:"unidade_id"`
+	Nome                string        `json:"nome"`
+	Categoria           string        `json:"categoria"`
+	Ingredientes        []string      `json:"ingredientes"`
+	Alergenos           []string      `json:"alergenos"`
+	RestricoesAtendidas []string      `json:"restricoes_atendidas"`
+	NaoIndicadoPara     []string      `json:"nao_indicado_para"`
+	Calorias            int           `json:"calorias"`
+	ProteinasG          float64       `json:"proteinas_g"`
+	CarboidratosG       float64       `json:"carboidratos_g"`
+	GordurasG           float64       `json:"gorduras_g"`
+	Ativo               bool          `json:"ativo"`
+	IsProteinaDoDia     bool          `json:"is_proteina_do_dia"`
+	NutriAlimentoID     *int64        `json:"nutri_alimento_id,omitempty"`
+	Porcoes             []NutriPorcao `json:"porcoes,omitempty"`
 }
 
 type CardapioDia struct {

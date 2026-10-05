@@ -159,6 +159,6 @@ def test_nenhum_campo_do_perfil_ficou_sem_consumidor():
               # consumido em motor/turn.py: quando motor/erros.py classifica a
               # falha como permanente, "tente de novo" seria mentira.
               "resposta_erro_permanente",
-              "reminders", "regras", "pos_processar"}
+              "reminders", "regras", "pos_processar", "reparar_resposta"}
     declarados = set(PerfilDeDominio.__dataclass_fields__)
     assert declarados == usados, f"campo sem consumidor neste teste: {declarados - usados}"

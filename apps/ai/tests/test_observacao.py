@@ -92,15 +92,13 @@ def test_listagem_vazia_proibe_sugestao(monkeypatch):
     assert "NÃO sugira" in out["nota_do_sistema"]
 
 
-def test_listagem_nao_expoe_numeros_que_nao_mostrou(turno):
-    # `listar_pratos_do_dia` devolve só {id, nome, categoria} — a kcal NUNCA foi
-    # mostrada ao modelo. Se ela entrasse em valores_expostos, um número
-    # inventado passaria batido na validação.
-    t.listar_pratos_do_dia.invoke({"dia": "hoje"})
+def test_listagem_observa_apenas_valores_retornados(turno):
+    out = t.listar_pratos_do_dia.invoke({"dia": "hoje"})
     obs = observacoes_do_turno()
-
     assert "frango grelhado" in obs.itens_conhecidos
-    assert 180.0 not in obs.valores_expostos
+    assert 180.0 in obs.valores_expostos
+    assert any(p.get("calorias") == 180.0 for p in out["pratos"])
+    assert 999.0 not in obs.valores_expostos
 
 
 def test_id_nao_vira_valor_exposto(turno):

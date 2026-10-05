@@ -1,0 +1,726 @@
+[
+  {
+    "label": "Perfil QA bordas",
+    "data": {
+      "perfil": {
+        "nome": "QA Bordas",
+        "restricoes": [],
+        "preferencias": [],
+        "alergias": []
+      },
+      "usuario": {
+        "id": 10,
+        "unidade_id": 1,
+        "nome": "QA Bordas",
+        "restricoes": [],
+        "preferencias": [],
+        "alergias": []
+      }
+    }
+  },
+  {
+    "label": "Consumo repetição 1",
+    "data": {
+      "session_id": "ddf0d8cf-9604-43a5-b73a-efd0630f9d99",
+      "resposta": "Preparei a prévia — **nada foi salvo ainda**.\n\nVocê comeu:\n- 2 concha de Arroz Integral Cozido — 601,4 kcal\n- 1 concha de Feijão-Preto Cozido — 55,2 kcal\nTotal calculado: **656,6 kcal**.\n\nSobras: **nenhuma**.\nAlguns valores são aproximados; deixei isso sinalizado no resumo.\n\nEstá correto? Confirme para eu registrar e calcular seus pontos.",
+      "fora_de_escopo": false,
+      "confianca": {
+        "nivel": "aproximada",
+        "aproximados": [
+          "arroz integral"
+        ]
+      },
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 117.30000000000001,
+          "completo": true,
+          "gordura_g": 14.18,
+          "gramas_totais": 314,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 107.54,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "concha",
+                "quantidade": 2
+              },
+              "gordura_g": 13.94,
+              "gramas_totais": 234,
+              "kcal": 601.38,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 11.38
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 656.58,
+          "proteina_g": 14.9
+        },
+        "pode_confirmar": true,
+        "resto": {},
+        "tipo": "consumo_previa"
+      }
+    }
+  },
+  {
+    "label": "Cancelar prévia",
+    "data": {
+      "session_id": "ddf0d8cf-9604-43a5-b73a-efd0630f9d99",
+      "resposta": "Tudo bem — não salvei nada. Me diga o que precisa corrigir e eu preparo uma nova prévia.",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "tipo": "consumo_cancelado"
+      }
+    }
+  },
+  {
+    "label": "Consumo repetição 2",
+    "data": {
+      "session_id": "febc0fea-666a-4cad-92dc-ed6fd0ed7852",
+      "resposta": "Preparei a prévia — **nada foi salvo ainda**.\n\nVocê comeu:\n- 2 concha de Arroz Integral Cozido — 601,4 kcal\n- 1 concha de Feijão-Preto Cozido — 55,2 kcal\nTotal calculado: **656,6 kcal**.\n\nSobras: **nenhuma**.\nAlguns valores são aproximados; deixei isso sinalizado no resumo.\n\nEstá correto? Confirme para eu registrar e calcular seus pontos.",
+      "fora_de_escopo": false,
+      "confianca": {
+        "nivel": "aproximada",
+        "aproximados": [
+          "arroz integral"
+        ]
+      },
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 117.30000000000001,
+          "completo": true,
+          "gordura_g": 14.18,
+          "gramas_totais": 314,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 107.54,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "concha",
+                "quantidade": 2
+              },
+              "gordura_g": 13.94,
+              "gramas_totais": 234,
+              "kcal": 601.38,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 11.38
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 656.58,
+          "proteina_g": 14.9
+        },
+        "pode_confirmar": true,
+        "resto": {},
+        "tipo": "consumo_previa"
+      }
+    }
+  },
+  {
+    "label": "Confirmar prévia",
+    "data": {
+      "session_id": "febc0fea-666a-4cad-92dc-ed6fd0ed7852",
+      "resposta": "Registro confirmado ✓\n- Consumo: **656,6 kcal**\n- Desperdício: **0%**\n- Pontos ganhos: **+30**\n- Total: **30 pontos** · nível 1 · sequência de 1 dia(s)",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 117.30000000000001,
+          "completo": true,
+          "gordura_g": 14.18,
+          "gramas_totais": 314,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 107.54,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "concha",
+                "quantidade": 2
+              },
+              "gordura_g": 13.94,
+              "gramas_totais": 234,
+              "kcal": 601.38,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 11.38
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 656.58,
+          "proteina_g": 14.9
+        },
+        "consumo_id": 5,
+        "gamificacao": {
+          "nivel": 1,
+          "pontos": 30,
+          "streak_dias": 1,
+          "ultimo_registro": "2026-10-05T00:00:00Z",
+          "usuario_id": 10
+        },
+        "indice_resto_perc": 0,
+        "pontuacao": {
+          "bonus_prato_limpo": 20,
+          "bonus_streak": 0,
+          "meta_kcal_refeicao": 0,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "pontos": 30,
+          "pontos_base": 10
+        },
+        "resto": {
+          "carboidrato_g": 0,
+          "completo": true,
+          "gordura_g": 0,
+          "gramas_totais": 0,
+          "itens": null,
+          "kcal": 0,
+          "proteina_g": 0
+        },
+        "tipo": "consumo_registrado"
+      }
+    }
+  },
+  {
+    "label": "Pontos antes de replay",
+    "data": {
+      "eventos": [
+        {
+          "id": 5,
+          "pontos": 30,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "created_at": "2026-10-05T17:40:46.646322Z"
+        }
+      ],
+      "gamificacao": {
+        "usuario_id": 10,
+        "pontos": 30,
+        "nivel": 1,
+        "streak_dias": 1,
+        "ultimo_registro": "2026-10-05T00:00:00Z"
+      }
+    }
+  },
+  {
+    "label": "Confirmar novamente",
+    "data": {
+      "session_id": "febc0fea-666a-4cad-92dc-ed6fd0ed7852",
+      "resposta": "Já registrei! 🎉 Seu consumo foi salvo com sucesso.\n\nPróxima refeição, é só me chamar — vamos escolher algo gostoso e que combine com você!",
+      "fora_de_escopo": false
+    }
+  },
+  {
+    "label": "Pontos depois de replay",
+    "data": {
+      "eventos": [
+        {
+          "id": 5,
+          "pontos": 30,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "created_at": "2026-10-05T17:40:46.646322Z"
+        }
+      ],
+      "gamificacao": {
+        "usuario_id": 10,
+        "pontos": 30,
+        "nivel": 1,
+        "streak_dias": 1,
+        "ultimo_registro": "2026-10-05T00:00:00Z"
+      }
+    }
+  },
+  {
+    "label": "Consumo repetição 3",
+    "data": {
+      "session_id": "e5ed2a72-341b-483e-bbaf-8d2f3ef64f8f",
+      "resposta": "Preparei a prévia — **nada foi salvo ainda**.\n\nVocê comeu:\n- 2 concha de Arroz Integral Cozido — 601,4 kcal\n- 1 concha de Feijão-Preto Cozido — 55,2 kcal\nTotal calculado: **656,6 kcal**.\n\nSobras: **nenhuma**.\nAlguns valores são aproximados; deixei isso sinalizado no resumo.\n\nEstá correto? Confirme para eu registrar e calcular seus pontos.",
+      "fora_de_escopo": false,
+      "confianca": {
+        "nivel": "aproximada",
+        "aproximados": [
+          "arroz integral"
+        ]
+      },
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 117.30000000000001,
+          "completo": true,
+          "gordura_g": 14.18,
+          "gramas_totais": 314,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 107.54,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "concha",
+                "quantidade": 2
+              },
+              "gordura_g": 13.94,
+              "gramas_totais": 234,
+              "kcal": 601.38,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 11.38
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 656.58,
+          "proteina_g": 14.9
+        },
+        "pode_confirmar": true,
+        "resto": {},
+        "tipo": "consumo_previa"
+      }
+    }
+  },
+  {
+    "label": "Confirmar prévia",
+    "data": {
+      "session_id": "e5ed2a72-341b-483e-bbaf-8d2f3ef64f8f",
+      "resposta": "Registro confirmado ✓\n- Consumo: **656,6 kcal**\n- Desperdício: **0%**\n- Pontos ganhos: **+30**\n- Total: **60 pontos** · nível 1 · sequência de 1 dia(s)",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 117.30000000000001,
+          "completo": true,
+          "gordura_g": 14.18,
+          "gramas_totais": 314,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 107.54,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "concha",
+                "quantidade": 2
+              },
+              "gordura_g": 13.94,
+              "gramas_totais": 234,
+              "kcal": 601.38,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 11.38
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 656.58,
+          "proteina_g": 14.9
+        },
+        "consumo_id": 6,
+        "gamificacao": {
+          "nivel": 1,
+          "pontos": 60,
+          "streak_dias": 1,
+          "ultimo_registro": "2026-10-05T00:00:00Z",
+          "usuario_id": 10
+        },
+        "indice_resto_perc": 0,
+        "pontuacao": {
+          "bonus_prato_limpo": 20,
+          "bonus_streak": 0,
+          "meta_kcal_refeicao": 0,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "pontos": 30,
+          "pontos_base": 10
+        },
+        "resto": {
+          "carboidrato_g": 0,
+          "completo": true,
+          "gordura_g": 0,
+          "gramas_totais": 0,
+          "itens": null,
+          "kcal": 0,
+          "proteina_g": 0
+        },
+        "tipo": "consumo_registrado"
+      }
+    }
+  },
+  {
+    "label": "Pontos antes de replay",
+    "data": {
+      "eventos": [
+        {
+          "id": 6,
+          "pontos": 30,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "created_at": "2026-10-05T17:40:53.674737Z"
+        },
+        {
+          "id": 5,
+          "pontos": 30,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "created_at": "2026-10-05T17:40:46.646322Z"
+        }
+      ],
+      "gamificacao": {
+        "usuario_id": 10,
+        "pontos": 60,
+        "nivel": 1,
+        "streak_dias": 1,
+        "ultimo_registro": "2026-10-05T00:00:00Z"
+      }
+    }
+  },
+  {
+    "label": "Confirmar novamente",
+    "data": {
+      "session_id": "e5ed2a72-341b-483e-bbaf-8d2f3ef64f8f",
+      "resposta": "Entendi! Você já confirmou o registro anterior. Tudo pronto — seus **60 pontos** foram salvos. 🎉\n\nPrecisa de algo mais? Quer ver o cardápio de hoje, uma recomendação para a próxima refeição, ou tem dúvida sobre pontuação?",
+      "fora_de_escopo": false
+    }
+  },
+  {
+    "label": "Pontos depois de replay",
+    "data": {
+      "eventos": [
+        {
+          "id": 6,
+          "pontos": 30,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "created_at": "2026-10-05T17:40:53.674737Z"
+        },
+        {
+          "id": 5,
+          "pontos": 30,
+          "motivo": "registro de consumo (sem meta calórica no perfil)",
+          "created_at": "2026-10-05T17:40:46.646322Z"
+        }
+      ],
+      "gamificacao": {
+        "usuario_id": 10,
+        "pontos": 60,
+        "nivel": 1,
+        "streak_dias": 1,
+        "ultimo_registro": "2026-10-05T00:00:00Z"
+      }
+    }
+  },
+  {
+    "label": "Alimento desconhecido",
+    "data": {
+      "session_id": "0219739a-a013-4240-9998-2acd377a7f7d",
+      "resposta": "Não reconheci nenhum dos alimentos: xyzabc. **Não salvei nada** e esses itens ficaram fora do cálculo. Descreva os alimentos de forma mais simples para eu preparar uma nova prévia.",
+      "fora_de_escopo": false,
+      "confianca": {
+        "nivel": "parcial",
+        "nao_reconhecidos": [
+          "xyzabc"
+        ]
+      },
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 0,
+          "completo": false,
+          "gordura_g": 0,
+          "gramas_totais": 0,
+          "itens": [
+            {
+              "alimento_resolvido": "",
+              "carboidrato_g": 0,
+              "confianca": "baixa",
+              "entrada": {
+                "alimento": "xyzabc",
+                "medida": "unidade",
+                "quantidade": 1
+              },
+              "gordura_g": 0,
+              "gramas_totais": 0,
+              "kcal": 0,
+              "obs": "alimento não encontrado na base",
+              "porcao_resolvida": "",
+              "procedencia": "base_geral",
+              "proteina_g": 0
+            }
+          ],
+          "itens_ignorados": [
+            "xyzabc"
+          ],
+          "kcal": 0,
+          "proteina_g": 0
+        },
+        "pode_confirmar": false,
+        "resto": {},
+        "tipo": "consumo_previa"
+      }
+    }
+  },
+  {
+    "label": "Sobra incoerente",
+    "data": {
+      "session_id": "b8f09b82-2d25-4c23-860a-617e6d601745",
+      "resposta": "Preparei a prévia — **nada foi salvo ainda**.\n\nVocê comeu:\n- 1 concha de Arroz Integral Cozido — 300,7 kcal\nTotal calculado: **300,7 kcal**.\n\nSobrou no prato:\n- 3 concha de Arroz Integral Cozido — 902,1 kcal\nTotal das sobras: **902,1 kcal**.\nAlguns valores são aproximados; deixei isso sinalizado no resumo.\n\nAs sobras informadas são maiores que o consumo informado. Confira as quantidades e me diga o que precisa corrigir antes de registrar.",
+      "fora_de_escopo": false,
+      "confianca": {
+        "nivel": "aproximada",
+        "aproximados": [
+          "arroz"
+        ]
+      },
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 53.77,
+          "completo": true,
+          "gordura_g": 6.97,
+          "gramas_totais": 117,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 53.77,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 6.97,
+              "gramas_totais": 117,
+              "kcal": 300.69,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 5.69
+            }
+          ],
+          "kcal": 300.69,
+          "proteina_g": 5.69
+        },
+        "pode_confirmar": false,
+        "resto": {
+          "carboidrato_g": 161.31,
+          "completo": true,
+          "gordura_g": 20.91,
+          "gramas_totais": 351,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 161.31,
+              "confianca": "media",
+              "entrada": {
+                "alimento": "arroz",
+                "medida": "concha",
+                "quantidade": 3
+              },
+              "gordura_g": 20.91,
+              "gramas_totais": 351,
+              "kcal": 902.0699999999999,
+              "kcal_declarada_cardapio": 110,
+              "obs": "valor da tabela marcado para revisão nutricional; trate como aproximação",
+              "porcao_resolvida": "CO M CH",
+              "procedencia": "cardapio",
+              "proteina_g": 17.07
+            }
+          ],
+          "kcal": 902.0699999999999,
+          "proteina_g": 17.07
+        },
+        "tipo": "consumo_previa"
+      }
+    }
+  },
+  {
+    "label": "Cardápio não publicado",
+    "data": {
+      "session_id": "842d7db8-563a-4c51-8917-2a2004ace807",
+      "resposta": "Oi! Não consigo consultar o cardápio de datas tão distantes — o sistema só tem informações do cardápio próximo (semanas atuais e futuras próximas).\n\nAlém disso, 2030-01-01 é uma data muito à frente. 😊\n\nSe você quer ver o cardápio de **amanhã** ou de **outro dia da semana que vem**, posso ajudar! Qual dia você gostaria de consultar?",
+      "fora_de_escopo": false
+    }
+  },
+  {
+    "label": "Outro refeitório",
+    "data": {
+      "session_id": "edd76252-be08-4211-9e39-7e3783db97de",
+      "resposta": "Desculpa, mas não tenho acesso ao cardápio de outras unidades — só consigo trabalhar com o cardápio da unidade atual desta conversa. 🍽️\n\nSe você está no Refeitório Norte, posso mostrar o cardápio de hoje sem problema! Quer que eu liste os pratos?",
+      "fora_de_escopo": false
+    }
+  },
+  {
+    "label": "Orientação de saúde",
+    "data": {
+      "session_id": "c76f3747-98d4-47df-8669-f4bbe80ac872",
+      "resposta": "Oi, QA! Tudo bem? \n\nVocê mencionou que tem diabetes — vou mostrar as opções de hoje pensando nisso. Aqui está o cardápio:\n\n🍽️ **Cardápio de hoje:**\n- **Arroz Integral** (Acompanhamento) — 110 kcal\n- **Feijão Carioca** (Acompanhamento) — 95 kcal\n- **Frango Grelhado** (Proteína) — 165 kcal\n- **Strogonoff de Grão-de-Bico** (Proteína) — 220 kcal\n- **Salada Verde** (Salada) — 30 kcal\n\n---\n\n**Minhas sugestões para você:**\n\n- Nutrição: 165 kcal | 31g proteína | 0g carboidrato\n\n🍽️ **Arroz Integral + Feijão Carioca** — o arroz integral é mais lento para virar açúcar no sangue do que o branco, e o feijão tem fibra que ajuda a controlar. Juntos formam uma boa dupla.\n- Nutrição: 205 kcal | 9g proteína | 40g carboidrato\n\n🍽️ **Salada Verde** — leve, sem açúcar, ótima para acompanhar qualquer proteína.\n- Nutrição: 30 kcal | 2g proteína | 5g carboidrato\n\nVocê pode montar um prato combinando a proteína (Frango), um acompanhamento (Arroz Integral ou Feijão) e a Salada — assim fica equilibrado.\n\nIsso aqui é orientação geral — para um plano do seu caso, vale conversar com seu médico ou nutricionista, combinado?",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "fonte": "Cardápio da unidade",
+        "pratos": [
+          {
+            "calorias": 110,
+            "carboidratos_g": 23,
+            "categoria": "Acompanhamento",
+            "conflita_com_perfil": [],
+            "gorduras_g": 1,
+            "id": 3,
+            "ingredientes": [
+              "arroz integral"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Arroz Integral",
+            "proteinas_g": 3
+          },
+          {
+            "calorias": 95,
+            "carboidratos_g": 17,
+            "categoria": "Acompanhamento",
+            "conflita_com_perfil": [],
+            "gorduras_g": 1,
+            "id": 4,
+            "ingredientes": [
+              "feijao carioca"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Feijão Carioca",
+            "proteinas_g": 6
+          },
+          {
+            "calorias": 165,
+            "carboidratos_g": 0,
+            "categoria": "Proteína",
+            "conflita_com_perfil": [],
+            "gorduras_g": 4,
+            "id": 1,
+            "ingredientes": [
+              "frango",
+              "azeite",
+              "alho"
+            ],
+            "is_proteina_do_dia": true,
+            "nome": "Frango Grelhado",
+            "proteinas_g": 31
+          },
+          {
+            "calorias": 220,
+            "carboidratos_g": 30,
+            "categoria": "Proteína",
+            "conflita_com_perfil": [],
+            "gorduras_g": 8,
+            "id": 2,
+            "ingredientes": [
+              "grao-de-bico",
+              "creme de leite",
+              "tomate"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Strogonoff de Grão-de-Bico",
+            "proteinas_g": 12
+          },
+          {
+            "calorias": 30,
+            "carboidratos_g": 5,
+            "categoria": "Salada",
+            "conflita_com_perfil": [],
+            "gorduras_g": 0,
+            "id": 5,
+            "ingredientes": [
+              "alface",
+              "rucula",
+              "tomate"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Salada Verde",
+            "proteinas_g": 2
+          }
+        ],
+        "tipo": "cardapio",
+        "titulo": "Cardápio consultado"
+      }
+    }
+  }
+]

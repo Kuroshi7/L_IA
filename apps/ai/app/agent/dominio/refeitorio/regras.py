@@ -211,7 +211,7 @@ def _numero_nao_exposto(a: Achado) -> str | None:
     return f"números citados que nenhuma tool expôs: {fora}"
 
 def reparar_resposta(resposta: str, veredicto, observacoes) -> str:
-    """Remove linhas com números que nenhuma tool expôs.
+    """Retira somente os valores sem procedência, preservando prato e porção.
 
     Reparo conservador: não tenta adivinhar o valor correto e não faz outra
     inferência. O card estruturado usa a ficha real; a prosa mantém apenas o que
@@ -224,10 +224,15 @@ def reparar_resposta(resposta: str, veredicto, observacoes) -> str:
     linhas_seguras = []
     removeu = False
     for linha in resposta.splitlines():
-        if _numero_nao_exposto(Achado(linha, (), observacoes)):
-            removeu = True
-            continue
-        linhas_seguras.append(linha)
+        def substituir(match):
+            nonlocal removeu
+            if _numero_nao_exposto(Achado(match.group(), (), observacoes)):
+                removeu = True
+                return "(valor não confirmado)"
+            return match.group()
+        limpa = _NUMERO_COM_UNIDADE.sub(substituir, linha)
+        limpa = re.sub(r"\d+(?:[.,]\d+)?\s*[-–]\s*\(valor não confirmado\)", "(valor não confirmado)", limpa)
+        linhas_seguras.append(limpa)
     reparada = "\n".join(linhas_seguras).strip()
     if not reparada:
         reparada = "Consultei o cardápio, mas retirei valores que não estavam confirmados na ficha."

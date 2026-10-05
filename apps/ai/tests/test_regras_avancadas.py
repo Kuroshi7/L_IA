@@ -113,12 +113,12 @@ def test_resposta_limpa_passa_em_tudo():
     assert v and v.ok and v.violacoes == ()
 
 
-def test_veredicto_nao_bloqueia_por_padrao():
-    # Default log-only: nenhuma regra tem taxa de falso positivo medida ainda.
+def test_numero_inventado_bloqueia_por_padrao():
+    # R3 impede publicar valores que não foram retornados pelas tools.
     v = verificar_resposta("Recomendo **Lasanha inventada** com 999 kcal.",
                            tools_chamadas=TOOLS_CARDAPIO, observacoes=_obs(CARDAPIO))
     assert not v.ok
-    assert not v.bloqueia
+    assert v.bloqueia
 
 
 def test_todas_as_regras_do_perfil_tem_id_unico():

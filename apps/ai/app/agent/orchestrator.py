@@ -88,10 +88,6 @@ def processar_mensagem(
         session_id[:12], unidade_id, mensagem[:120],
     )
 
-    if not PERFIL.esta_no_escopo(mensagem, len(historico) > 0):
-        log.info("REQ END | fora de escopo")
-        return {"resposta": PERFIL.resposta_fora_de_escopo, "fora_de_escopo": True}
-
     contexto = RequestContext(
         unidade_id=unidade_id, usuario_id=usuario_id, is_admin=is_admin,
         session_id=session_id, acao_pendente=acao_pendente,
@@ -101,6 +97,9 @@ def processar_mensagem(
     try:
         direto = _resolver_acao_pendente(mensagem, acao_pendente)
         if direto is None:
+            if not PERFIL.esta_no_escopo(mensagem, len(historico) > 0):
+                log.info("REQ END | fora de escopo")
+                return {"resposta": PERFIL.resposta_fora_de_escopo, "fora_de_escopo": True}
             resultado = turn.executar_turno(
                 PERFIL,
                 mensagem,

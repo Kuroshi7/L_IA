@@ -1,0 +1,46 @@
+LIA — COLA DO APRESENTADOR
+http://localhost:5273 • roteiro completo: ROTEIRO-APRESENTACAO.txt
+
+ANTES: verificar cardápio de hoje; perfil fictício; abas chat/admin; unidade
+separada para alterações. Não exibir credenciais. Token local de gestão: dev-admin.
+
+SEQUÊNCIA / FALA-CHAVE
+1. Ideia: conversa conecta usuário e refeitório; telas tornam dados verificáveis.
+2. /perfil: criar perfil fictício; mostrar alergia a leite e preferências.
+3. /admin → alimentos: mostrar ingredientes e referência de medida caseira.
+4. /admin/u/1/cardapio: data + pratos; /unidades: Refeitório Central.
+5. /u/1/chat: consultar, recomendar e mostrar restrições.
+6. Consumo: prévia → conferir → confirmar → registro concluído.
+7. Sobras/cancelamento; /admin/u/1/desperdicio: agregado após processamento.
+8. /u/1/ranking: pontos; não prometer valor fixo.
+9. Motor: condução genérica + perfil de domínio + ferramentas + validações.
+
+MENSAGENS PARA COPIAR — UMA POR VEZ
+Qual é o cardápio de hoje?
+
+Quero algo com bastante proteína, quanto eu ponho no prato?
+
+Tenho alergia a leite. O Strogonoff de Grão-de-Bico é uma opção?
+
+Compare o frango grelhado e o strogonoff considerando meu perfil.
+
+Comi 2 colheres de sopa de arroz integral e 1 concha de feijão. Não sobrou nada.
+
+Confirmo.
+
+Comi 2 conchas de feijão e deixei meia concha no prato.
+
+Cancelar
+
+MOTOR — FALA EM 30 SEGUNDOS
+“O motor conduz a conversa e o uso das ferramentas. O perfil de domínio define
+objetivo, escopo, operações e validações. Para outro contexto, implementamos
+outro perfil e suas ferramentas. A IA escolhe como consultar; a aplicação
+controla acesso, dados e confirmação das ações.”
+
+ATENÇÃO
+Conta e alimentos são criados nas telas; consumo/sobras pelo chat.
+Despesas financeiras não estão implementadas neste roteiro.
+1 filé/100 g é a medida cadastrada do cenário de frango testado, não regra geral.
+Perguntas de esclarecimento são aceitáveis. Não confirmar prévia incorreta.
+Não garantir precisão clínica, ausência de contaminação ou toda resposta livre.

@@ -264,6 +264,9 @@ def resumir(prato: dict) -> dict:
         "carboidratos_g": prato.get("carboidratos_g"), "gorduras_g": prato.get("gorduras_g"),
         "ingredientes": prato.get("ingredientes") or [],
         "is_proteina_do_dia": bool(prato.get("is_proteina_do_dia")),
+        "porcoes_caseiras": prato.get("porcoes_caseiras") or [],
+        "porcao_referencia": prato.get("porcao_referencia"),
+        "porcao_status": prato.get("porcao_status", "sem_medida_caseira_cadastrada"),
     }
     if prato.get("conflita_com_perfil"):
         resumo["conflita_com_perfil"] = prato["conflita_com_perfil"]

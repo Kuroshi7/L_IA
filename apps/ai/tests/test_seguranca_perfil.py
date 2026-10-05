@@ -188,11 +188,10 @@ def test_r5_silencia_sem_conflito_conhecido():
 def test_r5_e_bloqueante_por_padrao():
     from app import config
 
-    # É a única regra que nasce bloqueante: 100% estrutural, e o erro dela pode
-    # mandar alguém para o hospital. Nas outras, bloquear troca uma resposta
-    # provavelmente boa por uma mensagem de erro.
-    assert "R5-prato-conflita-com-perfil" in config.VALIDACAO_BLOQUEANTE
-    assert len(config.VALIDACAO_BLOQUEANTE) == 1, "bloquear demais degrada a experiência"
+    # Segurança do perfil e procedência dos números são barreiras estruturais.
+    assert config.VALIDACAO_BLOQUEANTE == frozenset({
+        "R5-prato-conflita-com-perfil", "R3-numero-nao-exposto",
+    })
 
 
 def test_veredicto_marca_bloqueio():

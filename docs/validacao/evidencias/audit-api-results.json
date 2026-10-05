@@ -1,0 +1,1534 @@
+[
+  {
+    "label": "Readiness",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.03,
+    "data": {
+      "checks": {
+        "postgres": "ok",
+        "rabbitmq": "ok"
+      },
+      "status": "ready"
+    }
+  },
+  {
+    "label": "Saudação",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "demo_mode": false,
+      "mensagem": "Em uma frase, diga o que você quer comer ou evitar. Eu cruzo seu perfil com o cardápio de hoje e mostro opções com dados nutricionais verificados."
+    }
+  },
+  {
+    "label": "Admin protegido",
+    "status": 401,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "erro": "token de admin inválido ou ausente"
+    }
+  },
+  {
+    "label": "Listar unidades",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "unidades": [
+        {
+          "id": 3,
+          "nome": "QA editada",
+          "slug": "qa-1791220977",
+          "ativo": true
+        },
+        {
+          "id": 4,
+          "nome": "QA editada",
+          "slug": "qa-1791221000",
+          "ativo": true
+        },
+        {
+          "id": 5,
+          "nome": "QA editada",
+          "slug": "qa-1791221333",
+          "ativo": true
+        },
+        {
+          "id": 1,
+          "nome": "Refeitório Central",
+          "slug": "central",
+          "ativo": true
+        },
+        {
+          "id": 2,
+          "nome": "Refeitório Norte",
+          "slug": "norte",
+          "ativo": true
+        }
+      ]
+    }
+  },
+  {
+    "label": "Cardápio Central",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 1,
+      "unidade_id": 1,
+      "data": "2026-10-05",
+      "dia_semana": "Segunda-feira",
+      "pratos": [
+        {
+          "id": 3,
+          "unidade_id": 1,
+          "nome": "Arroz Integral",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "arroz integral"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem lactose"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 110,
+          "proteinas_g": 3,
+          "carboidratos_g": 23,
+          "gorduras_g": 1,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 4,
+          "unidade_id": 1,
+          "nome": "Feijão Carioca",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "feijao carioca"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem lactose",
+            "sem gluten"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 95,
+          "proteinas_g": 6,
+          "carboidratos_g": 17,
+          "gorduras_g": 1,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 1,
+          "unidade_id": 1,
+          "nome": "Frango Grelhado",
+          "categoria": "Proteína",
+          "ingredientes": [
+            "frango",
+            "azeite",
+            "alho"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "sem gluten",
+            "sem lactose",
+            "low carb",
+            "proteico"
+          ],
+          "nao_indicado_para": [
+            "vegetariano",
+            "vegano"
+          ],
+          "calorias": 165,
+          "proteinas_g": 31,
+          "carboidratos_g": 0,
+          "gorduras_g": 4,
+          "ativo": true,
+          "is_proteina_do_dia": true
+        },
+        {
+          "id": 2,
+          "unidade_id": 1,
+          "nome": "Strogonoff de Grão-de-Bico",
+          "categoria": "Proteína",
+          "ingredientes": [
+            "grao-de-bico",
+            "creme de leite",
+            "tomate"
+          ],
+          "alergenos": [
+            "lactose"
+          ],
+          "restricoes_atendidas": [
+            "vegetariano"
+          ],
+          "nao_indicado_para": [
+            "vegano",
+            "intolerante a lactose"
+          ],
+          "calorias": 220,
+          "proteinas_g": 12,
+          "carboidratos_g": 30,
+          "gorduras_g": 8,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 5,
+          "unidade_id": 1,
+          "nome": "Salada Verde",
+          "categoria": "Salada",
+          "ingredientes": [
+            "alface",
+            "rucula",
+            "tomate"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem lactose",
+            "sem gluten",
+            "low carb"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 30,
+          "proteinas_g": 2,
+          "carboidratos_g": 5,
+          "gorduras_g": 0,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        }
+      ]
+    }
+  },
+  {
+    "label": "Cardápio Norte",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 4,
+      "unidade_id": 2,
+      "data": "2026-10-05",
+      "dia_semana": "Segunda-feira",
+      "pratos": [
+        {
+          "id": 8,
+          "unidade_id": 2,
+          "nome": "Arroz Branco",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "arroz branco"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem lactose",
+            "sem gluten"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 130,
+          "proteinas_g": 3,
+          "carboidratos_g": 28,
+          "gorduras_g": 0,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 10,
+          "unidade_id": 2,
+          "nome": "Legumes no Vapor",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "cenoura",
+            "abobrinha",
+            "vagem"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem lactose",
+            "sem gluten",
+            "low carb"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 45,
+          "proteinas_g": 2,
+          "carboidratos_g": 9,
+          "gorduras_g": 0,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 9,
+          "unidade_id": 2,
+          "nome": "Lentilha",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "lentilha",
+            "cebola"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem lactose",
+            "sem gluten"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 115,
+          "proteinas_g": 9,
+          "carboidratos_g": 20,
+          "gorduras_g": 0,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 7,
+          "unidade_id": 2,
+          "nome": "Bowl Vegano de Quinoa",
+          "categoria": "Proteína",
+          "ingredientes": [
+            "quinoa",
+            "grao-de-bico",
+            "brocolis"
+          ],
+          "alergenos": [
+            "gergelim"
+          ],
+          "restricoes_atendidas": [
+            "vegetariano",
+            "vegano",
+            "sem gluten",
+            "sem lactose"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 240,
+          "proteinas_g": 12,
+          "carboidratos_g": 38,
+          "gorduras_g": 7,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        },
+        {
+          "id": 6,
+          "unidade_id": 2,
+          "nome": "Peixe Assado",
+          "categoria": "Proteína",
+          "ingredientes": [
+            "tilapia",
+            "limao",
+            "azeite"
+          ],
+          "alergenos": [
+            "peixe"
+          ],
+          "restricoes_atendidas": [
+            "sem gluten",
+            "sem lactose",
+            "proteico"
+          ],
+          "nao_indicado_para": [
+            "vegetariano",
+            "vegano",
+            "alergico a peixe"
+          ],
+          "calorias": 150,
+          "proteinas_g": 28,
+          "carboidratos_g": 0,
+          "gorduras_g": 4,
+          "ativo": true,
+          "is_proteina_do_dia": true
+        }
+      ]
+    }
+  },
+  {
+    "label": "Criar unidade QA",
+    "status": 201,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 6,
+      "nome": "QA 1791221418",
+      "slug": "qa-1791221418",
+      "ativo": true
+    }
+  },
+  {
+    "label": "Editar unidade",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 6,
+      "nome": "QA editada",
+      "slug": "qa-1791221418",
+      "ativo": true
+    }
+  },
+  {
+    "label": "Referência para prato",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "nutri_alimentos": [
+        {
+          "id": 140,
+          "nome": "Arroz-Doce",
+          "categoria": "Sobremesa",
+          "fonte": "*",
+          "aliases": [
+            "arroz doce"
+          ]
+        },
+        {
+          "id": 3,
+          "nome": "Arroz à Grega",
+          "categoria": "Acompanhamento",
+          "fonte": "*",
+          "aliases": [
+            "arroz a grega"
+          ]
+        },
+        {
+          "id": 1,
+          "nome": "Arroz Branco Cozido",
+          "categoria": "Acompanhamento",
+          "fonte": "IBGE",
+          "aliases": [
+            "arroz",
+            "arroz branco",
+            "arroz cozido"
+          ]
+        },
+        {
+          "id": 2,
+          "nome": "Arroz Integral Cozido",
+          "categoria": "Acompanhamento",
+          "fonte": "*",
+          "aliases": [
+            "arroz integral"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "label": "Cadastrar alimento",
+    "status": 201,
+    "ok": true,
+    "seconds": 0.01,
+    "data": {
+      "id": 13,
+      "unidade_id": 6,
+      "nome": "Prato QA",
+      "categoria": "Acompanhamento",
+      "ingredientes": [
+        "arroz"
+      ],
+      "alergenos": [],
+      "restricoes_atendidas": [
+        "vegano"
+      ],
+      "nao_indicado_para": [],
+      "calorias": 110,
+      "proteinas_g": 3,
+      "carboidratos_g": 23,
+      "gorduras_g": 1,
+      "ativo": true,
+      "is_proteina_do_dia": false,
+      "nutri_alimento_id": 140
+    }
+  },
+  {
+    "label": "Editar alimento",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 13,
+      "unidade_id": 6,
+      "nome": "Prato QA editado",
+      "categoria": "Acompanhamento",
+      "ingredientes": [
+        "arroz"
+      ],
+      "alergenos": [],
+      "restricoes_atendidas": [
+        "vegano"
+      ],
+      "nao_indicado_para": [],
+      "calorias": 110,
+      "proteinas_g": 3,
+      "carboidratos_g": 23,
+      "gorduras_g": 1,
+      "ativo": true,
+      "is_proteina_do_dia": false,
+      "nutri_alimento_id": 140
+    }
+  },
+  {
+    "label": "Publicar cardápio",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 23,
+      "unidade_id": 6,
+      "data": "2026-10-05",
+      "dia_semana": "Segunda-feira",
+      "pratos": [
+        {
+          "id": 13,
+          "unidade_id": 6,
+          "nome": "Prato QA editado",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "arroz"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegano"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 110,
+          "proteinas_g": 3,
+          "carboidratos_g": 23,
+          "gorduras_g": 1,
+          "ativo": true,
+          "is_proteina_do_dia": false,
+          "nutri_alimento_id": 140
+        }
+      ]
+    }
+  },
+  {
+    "label": "Cardápio publicado",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "id": 23,
+      "unidade_id": 6,
+      "data": "2026-10-05",
+      "dia_semana": "Segunda-feira",
+      "pratos": [
+        {
+          "id": 13,
+          "unidade_id": 6,
+          "nome": "Prato QA editado",
+          "categoria": "Acompanhamento",
+          "ingredientes": [
+            "arroz"
+          ],
+          "alergenos": [],
+          "restricoes_atendidas": [
+            "vegano"
+          ],
+          "nao_indicado_para": [],
+          "calorias": 110,
+          "proteinas_g": 3,
+          "carboidratos_g": 23,
+          "gorduras_g": 1,
+          "ativo": true,
+          "is_proteina_do_dia": false
+        }
+      ]
+    }
+  },
+  {
+    "label": "Cardápio semanal",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "unidade_id": 6,
+      "inicio": "2026-10-05",
+      "dias": [
+        {
+          "id": 23,
+          "unidade_id": 6,
+          "data": "2026-10-05",
+          "dia_semana": "Segunda-feira",
+          "pratos": [
+            {
+              "id": 13,
+              "unidade_id": 6,
+              "nome": "Prato QA editado",
+              "categoria": "Acompanhamento",
+              "ingredientes": [
+                "arroz"
+              ],
+              "alergenos": [],
+              "restricoes_atendidas": [
+                "vegano"
+              ],
+              "nao_indicado_para": [],
+              "calorias": 110,
+              "proteinas_g": 3,
+              "carboidratos_g": 23,
+              "gorduras_g": 1,
+              "ativo": true,
+              "is_proteina_do_dia": false,
+              "nutri_alimento_id": 140
+            }
+          ]
+        },
+        {
+          "id": 0,
+          "unidade_id": 6,
+          "data": "2026-10-06",
+          "dia_semana": "Terça-feira",
+          "pratos": []
+        },
+        {
+          "id": 0,
+          "unidade_id": 6,
+          "data": "2026-10-07",
+          "dia_semana": "Quarta-feira",
+          "pratos": []
+        },
+        {
+          "id": 0,
+          "unidade_id": 6,
+          "data": "2026-10-08",
+          "dia_semana": "Quinta-feira",
+          "pratos": []
+        },
+        {
+          "id": 0,
+          "unidade_id": 6,
+          "data": "2026-10-09",
+          "dia_semana": "Sexta-feira",
+          "pratos": []
+        },
+        {
+          "id": 0,
+          "unidade_id": 6,
+          "data": "2026-10-10",
+          "dia_semana": "Sábado",
+          "pratos": []
+        },
+        {
+          "id": 0,
+          "unidade_id": 6,
+          "data": "2026-10-11",
+          "dia_semana": "Domingo",
+          "pratos": []
+        }
+      ]
+    }
+  },
+  {
+    "label": "Copiar semana",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.02,
+    "data": {
+      "unidade_id": 6,
+      "inicio": "2026-10-12",
+      "dias": [
+        {
+          "id": 24,
+          "unidade_id": 6,
+          "data": "2026-10-12",
+          "dia_semana": "Segunda-feira",
+          "pratos": [
+            {
+              "id": 13,
+              "unidade_id": 6,
+              "nome": "Prato QA editado",
+              "categoria": "Acompanhamento",
+              "ingredientes": [
+                "arroz"
+              ],
+              "alergenos": [],
+              "restricoes_atendidas": [
+                "vegano"
+              ],
+              "nao_indicado_para": [],
+              "calorias": 110,
+              "proteinas_g": 3,
+              "carboidratos_g": 23,
+              "gorduras_g": 1,
+              "ativo": true,
+              "is_proteina_do_dia": false,
+              "nutri_alimento_id": 140
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "unidade_id": 6,
+          "data": "2026-10-13",
+          "dia_semana": "Terça-feira",
+          "pratos": []
+        },
+        {
+          "id": 26,
+          "unidade_id": 6,
+          "data": "2026-10-14",
+          "dia_semana": "Quarta-feira",
+          "pratos": []
+        },
+        {
+          "id": 27,
+          "unidade_id": 6,
+          "data": "2026-10-15",
+          "dia_semana": "Quinta-feira",
+          "pratos": []
+        },
+        {
+          "id": 28,
+          "unidade_id": 6,
+          "data": "2026-10-16",
+          "dia_semana": "Sexta-feira",
+          "pratos": []
+        },
+        {
+          "id": 29,
+          "unidade_id": 6,
+          "data": "2026-10-17",
+          "dia_semana": "Sábado",
+          "pratos": []
+        },
+        {
+          "id": 30,
+          "unidade_id": 6,
+          "data": "2026-10-18",
+          "dia_semana": "Domingo",
+          "pratos": []
+        }
+      ]
+    }
+  },
+  {
+    "label": "Inativar alimento",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "ativo": false,
+      "id": 13
+    }
+  },
+  {
+    "label": "Reativar alimento",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "ativo": true,
+      "id": 13
+    }
+  },
+  {
+    "label": "Busca nutricional",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "nutri_alimentos": [
+        {
+          "id": 140,
+          "nome": "Arroz-Doce",
+          "categoria": "Sobremesa",
+          "fonte": "*",
+          "aliases": [
+            "arroz doce"
+          ]
+        },
+        {
+          "id": 3,
+          "nome": "Arroz à Grega",
+          "categoria": "Acompanhamento",
+          "fonte": "*",
+          "aliases": [
+            "arroz a grega"
+          ]
+        },
+        {
+          "id": 1,
+          "nome": "Arroz Branco Cozido",
+          "categoria": "Acompanhamento",
+          "fonte": "IBGE",
+          "aliases": [
+            "arroz",
+            "arroz branco",
+            "arroz cozido"
+          ]
+        },
+        {
+          "id": 2,
+          "nome": "Arroz Integral Cozido",
+          "categoria": "Acompanhamento",
+          "fonte": "*",
+          "aliases": [
+            "arroz integral"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "label": "Cadastro com perfil",
+    "status": 201,
+    "ok": true,
+    "seconds": 0.07,
+    "data": {
+      "perfil": {
+        "nome": "QA Demonstração 1791221418",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "imc": 24.221453287197235,
+        "classificacao_imc": "peso normal",
+        "meta_calorica_kcal": 2250
+      },
+      "usuario": {
+        "id": 6,
+        "unidade_id": 1,
+        "nome": "QA Demonstração 1791221418",
+        "peso_kg": 70,
+        "altura_cm": 170,
+        "idade": 30,
+        "sexo": "F",
+        "nivel_atividade": "moderado",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "telefone": "11991221418"
+      }
+    }
+  },
+  {
+    "label": "Login válido",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.08,
+    "data": {
+      "perfil": {
+        "nome": "QA Demonstração 1791221418",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "imc": 24.221453287197235,
+        "classificacao_imc": "peso normal",
+        "meta_calorica_kcal": 2250
+      },
+      "usuario": {
+        "id": 6,
+        "unidade_id": 1,
+        "nome": "QA Demonstração 1791221418",
+        "peso_kg": 70,
+        "altura_cm": 170,
+        "idade": 30,
+        "sexo": "F",
+        "nivel_atividade": "moderado",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "telefone": "11991221418"
+      }
+    }
+  },
+  {
+    "label": "Login inválido",
+    "status": 401,
+    "ok": true,
+    "seconds": 0.07,
+    "data": {
+      "erro": "telefone ou PIN incorretos"
+    }
+  },
+  {
+    "label": "Telefone duplicado",
+    "status": 409,
+    "ok": true,
+    "seconds": 0.07,
+    "data": {
+      "erro": "telefone já cadastrado em outro perfil"
+    }
+  },
+  {
+    "label": "Recuperar perfil",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "perfil": {
+        "nome": "QA Demonstração 1791221418",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "imc": 24.221453287197235,
+        "classificacao_imc": "peso normal",
+        "meta_calorica_kcal": 2250
+      },
+      "usuario": {
+        "id": 6,
+        "unidade_id": 1,
+        "nome": "QA Demonstração 1791221418",
+        "peso_kg": 70,
+        "altura_cm": 170,
+        "idade": 30,
+        "sexo": "F",
+        "nivel_atividade": "moderado",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ]
+      }
+    }
+  },
+  {
+    "label": "Atualizar perfil",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.07,
+    "data": {
+      "perfil": {
+        "nome": "QA Demonstração 1791221418",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "imc": 24.221453287197235,
+        "classificacao_imc": "peso normal",
+        "meta_calorica_kcal": 2250
+      },
+      "usuario": {
+        "id": 6,
+        "unidade_id": 1,
+        "nome": "QA Demonstração 1791221418",
+        "peso_kg": 70,
+        "altura_cm": 170,
+        "idade": 30,
+        "sexo": "F",
+        "nivel_atividade": "moderado",
+        "restricoes": [],
+        "preferencias": [
+          "frango"
+        ],
+        "alergias": [
+          "leite"
+        ],
+        "telefone": "11991221418"
+      }
+    }
+  },
+  {
+    "label": "Gamificação inicial",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "eventos": [],
+      "gamificacao": {
+        "usuario_id": 6,
+        "pontos": 0,
+        "nivel": 1,
+        "streak_dias": 0
+      }
+    }
+  },
+  {
+    "label": "Cardápio via chat",
+    "status": 200,
+    "ok": true,
+    "seconds": 3.72,
+    "data": {
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15",
+      "resposta": "🍽️ **Cardápio de hoje (segunda-feira, 5 de outubro):**\n\n- **Arroz Integral** (Acompanhamento) — 110 kcal\n- **Feijão Carioca** (Acompanhamento) — 95 kcal\n- **Frango Grelhado** (Proteína) — 165 kcal ⭐ *proteína do dia*\n- **Strogonoff de Grão-de-Bico** (Proteína) — 220 kcal\n- **Salada Verde** (Salada) — 30 kcal\n\nVejo que você já tem um perfil conosco! Antes de recomendar algo, só uma pergunta rápida: **tem algo mais que você não pode ou não gosta de comer?** (além do que já sei sobre você)",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "fonte": "Cardápio da unidade",
+        "pratos": [
+          {
+            "calorias": 110,
+            "carboidratos_g": 23,
+            "categoria": "Acompanhamento",
+            "conflita_com_perfil": [],
+            "gorduras_g": 1,
+            "id": 3,
+            "ingredientes": [
+              "arroz integral"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Arroz Integral",
+            "proteinas_g": 3
+          },
+          {
+            "calorias": 95,
+            "carboidratos_g": 17,
+            "categoria": "Acompanhamento",
+            "conflita_com_perfil": [],
+            "gorduras_g": 1,
+            "id": 4,
+            "ingredientes": [
+              "feijao carioca"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Feijão Carioca",
+            "proteinas_g": 6
+          },
+          {
+            "calorias": 165,
+            "carboidratos_g": 0,
+            "categoria": "Proteína",
+            "conflita_com_perfil": [],
+            "gorduras_g": 4,
+            "id": 1,
+            "ingredientes": [
+              "frango",
+              "azeite",
+              "alho"
+            ],
+            "is_proteina_do_dia": true,
+            "nome": "Frango Grelhado",
+            "proteinas_g": 31
+          },
+          {
+            "calorias": 220,
+            "carboidratos_g": 30,
+            "categoria": "Proteína",
+            "conflita_com_perfil": [
+              "você informou alergia a leite — e este prato leva creme de leite, lactose"
+            ],
+            "gorduras_g": 8,
+            "id": 2,
+            "ingredientes": [
+              "grao-de-bico",
+              "creme de leite",
+              "tomate"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Strogonoff de Grão-de-Bico",
+            "proteinas_g": 12
+          },
+          {
+            "calorias": 30,
+            "carboidratos_g": 5,
+            "categoria": "Salada",
+            "conflita_com_perfil": [],
+            "gorduras_g": 0,
+            "id": 5,
+            "ingredientes": [
+              "alface",
+              "rucula",
+              "tomate"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Salada Verde",
+            "proteinas_g": 2
+          }
+        ],
+        "tipo": "cardapio",
+        "titulo": "Cardápio consultado"
+      }
+    }
+  },
+  {
+    "label": "Recomendação com alergia",
+    "status": 200,
+    "ok": true,
+    "seconds": 5.97,
+    "data": {
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15",
+      "resposta": "Perfeito! Baseado no seu perfil — você gosta de frango, tem alergia a leite e sua meta é 2.250 kcal — **aqui está meu prato recomendado:**\n\n🍽️ **Frango Grelhado** — é a proteína do dia e combina 100% com você: sem leite, rico em proteína (31g) e você já me disse que gosta de frango!\n- Nutrição: 165 kcal | 31g proteína | 0g carbo\n\n**Acompanhamentos:**\n- **Arroz Integral** — dá energia e é sem leite\n  - Nutrição: 110 kcal | 3g proteína | 23g carbo\n- **Feijão Carioca** — ajuda a segurar a fome e tem proteína também\n  - Nutrição: 95 kcal | 6g proteína | 17g carbo\n\n**Salada Verde** — completa o prato, é leve e sem leite\n- Nutrição: 30 kcal | 2g proteína | 5g carbo\n\n**Porção sugerida:**\n- 1 filé de frango (ou 1 pegador)\n- 2 colheres de sopa de arroz integral\n- 1 concha de feijão\n- À vontade de salada verde\n\n\nDepois que almoçar, é só me contar o que você comeu e o que sobrou pra você pontuar! 💪\n\nOs valores nutricionais exibidos nos cartões abaixo vêm diretamente da ficha do cardápio.",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "fonte": "Cardápio da unidade",
+        "pratos": [
+          {
+            "calorias": 110,
+            "carboidratos_g": 23,
+            "categoria": "Acompanhamento",
+            "conflita_com_perfil": [],
+            "gorduras_g": 1,
+            "id": 3,
+            "ingredientes": [
+              "arroz integral"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Arroz Integral",
+            "proteinas_g": 3
+          },
+          {
+            "calorias": 95,
+            "carboidratos_g": 17,
+            "categoria": "Acompanhamento",
+            "conflita_com_perfil": [],
+            "gorduras_g": 1,
+            "id": 4,
+            "ingredientes": [
+              "feijao carioca"
+            ],
+            "is_proteina_do_dia": false,
+            "nome": "Feijão Carioca",
+            "proteinas_g": 6
+          },
+          {
+            "calorias": 165,
+            "carboidratos_g": 0,
+            "categoria": "Proteína",
+            "conflita_com_perfil": [],
+            "gorduras_g": 4,
+            "id": 1,
+            "ingredientes": [
+              "frango",
+              "azeite",
+              "alho"
+            ],
+            "is_proteina_do_dia": true,
+            "nome": "Frango Grelhado",
+            "proteinas_g": 31
+          }
+        ],
+        "tipo": "recomendacoes",
+        "titulo": "Opções compatíveis"
+      }
+    }
+  },
+  {
+    "label": "Consumo e sobras",
+    "status": 200,
+    "ok": true,
+    "seconds": 1.4,
+    "data": {
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15",
+      "resposta": "Ótimo! Deixa eu confirmar o que você comeu:\n\n📝 **Seu consumo:**\n- 2 colheres de sopa de arroz integral (~180 kcal)\n- 1 concha de feijão carioca (~95 kcal)\n\n**Total: ~275 kcal**\n\nConfirma que foi isso mesmo? 😊",
+      "fora_de_escopo": false
+    }
+  },
+  {
+    "label": "Confirmar consumo",
+    "status": 200,
+    "ok": true,
+    "seconds": 5.87,
+    "data": {
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15",
+      "resposta": "Preparei a prévia — **nada foi salvo ainda**.\n\nVocê comeu:\n- 2 colher de sopa de Arroz Integral Cozido — 128,5 kcal\n- 1 concha de Feijão-Preto Cozido — 55,2 kcal\nTotal calculado: **183,7 kcal**.\n\nSobras: **nenhuma**.\nAlguns valores são aproximados; deixei isso sinalizado no resumo.\n\nEstá correto? Confirme para eu registrar e calcular seus pontos.",
+      "fora_de_escopo": false,
+      "confianca": {
+        "nivel": "aproximada",
+        "aproximados": [
+          "arroz integral"
+        ]
+      },
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 32.74,
+          "completo": true,
+          "gordura_g": 3.2199999999999998,
+          "gramas_totais": 130,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 22.98,
+              "confianca": "baixa",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "colher de sopa",
+                "quantidade": 2
+              },
+              "gordura_g": 2.98,
+              "gramas_totais": 50,
+              "kcal": 128.5,
+              "kcal_declarada_cardapio": 110,
+              "obs": "sem porção 'colher de sopa' para este alimento; estimado pelo peso típico dessa medida (25 g)",
+              "porcao_resolvida": "COL S (peso típico)",
+              "procedencia": "cardapio",
+              "proteina_g": 2.43
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão carioca",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 183.7,
+          "proteina_g": 5.95
+        },
+        "pode_confirmar": true,
+        "resto": {},
+        "tipo": "consumo_previa"
+      }
+    }
+  },
+  {
+    "label": "Confirmar prévia estruturada",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.64,
+    "data": {
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15",
+      "resposta": "Registro confirmado ✓\n- Consumo: **183,7 kcal**\n- Desperdício: **0%**\n- Pontos ganhos: **+20**\n- Total: **20 pontos** · nível 1 · sequência de 1 dia(s)",
+      "fora_de_escopo": false,
+      "experiencia": {
+        "consumido": {
+          "carboidrato_g": 32.74,
+          "completo": true,
+          "gordura_g": 3.2199999999999998,
+          "gramas_totais": 130,
+          "itens": [
+            {
+              "alimento_resolvido": "Arroz Integral Cozido",
+              "carboidrato_g": 22.98,
+              "confianca": "baixa",
+              "entrada": {
+                "alimento": "arroz integral",
+                "medida": "colher de sopa",
+                "quantidade": 2
+              },
+              "gordura_g": 2.98,
+              "gramas_totais": 50,
+              "kcal": 128.5,
+              "kcal_declarada_cardapio": 110,
+              "obs": "sem porção 'colher de sopa' para este alimento; estimado pelo peso típico dessa medida (25 g)",
+              "porcao_resolvida": "COL S (peso típico)",
+              "procedencia": "cardapio",
+              "proteina_g": 2.43
+            },
+            {
+              "alimento_resolvido": "Feijão-Preto Cozido",
+              "carboidrato_g": 9.76,
+              "confianca": "alta",
+              "entrada": {
+                "alimento": "feijão carioca",
+                "medida": "concha",
+                "quantidade": 1
+              },
+              "gordura_g": 0.24,
+              "gramas_totais": 80,
+              "kcal": 55.2,
+              "kcal_declarada_cardapio": 95,
+              "porcao_resolvida": "CO M R",
+              "procedencia": "cardapio",
+              "proteina_g": 3.52
+            }
+          ],
+          "kcal": 183.7,
+          "proteina_g": 5.95
+        },
+        "consumo_id": 2,
+        "gamificacao": {
+          "nivel": 1,
+          "pontos": 20,
+          "streak_dias": 1,
+          "ultimo_registro": "2026-10-05T00:00:00Z",
+          "usuario_id": 6
+        },
+        "indice_resto_perc": 0,
+        "pontuacao": {
+          "bonus_prato_limpo": 20,
+          "bonus_streak": 0,
+          "desvio_perc": 76.7,
+          "meta_kcal_refeicao": 788,
+          "motivo": "proximidade da meta calórica da refeição",
+          "pontos": 20,
+          "pontos_base": 0
+        },
+        "resto": {
+          "carboidrato_g": 0,
+          "completo": true,
+          "gordura_g": 0,
+          "gramas_totais": 0,
+          "itens": null,
+          "kcal": 0,
+          "proteina_g": 0
+        },
+        "tipo": "consumo_registrado"
+      }
+    }
+  },
+  {
+    "label": "Histórico persistido",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "mensagens": [
+        {
+          "papel": "user",
+          "conteudo": "Qual é o cardápio de hoje?",
+          "created_at": "2026-10-05T17:30:18.658184Z"
+        },
+        {
+          "papel": "assistant",
+          "conteudo": "🍽️ **Cardápio de hoje (segunda-feira, 5 de outubro):**\n\n- **Arroz Integral** (Acompanhamento) — 110 kcal\n- **Feijão Carioca** (Acompanhamento) — 95 kcal\n- **Frango Grelhado** (Proteína) — 165 kcal ⭐ *proteína do dia*\n- **Strogonoff de Grão-de-Bico** (Proteína) — 220 kcal\n- **Salada Verde** (Salada) — 30 kcal\n\nVejo que você já tem um perfil conosco! Antes de recomendar algo, só uma pergunta rápida: **tem algo mais que você não pode ou não gosta de comer?** (além do que já sei sobre você)",
+          "created_at": "2026-10-05T17:30:22.373285Z"
+        },
+        {
+          "papel": "user",
+          "conteudo": "Monte um prato para meu almoço considerando meu perfil e minha alergia a leite.",
+          "created_at": "2026-10-05T17:30:22.38141Z"
+        },
+        {
+          "papel": "assistant",
+          "conteudo": "Perfeito! Baseado no seu perfil — você gosta de frango, tem alergia a leite e sua meta é 2.250 kcal — **aqui está meu prato recomendado:**\n\n🍽️ **Frango Grelhado** — é a proteína do dia e combina 100% com você: sem leite, rico em proteína (31g) e você já me disse que gosta de frango!\n- Nutrição: 165 kcal | 31g proteína | 0g carbo\n\n**Acompanhamentos:**\n- **Arroz Integral** — dá energia e é sem leite\n  - Nutrição: 110 kcal | 3g proteína | 23g carbo\n- **Feijão Carioca** — ajuda a segurar a fome e tem proteína também\n  - Nutrição: 95 kcal | 6g proteína | 17g carbo\n\n**Salada Verde** — completa o prato, é leve e sem leite\n- Nutrição: 30 kcal | 2g proteína | 5g carbo\n\n**Porção sugerida:**\n- 1 filé de frango (ou 1 pegador)\n- 2 colheres de sopa de arroz integral\n- 1 concha de feijão\n- À vontade de salada verde\n\n\nDepois que almoçar, é só me contar o que você comeu e o que sobrou pra você pontuar! 💪\n\nOs valores nutricionais exibidos nos cartões abaixo vêm diretamente da ficha do cardápio.",
+          "created_at": "2026-10-05T17:30:28.341986Z"
+        },
+        {
+          "papel": "user",
+          "conteudo": "Comi 2 colheres de sopa de arroz e 1 concha de feijão. Não sobrou nada.",
+          "created_at": "2026-10-05T17:30:28.352654Z"
+        },
+        {
+          "papel": "assistant",
+          "conteudo": "Ótimo! Deixa eu confirmar o que você comeu:\n\n📝 **Seu consumo:**\n- 2 colheres de sopa de arroz integral (~180 kcal)\n- 1 concha de feijão carioca (~95 kcal)\n\n**Total: ~275 kcal**\n\nConfirma que foi isso mesmo? 😊",
+          "created_at": "2026-10-05T17:30:29.74476Z"
+        },
+        {
+          "papel": "user",
+          "conteudo": "Confirmo o registro.",
+          "created_at": "2026-10-05T17:30:29.758701Z"
+        },
+        {
+          "papel": "assistant",
+          "conteudo": "Preparei a prévia — **nada foi salvo ainda**.\n\nVocê comeu:\n- 2 colher de sopa de Arroz Integral Cozido — 128,5 kcal\n- 1 concha de Feijão-Preto Cozido — 55,2 kcal\nTotal calculado: **183,7 kcal**.\n\nSobras: **nenhuma**.\nAlguns valores são aproximados; deixei isso sinalizado no resumo.\n\nEstá correto? Confirme para eu registrar e calcular seus pontos.",
+          "created_at": "2026-10-05T17:30:35.620824Z"
+        },
+        {
+          "papel": "user",
+          "conteudo": "Confirmo.",
+          "created_at": "2026-10-05T17:30:35.628501Z"
+        },
+        {
+          "papel": "assistant",
+          "conteudo": "Registro confirmado ✓\n- Consumo: **183,7 kcal**\n- Desperdício: **0%**\n- Pontos ganhos: **+20**\n- Total: **20 pontos** · nível 1 · sequência de 1 dia(s)",
+          "created_at": "2026-10-05T17:30:36.26588Z"
+        }
+      ],
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15"
+    }
+  },
+  {
+    "label": "Gamificação após consumo",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "eventos": [
+        {
+          "id": 2,
+          "pontos": 20,
+          "motivo": "proximidade da meta calórica da refeição",
+          "created_at": "2026-10-05T17:30:36.244196Z"
+        }
+      ],
+      "gamificacao": {
+        "usuario_id": 6,
+        "pontos": 20,
+        "nivel": 1,
+        "streak_dias": 1,
+        "ultimo_registro": "2026-10-05T00:00:00Z"
+      }
+    }
+  },
+  {
+    "label": "Ranking",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "ranking": [
+        {
+          "usuario_id": 2,
+          "nome": "QA Demonstração 1791221000",
+          "pontos": 20,
+          "nivel": 1
+        },
+        {
+          "usuario_id": 6,
+          "nome": "QA Demonstração 1791221418",
+          "pontos": 20,
+          "nivel": 1
+        }
+      ]
+    }
+  },
+  {
+    "label": "Admin usuários",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "usuarios": [
+        {
+          "alergias": [],
+          "id": 1,
+          "nivel": 1,
+          "nome": "Ana Demo",
+          "pontos": 0,
+          "registros_consumo": 0,
+          "restricoes": [
+            "sem lactose"
+          ],
+          "streak_dias": 0,
+          "unidade_id": 1
+        },
+        {
+          "alergias": [
+            "leite"
+          ],
+          "id": 2,
+          "nivel": 1,
+          "nome": "QA Demonstração 1791221000",
+          "pontos": 20,
+          "registros_consumo": 1,
+          "restricoes": [],
+          "streak_dias": 1,
+          "unidade_id": 1
+        },
+        {
+          "alergias": [
+            "leite"
+          ],
+          "id": 4,
+          "nivel": 1,
+          "nome": "QA Demonstração 1791221333",
+          "pontos": 0,
+          "registros_consumo": 0,
+          "restricoes": [],
+          "streak_dias": 0,
+          "unidade_id": 1
+        },
+        {
+          "alergias": [
+            "leite"
+          ],
+          "id": 6,
+          "nivel": 1,
+          "nome": "QA Demonstração 1791221418",
+          "pontos": 20,
+          "registros_consumo": 1,
+          "restricoes": [],
+          "streak_dias": 1,
+          "unidade_id": 1
+        }
+      ]
+    }
+  },
+  {
+    "label": "Desperdício",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "unidade_id": 1,
+      "de": "2026-10-05",
+      "ate": "2026-10-05",
+      "refeicoes": 1,
+      "consumido_g": 130,
+      "resto_g": 0,
+      "resto_kcal": 0,
+      "indice_resto_perc": 0,
+      "classificacao": "otimo",
+      "resto_per_capita_g": 0,
+      "dias": [
+        {
+          "data": "2026-10-05",
+          "refeicoes": 1,
+          "consumido_g": 130,
+          "consumido_kcal": 183.7,
+          "resto_g": 0,
+          "resto_kcal": 0
+        }
+      ],
+      "top_desperdicados": []
+    }
+  },
+  {
+    "label": "Fora de escopo",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.56,
+    "data": {
+      "session_id": "149acca7-2800-48d3-8e38-b73199282abd",
+      "resposta": "Sou a Lia, especialista nas refeições do cardápio 🍽️. Posso te ajudar a escolher um prato considerando suas preferências e restrições alimentares. O que você gostaria de saber sobre o cardápio?",
+      "fora_de_escopo": true
+    }
+  },
+  {
+    "label": "Apagar conversa QA",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.01,
+    "data": {
+      "reset": true
+    }
+  },
+  {
+    "label": "Histórico limpo",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "mensagens": [],
+      "session_id": "5ce6c7b8-e14f-4119-9e42-9259d3cd1d15"
+    }
+  },
+  {
+    "label": "Inativar unidade QA",
+    "status": 200,
+    "ok": true,
+    "seconds": 0.0,
+    "data": {
+      "ativo": false,
+      "id": 6
+    }
+  }
+]

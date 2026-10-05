@@ -116,7 +116,10 @@ func (s *Store) topDesperdicados(ctx context.Context, unidadeID int64, de, ate s
 		        count(*) AS ocorrencias,
 		        COALESCE(sum((item->>'gramas_totais')::numeric), 0) AS resto_g,
 		        COALESCE(sum((item->>'kcal')::numeric), 0) AS resto_kcal
-		   FROM consumos c, jsonb_array_elements(c.resto_itens) AS item
+		   FROM consumos c, jsonb_array_elements(
+		     CASE WHEN jsonb_typeof(c.resto_itens) = 'array'
+		          THEN c.resto_itens ELSE '[]'::jsonb END
+		   ) AS item
 		  WHERE c.unidade_id = $1
 		    AND c.completo
 	    AND (c.created_at AT TIME ZONE '`+TZRefeitorio+`')::date BETWEEN $2::date AND $3::date

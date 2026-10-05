@@ -114,6 +114,16 @@ func (s *Server) responderCardapio(w http.ResponseWriter, r *http.Request, unida
 		writeError(w, http.StatusInternalServerError, "erro ao buscar cardápio")
 		return
 	}
+	for i := range dia.Pratos {
+		if refID := dia.Pratos[i].NutriAlimentoID; refID != nil {
+			ref, err := s.store.GetNutriAlimentoComPorcoes(r.Context(), *refID)
+			if err != nil {
+				s.log.Warn("porções do prato indisponíveis", "alimento_id", dia.Pratos[i].ID, "err", err)
+				continue
+			}
+			dia.Pratos[i].Porcoes = ref.Porcoes
+		}
+	}
 	writeJSON(w, http.StatusOK, dia)
 }
 

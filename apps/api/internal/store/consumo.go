@@ -87,7 +87,11 @@ func (s *Store) RegistrarConsumo(ctx context.Context, in RegistroConsumoInput) (
 	defer tx.Rollback(ctx)
 
 	itensJSON, _ := json.Marshal(consumido.Itens)
-	restoJSON, _ := json.Marshal(resto.Itens)
+	restoItens := resto.Itens
+	if restoItens == nil {
+		restoItens = []domain.ConsumoItemResultado{}
+	}
+	restoJSON, _ := json.Marshal(restoItens)
 
 	// O registro é sempre gravado (é histórico do usuário), mas a PONTUAÇÃO
 	// depende de o total estar completo: pontuar é medir a distância entre o que

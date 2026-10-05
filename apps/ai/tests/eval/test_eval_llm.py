@@ -23,15 +23,15 @@ isolada não derrubar a rodada inteira.
 """
 
 import os
+import json
 import uuid
+from pathlib import Path
 from collections import defaultdict
 
 import pytest
 
-from app.agent.context import RequestContext, reset_context, set_context
 from app.agent.dominio.refeitorio.perfil import PERFIL
 from app.agent.motor import turn
-from app.agent.motor.reminders import Gatilhos
 from tests.eval import assercoes, fakes, juiz
 
 TAXA_MINIMA = float(os.getenv("EVAL_TAXA_MINIMA", "0.90"))
@@ -68,31 +68,55 @@ def _rodar(caso, monkeypatch):
         return None, dados
 
     sessao = f"{caso['nome'][:12]}-{uuid.uuid4().hex[:8]}"
-    contexto = RequestContext(unidade_id=1, usuario_id=caso.get("usuario_id"))
-    token = set_context(contexto)
-    try:
-        resultado = None
+    from app.agent.orchestrator import processar_mensagem
+    from app.agent.motor.observacao import ObservacoesDoTurno
+
+    capturados = []
+    executar_original = turn.executar_turno
+
+    def capturar(*args, **kwargs):
+        r = executar_original(*args, **kwargs)
+        capturados.append(r)
+        return r
+
+    with monkeypatch.context() as patch:
+        patch.setattr(turn, "executar_turno", capturar)
         tools, chamadas = [], []
+        pendente = None
+        observacoes = ObservacoesDoTurno()
+        erro = None
         for i, mensagem in enumerate(mensagens):
-            resultado = turn.executar_turno(
-                PERFIL, mensagem, contexto=contexto, historico=historico,
-                gatilhos=Gatilhos(primeira_interacao_do_dia=caso.get("primeira_do_dia", False) and i == 0),
-                session_id=sessao,
+            antes = len(capturados)
+            resposta = processar_mensagem(
+                session_id=sessao, mensagem=mensagem, unidade_id=1,
+                usuario_id=caso.get("usuario_id"), historico=historico,
+                primeira_do_dia=caso.get("primeira_do_dia", False) and i == 0,
+                acao_pendente=pendente,
             )
-            tools += resultado.tools_chamadas
-            if resultado.observacoes:
-                chamadas += list(resultado.observacoes.chamadas)
+            if len(capturados) > antes:
+                r = capturados[-1]
+                tools += r.tools_chamadas
+                if r.observacoes:
+                    observacoes = r.observacoes
+                    chamadas += list(r.observacoes.chamadas)
+            elif (resposta.get("experiencia") or {}).get("tipo") == "consumo_registrado":
+                tools.append("registrar_consumo")
+                chamadas.append(("registrar_consumo", json.dumps({"confirmado": True, **(pendente or {})})))
+            if resposta.get("limpar_acao_pendente"):
+                pendente = None
+            elif resposta.get("acao_pendente"):
+                pendente = resposta["acao_pendente"]
             historico += [{"papel": "user", "conteudo": mensagem},
-                          {"papel": "assistant", "conteudo": resultado.resposta}]
-            if resultado.erro:
+                          {"papel": "assistant", "conteudo": resposta["resposta"]}]
+            erro = resposta.get("erro_interno")
+            if erro:
                 break
-    finally:
-        reset_context(token)
 
     return assercoes.Contexto(
-        resposta=resultado.resposta, tools=tools, observacoes=resultado.observacoes,
-        dados=dados, erro=resultado.erro, chamadas=chamadas,
+        resposta=resposta["resposta"], tools=tools, observacoes=observacoes,
+        dados=dados, erro=erro, chamadas=chamadas,
     ), dados
+
 
 
 def _conferir(caso, ctx, _dados=None) -> list[str]:
@@ -110,7 +134,15 @@ def _executar_uma_vez(caso, monkeypatch) -> tuple[list[str], bool]:
     try:
         ctx, dados = _rodar(caso, monkeypatch)
         bloqueou = bool(ctx and ctx.erro == assercoes.BLOQUEIO)
-        return _conferir(caso, ctx, dados), bloqueou
+        falhas = _conferir(caso, ctx, dados)
+        if destino := os.getenv("EVAL_RESULTS_PATH"):
+            with Path(destino).open('a', encoding='utf-8') as f:
+                f.write(json.dumps({
+                    'caso':caso['nome'], 'bateria':caso['bateria'],
+                    'resposta':ctx.resposta if ctx else None,
+                    'falhas':falhas, 'bloqueou':bloqueou,
+                }, ensure_ascii=False) + '\n')
+        return falhas, bloqueou
     except Exception as e:  # um caso quebrado não invalida a rodada inteira
         return [f"exceção: {type(e).__name__}: {e}"], False
 

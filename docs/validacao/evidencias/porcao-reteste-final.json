@@ -1,0 +1,272 @@
+[
+  {
+    "session_id": "f4e150ef-0018-44da-b394-f9303cddbfc7",
+    "resposta": "Ótimo, Ana! 👋 Vi seu perfil e o cardápio de hoje. Você quer bastante proteína e vejo que você gosta de frango — perfeito!\n\n🍽️ **Frango Grelhado** — é a melhor opção de proteína do dia pra você! Tem 31g de proteína (muito mesmo!) e é bem leve, só com frango, azeite e alho. Sem lactose, exatamente como você precisa.\n- Nutrição: 165 kcal | 31g proteína | 0g carbo\n- Porção sugerida: **1 filé** (100g)\n\nPra montar um prato bem completo e equilibrado, você pode acompanhar com:\n- **1 concha de Feijão Carioca** (80g) — mais proteína e fibra pra segurar a fome\n- **1 concha de Arroz Integral** (117g) — dá energia pro dia\n- **Salada Verde à vontade** — sem calorias, só nutrientes\n\nIsso vai dar uns (valor não confirmado) no total — bem dentro da sua meta diária de 2.124 kcal. \n\nQuer que eu ajude com mais alguma coisa?\n\nOs valores nutricionais exibidos nos cartões abaixo vêm diretamente da ficha do cardápio.",
+    "fora_de_escopo": false,
+    "experiencia": {
+      "fonte": "Cardápio da unidade",
+      "pratos": [
+        {
+          "calorias": 110,
+          "carboidratos_g": 23,
+          "categoria": "Acompanhamento",
+          "conflita_com_perfil": [],
+          "gorduras_g": 1,
+          "id": 3,
+          "ingredientes": [
+            "arroz integral"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Arroz Integral",
+          "proteinas_g": 3
+        },
+        {
+          "calorias": 95,
+          "carboidratos_g": 17,
+          "categoria": "Acompanhamento",
+          "conflita_com_perfil": [],
+          "gorduras_g": 1,
+          "id": 4,
+          "ingredientes": [
+            "feijao carioca"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Feijão Carioca",
+          "proteinas_g": 6
+        },
+        {
+          "calorias": 165,
+          "carboidratos_g": 0,
+          "categoria": "Proteína",
+          "conflita_com_perfil": [],
+          "gorduras_g": 4,
+          "id": 1,
+          "ingredientes": [
+            "frango",
+            "azeite",
+            "alho"
+          ],
+          "is_proteina_do_dia": true,
+          "nome": "Frango Grelhado",
+          "proteinas_g": 31
+        },
+        {
+          "calorias": 220,
+          "carboidratos_g": 30,
+          "categoria": "Proteína",
+          "conflita_com_perfil": [
+            "você informou a restrição 'sem lactose', e este prato não atende — leva grao-de-bico, creme de leite, tomate"
+          ],
+          "gorduras_g": 8,
+          "id": 2,
+          "ingredientes": [
+            "grao-de-bico",
+            "creme de leite",
+            "tomate"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Strogonoff de Grão-de-Bico",
+          "proteinas_g": 12
+        },
+        {
+          "calorias": 30,
+          "carboidratos_g": 5,
+          "categoria": "Salada",
+          "conflita_com_perfil": [],
+          "gorduras_g": 0,
+          "id": 5,
+          "ingredientes": [
+            "alface",
+            "rucula",
+            "tomate"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Salada Verde",
+          "proteinas_g": 2
+        }
+      ],
+      "tipo": "cardapio",
+      "titulo": "Cardápio consultado"
+    }
+  },
+  {
+    "session_id": "e2a3c88c-7627-49fe-85e4-03c7699004c3",
+    "resposta": "Ótimo, Ana! 🍗 Achei a opção perfeita para você:\n\n**Frango Grelhado** — é a proteína do dia e tem 31g de proteína! Além disso, combina com suas preferências por frango e é bem leve (só 4g de gordura).\n\n- **Nutrição:** 165 kcal | 31g proteína | 0g carboidrato\n- **Porção sugerida:** 1 filé (100g)\n\nPara montar um prato bem equilibrado com bastante proteína, recomendo:\n- **1 filé de frango grelhado** (a proteína)\n- **1 concha de feijão carioca** (mais proteína + fibra para segurar a fome)\n- **1 concha de arroz integral** (energia)\n- **Salada verde à vontade** (leve e saudável)\n\nIsso vai dar uns (valor não confirmado) e você vai ficar bem saciado! 💪\n\nDepois da refeição, é só me contar o que você comeu e o que sobrou no prato — você pontua e sobe de nível! 😊\n\nOs valores nutricionais exibidos nos cartões abaixo vêm diretamente da ficha do cardápio.",
+    "fora_de_escopo": false,
+    "experiencia": {
+      "fonte": "Cardápio da unidade",
+      "pratos": [
+        {
+          "calorias": 110,
+          "carboidratos_g": 23,
+          "categoria": "Acompanhamento",
+          "conflita_com_perfil": [],
+          "gorduras_g": 1,
+          "id": 3,
+          "ingredientes": [
+            "arroz integral"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Arroz Integral",
+          "proteinas_g": 3
+        },
+        {
+          "calorias": 95,
+          "carboidratos_g": 17,
+          "categoria": "Acompanhamento",
+          "conflita_com_perfil": [],
+          "gorduras_g": 1,
+          "id": 4,
+          "ingredientes": [
+            "feijao carioca"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Feijão Carioca",
+          "proteinas_g": 6
+        },
+        {
+          "calorias": 165,
+          "carboidratos_g": 0,
+          "categoria": "Proteína",
+          "conflita_com_perfil": [],
+          "gorduras_g": 4,
+          "id": 1,
+          "ingredientes": [
+            "frango",
+            "azeite",
+            "alho"
+          ],
+          "is_proteina_do_dia": true,
+          "nome": "Frango Grelhado",
+          "proteinas_g": 31
+        },
+        {
+          "calorias": 220,
+          "carboidratos_g": 30,
+          "categoria": "Proteína",
+          "conflita_com_perfil": [
+            "você informou a restrição 'sem lactose', e este prato não atende — leva grao-de-bico, creme de leite, tomate"
+          ],
+          "gorduras_g": 8,
+          "id": 2,
+          "ingredientes": [
+            "grao-de-bico",
+            "creme de leite",
+            "tomate"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Strogonoff de Grão-de-Bico",
+          "proteinas_g": 12
+        },
+        {
+          "calorias": 30,
+          "carboidratos_g": 5,
+          "categoria": "Salada",
+          "conflita_com_perfil": [],
+          "gorduras_g": 0,
+          "id": 5,
+          "ingredientes": [
+            "alface",
+            "rucula",
+            "tomate"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Salada Verde",
+          "proteinas_g": 2
+        }
+      ],
+      "tipo": "cardapio",
+      "titulo": "Cardápio consultado"
+    }
+  },
+  {
+    "session_id": "e9b1b01c-2d0b-4563-b725-660171302db7",
+    "resposta": "Ótimo, Ana! 👋 Achei a opção perfeita para você:\n\n🍽️ **Frango Grelhado** — é a proteína do dia e tem 31g de proteína! Além disso, combina com sua preferência por frango e é sem lactose, como você precisa.\n- Nutrição: 165 kcal | 31g proteína | 0g carboidrato | 4g gordura\n- Porção sugerida: **1 filé** (100g)\n\nPara montar um prato bem completo e aproveitar bem a proteína, sugiro acompanhar com:\n- **1 concha de Feijão Carioca** (80g) — vai dar mais proteína ainda (6g) e ajuda a segurar a fome\n- **1 concha de Arroz Integral** (117g) — dá energia\n\nAssim você fica com um prato balanceado, perto da sua meta de 2.124 kcal no dia. \n\nTem mais opções no cardápio se quiser explorar! 😊",
+    "fora_de_escopo": false,
+    "experiencia": {
+      "fonte": "Cardápio da unidade",
+      "pratos": [
+        {
+          "calorias": 110,
+          "carboidratos_g": 23,
+          "categoria": "Acompanhamento",
+          "conflita_com_perfil": [],
+          "gorduras_g": 1,
+          "id": 3,
+          "ingredientes": [
+            "arroz integral"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Arroz Integral",
+          "proteinas_g": 3
+        },
+        {
+          "calorias": 95,
+          "carboidratos_g": 17,
+          "categoria": "Acompanhamento",
+          "conflita_com_perfil": [],
+          "gorduras_g": 1,
+          "id": 4,
+          "ingredientes": [
+            "feijao carioca"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Feijão Carioca",
+          "proteinas_g": 6
+        },
+        {
+          "calorias": 165,
+          "carboidratos_g": 0,
+          "categoria": "Proteína",
+          "conflita_com_perfil": [],
+          "gorduras_g": 4,
+          "id": 1,
+          "ingredientes": [
+            "frango",
+            "azeite",
+            "alho"
+          ],
+          "is_proteina_do_dia": true,
+          "nome": "Frango Grelhado",
+          "proteinas_g": 31
+        },
+        {
+          "calorias": 220,
+          "carboidratos_g": 30,
+          "categoria": "Proteína",
+          "conflita_com_perfil": [
+            "você informou a restrição 'sem lactose', e este prato não atende — leva grao-de-bico, creme de leite, tomate"
+          ],
+          "gorduras_g": 8,
+          "id": 2,
+          "ingredientes": [
+            "grao-de-bico",
+            "creme de leite",
+            "tomate"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Strogonoff de Grão-de-Bico",
+          "proteinas_g": 12
+        },
+        {
+          "calorias": 30,
+          "carboidratos_g": 5,
+          "categoria": "Salada",
+          "conflita_com_perfil": [],
+          "gorduras_g": 0,
+          "id": 5,
+          "ingredientes": [
+            "alface",
+            "rucula",
+            "tomate"
+          ],
+          "is_proteina_do_dia": false,
+          "nome": "Salada Verde",
+          "proteinas_g": 2
+        }
+      ],
+      "tipo": "cardapio",
+      "titulo": "Cardápio consultado"
+    }
+  }
+]

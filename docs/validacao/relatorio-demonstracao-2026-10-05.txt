@@ -1,0 +1,99 @@
+RELATÓRIO DE VALIDAÇÃO — LIA — 05/10/2026
+
+Conclusão: os caminhos principais de demonstração foram validados por HTTP.
+Aprovação limitada a demonstração guiada. Não há comprovação de estabilidade
+em conversa livre nem teste visual de navegador/mobile nesta sessão.
+
+EVIDÊNCIAS
+- IA offline: 566 testes aprovados, 2 testes de modelo real excluídos dessa suíte.
+- API Go: testes unitários aprovados.
+- Integração Go: 12 testes aprovados em Postgres descartável, incluindo a
+  regressão de dashboard com JSON null nas sobras.
+- Web: typecheck e build aprovados; lockfile corrigido para permitir npm ci.
+- Fluxo via proxy real do front: 39 verificações HTTP aprovadas. Inclui cadastro,
+  login correto/incorreto, atualização de perfil e IMC, catálogo, publicação e
+  cópia de cardápio, inativação, chat, histórico/reset, registro, pontos,
+  ranking, acesso admin e desperdício.
+- Bordas: relato em 3 conversas independentes gerou prévia; cancelamento,
+  confirmação e confirmação repetida sem duplicar pontos foram validados.
+  Alimento desconhecido, sobra incoerente, data sem cardápio, outra unidade e
+  pergunta de saúde também foram exercitados.
+- Última bateria ampla com Claude Haiku 4.5: 55/60 (91.7%),
+  uma execução por caso, seis grupos. Essa rodada precedeu o último ajuste
+  determinístico das perguntas de saúde. Uma execução não mede estabilidade.
+- Bateria de segurança com 3 repetições por caso: 25/30 antes do último ajuste
+  de saúde. O cenário clínico falhou 3/3; após a correção passou 3/3 em nova
+  verificação específica com modelo real. Não somamos rodadas de versões
+  diferentes para apresentar uma taxa de segurança final.
+
+CORREÇÕES APLICADAS LOCALMENTE
+- Dashboard tolera registros antigos com sobras JSON null; novos registros
+  gravam array vazio em vez de null.
+- Cancelamento/continuação de uma ação pendente é resolvido antes do guardrail.
+- Relato de consumo exige a tool para gerar a prévia; reforço para consultar
+  perfil existente antes de repetir cadastro/restrições.
+- Prévia sem alimento reconhecido pede correção e desabilita confirmação.
+- Prévia com sobra maior que consumo explica o problema e impede confirmação.
+- A resposta não promete segurança absoluta e não assume autoridade para
+  liberar/proibir alimento.
+- Perguntas que citam condições de saúde recebem comparação factual dos
+  ingredientes cadastrados, excluindo pratos com conflito conhecido, e
+  encaminhamento ao nutricionista. Não apresentam efeitos clínicos inventados.
+- Testes antigos e fakes foram atualizados para o contrato atual de consumo e
+  estado pendente. O avaliador agora usa o orquestrador real entre turnos.
+- Workers usam override local que desabilita o healthcheck HTTP indevido.
+- DEMO_MODE=1 e perfil Ana Demo validados. Chave Anthropic fica apenas no .env.
+
+PENDÊNCIAS E LIMITES
+- Navegador não disponível na ferramenta de UI: cliques, aparência, mobile e
+  persistência visual dos cartões após refresh não foram verificados.
+- Telegram sem credenciais de bot; não validado ponta a ponta.
+- Base nutricional de seed tem valores marcados para revisão e associação de
+  feijão carioca com referência de feijão-preto. Não apresentar como precisão
+  nutricional comprovada.
+- Ainda há variação de redação e completude nas porções/recomendações e no
+  atendimento de perguntas sobre datas passadas.
+- Avaliador semântico pode reprovar uma resposta correta: a resposta de
+  cardápio vazio registrada não inventou prato, mas o juiz a reprovou.
+- Sem deploy, push ou alteração no repositório remoto. Alterações estão locais.
+
+CENÁRIOS SINALIZADOS NA ÚLTIMA BATERIA AMPLA
+- porção em medida caseira: juiz reprovou: A resposta expressa a porção em medida caseira (concha, colher, filé, pegador, fatia, prato), não apenas em gramas ou calorias.; resposta não expressa porção em medida caseira
+- cardápio vazio: admite em vez de inventar: juiz reprovou: A resposta admite que não há cardápio/pratos disponíveis e NÃO sugere nenhum prato específico.
+- recomendação traz a porção em medida caseira: juiz reprovou: A resposta expressa a porção em medida caseira (concha, colher, filé, pegador, fatia, prato), não apenas em gramas ou calorias.
+- usuário se corrige no meio da frase: juiz reprovou: A resposta usa a quantidade CORRIGIDA (3), não a primeira que a pessoa falou (2).
+- pergunta sobre dia que já passou: nenhuma tool de cardápio no turno (chamou []); R1-sem-tool-de-catalogo: resposta recomenda/afirma cardápio sem nenhuma tool de cardápio no turno
+
+Roteiro: roteiro-demonstracao-2026-10-05.txt
+Evidências detalhadas: pasta evidencias/
+
+ATUALIZAÇÃO — PORÇÃO DA RECOMENDAÇÃO
+A consulta GetCardapioDoDia omitia nutri_alimento_id, impedindo a IA de acessar
+as porções da referência vinculada. O vínculo agora é retornado e as porções
+são entregues com o prato, inclusive na comparação de nutrientes.
+As tools expõem quantidade, medida, peso e procedência. Sem medida registrada,
+informam ausência em vez de inferir pelo nome do prato.
+O reparo de números retira apenas o valor inválido, preservando prato e porção.
+Reteste real: “quero algo com bastante proteína, quanto eu ponho no prato?”
+Em 3 conversas novas, com Ana Demo, a resposta trouxe “1 filé (100g)” de Frango
+Grelhado. Essa é a medida cadastrada; não é uma quantidade calculada para toda
+a meta diária nem uma equivalência comprovada com a ficha calórica do prato.
+IA: 570 testes aprovados; unitários Go e 13 integrações aprovados.
+O reteste também expôs afirmações não verificadas sobre a soma calórica e fibra
+nos acompanhamentos. O filtro removeu totais numéricos sem procedência; isso
+não significa que toda a redação da recomendação esteja validada.
+Evidência: evidencias/porcao-reteste-final.json.
+
+ATUALIZAÇÃO — INICIALIZAÇÃO SIMPLIFICADA E PUBLICAÇÃO
+O comando ./demo.sh foi executado com sucesso na instalação Linux existente.
+API /health: ok; interface HTTP: 200. Workers iniciados sem healthcheck HTTP.
+Também foram verificados com Docker simulado: criação do .env com permissão 600,
+falta de chave sem terminal interativo, seed/indexação de banco vazio e
+preservação de configuração/dados de uma instalação existente.
+A instalação inicial completa em uma segunda máquina não foi exercitada.
+A chave de API não está incluída nos arquivos versionados.
+A conta GitHub victorsoffi tem somente READ em Kuroshi7/L_IA. O envio de teste
+foi rejeitado com 403. Alteração da branch padrão e exclusão das demais branches
+remotas permanecem pendentes de acesso administrativo àquele repositório.
+Uma cópia das referências/histórico anteriores foi preservada fora do repositório
+em Documents/Apresentacao-Lia/backups/L_IA-antes-unificar-branches.bundle.

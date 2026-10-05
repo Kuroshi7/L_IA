@@ -1,0 +1,67 @@
+ROTEIRO DE DEMONSTRAÇÃO LOCAL — LIA
+Data: 05/10/2026
+Repositório: Kuroshi7/L_IA
+Branch: feat/motor-agente-onyx
+Endereço: http://localhost:5273
+
+Duração sugerida: 8–12 minutos.
+
+1. ENTRADA E UNIDADE
+Abra /unidades e escolha Refeitório Central.
+Mostre que a conversa pertence à unidade selecionada.
+Use “Usar perfil de demonstração” para entrar como Ana Demo, ou crie um perfil
+em /perfil. Para demonstrar recuperação em outro aparelho, cadastre telefone
+fictício e PIN; telefone/PIN são opcionais para o uso anônimo.
+
+2. CARDÁPIO E PERSONALIZAÇÃO
+Pergunte: “Qual é o cardápio de hoje?”
+Mostre os cinco pratos e os cartões com dados cadastrados.
+Pergunte: “Monte um prato para meu almoço considerando meu perfil.”
+Mostre motivo da escolha e medidas caseiras. Os valores dos cartões são da
+ficha do prato; não equivalem automaticamente à soma das porções sugeridas.
+Para mostrar alergia, registre “leite” no perfil e consulte o Strogonoff.
+A Lia deve informar que ele contém creme de leite. Não apresente a resposta
+como garantia de ausência de contaminação cruzada.
+
+3. CONSUMO, PRÉVIA E CONFIRMAÇÃO
+Envie: “Comi 2 colheres de sopa de arroz integral e 1 concha de feijão.
+Não sobrou nada.”
+Espere o cartão de prévia e a frase “nada foi salvo ainda”.
+Confira alimentos, medidas e avisos de aproximação.
+Use o botão de confirmação do cartão ou envie “Confirmo.”
+Mostre consumo registrado, pontos ganhos, nível e sequência de dias.
+Se a resposta pedir esclarecimento, responda até aparecer a prévia estruturada;
+não anuncie um registro antes da confirmação efetiva.
+
+4. RANKING
+Abra /u/1/ranking e mostre os pontos do usuário após o registro.
+Explique que os pontos consideram proximidade da meta da refeição, prato limpo
+e sequência de dias. Usuário sem perfil não recebe pontuação personalizada.
+
+5. ADMINISTRAÇÃO
+Abra /admin e guarde o token local de gestão “dev-admin”.
+Mostre catálogo de alimentos e referência de medida caseira; depois o editor de
+cardápio por dia e a cópia da semana. Use uma unidade de demonstração própria
+para mudanças; não altere o cardápio Central antes da parte de conversa.
+Mostre /admin/usuarios e /admin/u/1/desperdicio.
+Após um novo consumo, o agregado de desperdício pode levar alguns segundos,
+pois é atualizado pelo worker de eventos.
+
+6. LIMITES COMUNICADOS
+Use os dados nutricionais como dados de demonstração, com os avisos visíveis.
+Há porções marcadas para revisão nutricional e aproximações de medida caseira.
+O cadastro associa “feijão carioca” à referência de Feijão-Preto Cozido; isso
+precisa de revisão nutricional antes de apresentar números como exatos.
+Perguntas clínicas não demonstram diagnóstico, prescrição ou efeito sobre saúde.
+Telegram não está configurado nesta instalação e não foi validado com bot real.
+Os cliques, layout e comportamento mobile ainda precisam de uma passada manual:
+esta sessão não tem navegador conectado para teste visual.
+
+SUBIR OU REAPLICAR A CONFIGURAÇÃO LOCAL
+cd /home/victorsoffi/Apps/L_IA
+docker compose --project-name lia --env-file .env -f deploy/docker-compose.yml -f deploy/compose.local.yml up -d --build postgres rabbitmq api api-worker ai-worker ai-api web ollama
+
+PORTAS
+Front: 5273; API Go: 8080; API Python: 8001; Postgres: 5433;
+RabbitMQ: 5672 / painel 15672; Ollama: 11534.
+A configuração Anthropic está no .env local, ignorado pelo Git.

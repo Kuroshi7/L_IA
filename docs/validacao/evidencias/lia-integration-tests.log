@@ -1,0 +1,53 @@
+aguardando postgres em :5599...
+=== RUN   TestResolverPeloCardapio
+=== RUN   TestResolverPeloCardapio/palavra_solta_casa_o_prato_do_dia
+=== RUN   TestResolverPeloCardapio/acento_não_atrapalha
+=== RUN   TestResolverPeloCardapio/nome_composto
+=== RUN   TestResolverPeloCardapio/maiúsculas_e_minúsculas
+=== RUN   TestResolverPeloCardapio/consulta_igual_ao_prato
+=== RUN   TestResolverPeloCardapio/não_serviu_hoje
+=== RUN   TestResolverPeloCardapio/vazio
+=== RUN   TestResolverPeloCardapio/substring_não_basta
+--- PASS: TestResolverPeloCardapio (0.00s)
+    --- PASS: TestResolverPeloCardapio/palavra_solta_casa_o_prato_do_dia (0.00s)
+    --- PASS: TestResolverPeloCardapio/acento_não_atrapalha (0.00s)
+    --- PASS: TestResolverPeloCardapio/nome_composto (0.00s)
+    --- PASS: TestResolverPeloCardapio/maiúsculas_e_minúsculas (0.00s)
+    --- PASS: TestResolverPeloCardapio/consulta_igual_ao_prato (0.00s)
+    --- PASS: TestResolverPeloCardapio/não_serviu_hoje (0.00s)
+    --- PASS: TestResolverPeloCardapio/vazio (0.00s)
+    --- PASS: TestResolverPeloCardapio/substring_não_basta (0.00s)
+=== RUN   TestCardapioVazioNaoCasaNada
+--- PASS: TestCardapioVazioNaoCasaNada (0.00s)
+=== RUN   TestPrecedenciaEntreExatoEParcial
+--- PASS: TestPrecedenciaEntreExatoEParcial (0.00s)
+=== RUN   TestEscopoInvalidoDesligaAPrecedencia
+--- PASS: TestEscopoInvalidoDesligaAPrecedencia (0.00s)
+=== RUN   TestProcedenciaCarregaOValorDeclarado
+--- PASS: TestProcedenciaCarregaOValorDeclarado (0.00s)
+=== RUN   TestMesmoNucleoBarraTrocaDeAlimento
+--- PASS: TestMesmoNucleoBarraTrocaDeAlimento (0.00s)
+=== RUN   TestIntegracaoRegistrarConsumo
+--- PASS: TestIntegracaoRegistrarConsumo (0.37s)
+=== RUN   TestIntegracaoStreak
+--- PASS: TestIntegracaoStreak (0.36s)
+=== RUN   TestIntegracaoNivelERanking
+--- PASS: TestIntegracaoNivelERanking (0.30s)
+=== RUN   TestIntegracaoDesperdicioSemSobrasENullLegado
+--- PASS: TestIntegracaoDesperdicioSemSobrasENullLegado (0.28s)
+=== RUN   TestIntegracaoDesperdicio
+--- PASS: TestIntegracaoDesperdicio (0.27s)
+=== RUN   TestIntegracaoPrimeiraMensagemDoDia
+--- PASS: TestIntegracaoPrimeiraMensagemDoDia (0.21s)
+=== RUN   TestIntegracaoLoginTelefonePin
+--- PASS: TestIntegracaoLoginTelefonePin (0.53s)
+=== RUN   TestIntegracaoItemNaoResolvidoNaoPontua
+--- PASS: TestIntegracaoItemNaoResolvidoNaoPontua (0.17s)
+=== RUN   TestIntegracaoAgregadoIgnoraConsumoIncompleto
+--- PASS: TestIntegracaoAgregadoIgnoraConsumoIncompleto (0.19s)
+=== RUN   TestIntegracaoPorcaoSuspeitaRebaixaConfianca
+--- PASS: TestIntegracaoPorcaoSuspeitaRebaixaConfianca (0.32s)
+=== RUN   TestIntegracaoMigracaoMarcaPorcoesImplausiveis
+--- PASS: TestIntegracaoMigracaoMarcaPorcoesImplausiveis (0.22s)
+PASS
+ok  	github.com/tamy-ai/menu-ai/api/internal/store	3.845s

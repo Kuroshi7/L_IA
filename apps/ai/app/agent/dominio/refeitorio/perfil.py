@@ -5,6 +5,8 @@ produto significa escrever outro perfil ao lado deste; nada em `motor/` muda.
 """
 
 import re
+from app.agent.context import current_context
+from app.agent.motor.observacao import observacoes_do_turno
 
 from app.agent.dominio.refeitorio import prompts
 from app.agent.dominio.refeitorio import tools as _t
@@ -79,6 +81,31 @@ REMINDER_CONFIRMACAO = Reminder(
     regra_de_origem="DUAS ETAPAS",
 )
 
+REMINDER_CONSUMO = Reminder(
+    nome="relato_de_consumo",
+    texto=(
+        "A pessoa relatou o que COMEU. Chame registrar_consumo para preparar o fluxo; "
+        "não escreva uma prévia nem peça confirmação por conta própria. Se ela disse "
+        "que não sobrou nada, envie sobras=[] e sobras_informadas=true. "
+        "Nunca envie confirmado=true no primeiro relato."
+    ),
+    regra_de_origem="Usuário relata o que COMEU",
+)
+
+_RELATO_CONSUMO = re.compile(r"\b(comi|almocei|jantei|consumi)\b", re.IGNORECASE)
+
+REMINDER_PERFIL_IDENTIFICADO = Reminder(
+    nome="perfil_identificado",
+    texto=(
+        "Esta conversa tem usuário identificado. Antes de pedir novamente restrições "
+        "ou alergias, chame meu_perfil. Se o perfil já informa esses dados, consulte "
+        "o cardápio e responda ao pedido sem repetir o cadastro."
+    ),
+    regra_de_origem="Personalizar:",
+)
+
+_PEDIDO_RECOMENDACAO = re.compile(r"\b(mont|recomend|melhor|escolh|suger)|o que.{0,30}comer")
+
 # Formas de confirmar que apareceram ou aparecem no uso real. Fica no domínio:
 # "pode registrar" só significa algo num produto que registra consumo.
 _CONFIRMACAO = re.compile(
@@ -128,6 +155,14 @@ def reminders_do_turno(gatilhos: Gatilhos, mensagem: str = "") -> tuple[Reminder
         ativos.append(REMINDER_SAUDE)
     if _CONFIRMACAO.match(normalizar(mensagem or "").strip()):
         ativos.append(REMINDER_CONFIRMACAO)
+    if _RELATO_CONSUMO.search(normalizar(mensagem or "")):
+        ativos.append(REMINDER_CONSUMO)
+    try:
+        identificado = bool(current_context().usuario_id)
+    except RuntimeError:
+        identificado = False
+    if identificado and _PEDIDO_RECOMENDACAO.search(normalizar(mensagem or "")):
+        ativos.append(REMINDER_PERFIL_IDENTIFICADO)
     return tuple(ativos)
 
 
@@ -137,6 +172,14 @@ _JA_ENCAMINHOU = re.compile(
     r"\b(medico|nutricionista|profissional de saude|endocrino|especialista)\b"
 )
 
+_EFEITO_CLINICO = re.compile(
+    r"(?:control|estabil|mant|mex|dispar|eleva|baix|solta|libera).{0,70}"
+    r"(?:acucar|glicemi|pressao|colesterol)|"
+    r"(?:acucar|glicemi|pressao|colesterol).{0,45}(?:estavel|control|dispar)|"
+    r"(?:melhor|perfeit|segur).{0,45}(?:diabet|hipertens|doenca)",
+    re.IGNORECASE,
+)
+
 
 def pos_processar(resposta: str, gatilhos: Gatilhos, mensagem: str) -> str:
     """Garante o encaminhamento a profissional quando o assunto exige.
@@ -144,8 +187,41 @@ def pos_processar(resposta: str, gatilhos: Gatilhos, mensagem: str) -> str:
     Em código, não no prompt: com reminder reinjetado a aderência ficou em 0 de
     3 medições. Exigência de conformidade não pode depender de o modelo lembrar.
     """
+    resposta = re.sub(
+        r"\b(?:100\s*%\s*segur[oa]s?|(?:totalmente|completamente|absolutamente)\s+segur[oa]s?|sem\s+(?:nenhum\s+)?risco)\b",
+        "compatível com os ingredientes cadastrados; confirme os ingredientes e o preparo com a equipe do refeitório",
+        resposta, flags=re.IGNORECASE,
+    )
+    resposta = re.sub(
+        r"(?:eu\s+)?não\s+posso\s+(?:liberar|autorizar|permitir)(?:\s+não)?",
+        "a decisão é sua; o alerta sobre a alergia informada continua valendo",
+        resposta, flags=re.IGNORECASE,
+    )
     if not _CONDICAO_DE_SAUDE.search(normalizar(mensagem or "")):
         return resposta
+    observacoes = observacoes_do_turno()
+    if observacoes and observacoes.itens_conhecidos:
+        linhas = [
+            "Posso ajudar a comparar os dados cadastrados do cardápio. "
+            "Não determino qual prato ou porção é adequado para tratar sua condição.", "",
+        ]
+        pratos = [p for p in observacoes.itens_conhecidos.values()
+                  if isinstance(p, dict) and not p.get('conflita_com_perfil')]
+        for prato in pratos[:5]:
+            linha = f"- **{prato['nome']}**"
+            if prato.get('ingredientes'):
+                linha += ' — ingredientes: ' + ', '.join(prato['ingredientes'])
+            linhas.append(linha)
+        if not pratos:
+            linhas.append('Não encontrei uma opção sem conflito com o perfil informado nesta consulta.')
+        linhas.append(prompts.ENCAMINHAMENTO_PROFISSIONAL)
+        return '\n'.join(linhas)
+    resposta = '\n'.join(
+        linha for linha in resposta.splitlines()
+        if not _EFEITO_CLINICO.search(normalizar(linha))
+    ).strip()
+    if not resposta:
+        resposta = "Posso ajudar a comparar os ingredientes e valores cadastrados no cardápio."
     if _JA_ENCAMINHOU.search(normalizar(resposta)):
         return resposta
     return resposta.rstrip() + prompts.ENCAMINHAMENTO_PROFISSIONAL
